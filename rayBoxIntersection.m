@@ -24,8 +24,8 @@ minBound_y = vmin(2);
 minBound_z = vmin(3);
 
 maxBound_x = vmax(1);
-maxBound_y = vmin(2);
-maxBound_z = vmin(3);
+maxBound_y = vmax(2);
+maxBound_z = vmax(3);
 
     if (ray_direction_x >= 0) 
     	tmin = (minBound_x - ray_origin_x) / ray_direction_x;
