@@ -10,20 +10,37 @@ function [flag ,tmin] = rayBoxIntersection(origin, direction, vmin, vmax)
 %    tmin: distance from the ray origin.
 % Author: 
 %    Jesus Mena
-    if (direction(1) >= 0) 
-    	tmin = (vmin(1) - origin(1)) / direction(1);
-    	tmax = (vmax(1) - origin(1)) / direction(1);
+
+ray_direction_x = direction(1);
+ray_direction_y = direction(2);
+ray_direction_z = direction(3);
+
+ray_origin_x = origin(1);
+ray_origin_y = origin(2);
+ray_origin_z = origin(3);
+
+minBound_x = vmin(1);
+minBound_y = vmin(2);
+minBound_z = vmin(3);
+
+maxBound_x = vmax(1);
+maxBound_y = vmin(2);
+maxBound_z = vmin(3);
+
+    if (ray_direction_x >= 0) 
+    	tmin = (minBound_x - ray_origin_x) / ray_direction_x;
+    	tmax = (maxBound_x - ray_origin_x) / ray_direction_x;
     else
-    	tmin = (vmax(1) - origin(1)) / direction(1);
-    	tmax = (vmin(1) - origin(1)) / direction(1);
+    	tmin = (maxBound_x - ray_origin_x) / ray_direction_x;
+    	tmax = (minBound_x - ray_origin_x) / ray_direction_x;
     end
   
-    if (direction(2) >= 0) 
-        tymin = (vmin(2) - origin(2)) / direction(2);
-        tymax = (vmax(2) - origin(2)) / direction(2);
+    if (ray_direction_y >= 0) 
+        tymin = (minBound_y - ray_origin_y) / ray_direction_y;
+        tymax = (maxBound_y - ray_origin_y) / ray_direction_y;
     else
-    	tymin = (vmax(2) - origin(2)) / direction(2);
-    	tymax = (vmin(2) - origin(2)) / direction(2);
+    	tymin = (maxBound_y - ray_origin_y) / ray_direction_y;
+    	tymax = (minBound_y - ray_origin_y) / ray_direction_y;
     end
     if ( (tmin > tymax) || (tymin > tmax) )
         flag = 0;
@@ -39,12 +56,12 @@ function [flag ,tmin] = rayBoxIntersection(origin, direction, vmin, vmax)
         tmax = tymax;
     end
     
-	if (direction(3) >= 0)
-       tzmin = (vmin(3) - origin(3)) / direction(3);
-       tzmax = (vmax(3) - origin(3)) / direction(3);
+	if (ray_direction_z >= 0)
+       tzmin = (minBound_z - ray_origin_z) / ray_direction_z;
+       tzmax = (maxBound_z - ray_origin_z) / ray_direction_z;
     else
-       tzmin = (vmax(3) - origin(3)) / direction(3);
-       tzmax = (vmin(3) - origin(3)) / direction(3);
+       tzmin = (maxBound_z - ray_origin_z) / ray_direction_z;
+       tzmax = (minBound_z - ray_origin_z) / ray_direction_z;
     end
     if ((tmin > tzmax) || (tzmin > tmax))
         flag = 0;
