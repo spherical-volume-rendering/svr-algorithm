@@ -1,105 +1,68 @@
-function polarCoordinateTraversal(origin, direction, polarGrid2D, verbose)
+function polarCoordinateTraversal(ray_origin, ray_direction, max_radius, num_radial_sections, num_angular_sections)
 % Input:
-%    ray origin.
-%    ray direction.
-%    polarGrid2D: grid dimensions (deltaRadius, deltaTheta, maxRadius).
+%    ray origin: The origin of the ray in (x, y) coordinates.
+%    ray direction: The direction of the ray in (x, y) coordinates.
+%    max_radius: The largest that encompasses the circle.
+%    num_radial_sections: The number of radial sections in the circle.
+%    num_angular_sections: The number of angular sections in the circle.
 %
-% Pre-conditions: For simplcity, the ray's 'origin' is always along 'polarGrid2D.maxRadius'.
-% Notes: CURRENTLY UNDER CONSTRUCTION.
-        start   = origin; % + tmin*direction;
-        boxSize = grid3D.maxBound-grid3D.minBound;
+% Requires:
+%    max_radius > 0
+%    num_radial_sections > 0
+%    num_angular_sections > 0
+%
+% Notes: 
+%    Currently under construction.
+
+    ray_origin_x = ray_origin(1);
+    ray_origin_y = ray_origin(2);
+    ray_direction_x = ray_direction(1);
+    ray_direction_y = ray_direction(2);
+    
+    [is_radial_hit, t_hit, t_exit] = radial_hit(ray_origin, ray_direction, max_radius);
+    
+    if ~is_radial_hit
+        % The ray does not hit the first radius.
+        return;
+    end
+    
+    % If the ray does intersect the grid, calculate the 
+    % voxel_ID(r, theta) of entry. Note that the outermost shell is the
+    % first radial section. We are then guaranteed:
+    % 1 <= voxel_ID_r <= num_radial_sections
+    voxel_ID_r = 1;
+    
+    % Similarly, we can define unique angular sections. This guarantees us:
+    % 1 <= voxel_ID_theta <= num_angular_sections
+    voxel_ID_theta = floor(atan2(ray_origin_y, ray_origin_x) * num_angular_sections / (2 * pi));
+    if voxel_ID_theta < 0
+        voxel_ID_theta = num_angular_sections + voxel_ID_theta;
+    end
+    
+    t = t_hit;
+    
+    
+    while t < t_exit
+        [is_angular_hit, tMax_theta, delta_theta] = angular_hit(ray_origin, ray_direction, voxel_ID_theta);
         
-        if (verbose)
-            plot3(start(1), start(2), start(3), 'r.', 'MarkerSize', 15);
-        end;
-        
-        % Calculate the first voxel we are located in.
-        x = floor( ((start(1)-grid3D.minBound(1))/boxSize(1))*grid3D.nx )+1;
-        y = floor( ((start(2)-grid3D.minBound(2))/boxSize(2))*grid3D.ny )+1;
-        z = floor( ((start(3)-grid3D.minBound(3))/boxSize(3))*grid3D.nz )+1;
-        if (x==(grid3D.nx+1));  x=x-1;  end;
-        if (y==(grid3D.ny+1));  y=y-1;  end;            
-        if (z==(grid3D.nz+1));  z=z-1;  end;
-        
-        if (direction(1)>=0)
-            tVoxelX = (x)/grid3D.nx;
-            stepX = 1;
-        else
-            tVoxelX = (x-1)/grid3D.nx;
-            stepX = -1;  
-        end;
-        
-        if (direction(2)>=0)
-            tVoxelY = (y)/grid3D.ny;
-            stepY = 1;
-        else
-            tVoxelY = (y-1)/grid3D.ny;
-            stepY = -1;
-        end;
-        
-        if (direction(3)>=0)
-            tVoxelZ = (z)/grid3D.nz; 
-            stepZ = 1;
-        else
-            tVoxelZ = (z-1)/grid3D.nz;
-            stepZ = -1;  
-        end;
-                
-        voxelMaxX  = grid3D.minBound(1) + tVoxelX*boxSize(1);
-        voxelMaxY  = grid3D.minBound(2) + tVoxelY*boxSize(2);
-        voxelMaxZ  = grid3D.minBound(3) + tVoxelZ*boxSize(3);
-        tMaxX      = tmin + (voxelMaxX-start(1))/direction(1);
-        tMaxY      = tmin + (voxelMaxY-start(2))/direction(2);
-        tMaxZ      = tmin + (voxelMaxZ-start(3))/direction(3);
-        
-        voxelSizeX = boxSize(1)/grid3D.nx;
-        voxelSizeY = boxSize(2)/grid3D.ny;
-        voxelSizeZ = boxSize(3)/grid3D.nz;        
-        
-        tDeltaX    = voxelSizeX/abs(direction(1));
-        tDeltaY    = voxelSizeY/abs(direction(2));
-        tDeltaZ    = voxelSizeZ/abs(direction(3));
-                
-        while ( (x<=grid3D.nx)&&(x>=1) && (y<=grid3D.ny)&&(y>=1) && (z<=grid3D.nz)&&(z>=1) )
-            if (verbose)
-                fprintf('\nIntersection: voxel = [%d %d %d]', [x y z]);
-                
-                t1 = [(x-1)/grid3D.nx, (y-1)/grid3D.ny, (z-1)/grid3D.nz ]';
-                t2 = [  (x)/grid3D.nx,  (y)/grid3D.ny,    (z)/grid3D.nz ]';        
-                vmin = (grid3D.minBound + t1.*boxSize)';
-                vmax = (grid3D.minBound + t2.*boxSize)';
-                smallBoxVertices = [vmax(1) vmin(2) vmin(3); vmax(1) vmax(2) vmin(3); vmin(1) vmax(2) vmin(3); vmin(1) vmax(2) vmax(3); vmin(1) vmin(2) vmax(3); vmax(1) vmin(2) vmax(3); vmin; vmax ];
-                smallBoxFaces    = [1 2 3 7; 1 2 8 6; 1 6 5 7; 7 5 4 3; 2 8 4 3; 8 6 5 4];
- 
-                h = patch('Vertices', smallBoxVertices, 'Faces', smallBoxFaces, 'FaceColor', 'blue', 'EdgeColor', 'white');
-                set(h,'FaceAlpha',0.2);
-            end;
-            
-            % ---------------------------------------------------------- %
-            % check if voxel [x,y,z] contains any intersection with the ray
-            %
-            %   if ( intersection )
-            %       break;
-            %   end;
-            % ---------------------------------------------------------- %
-            
-            if (tMaxX < tMaxY)
-                if (tMaxX < tMaxZ)
-                    x = x + stepX;
-                    tMaxX = tMaxX + tDeltaX;
-                else
-                    z = z + stepZ;
-                    tMaxZ = tMaxZ + tDeltaZ;
-                end;
-            else
-                if (tMaxY < tMaxZ)
-                    y = y + stepY;
-                    tMaxY = tMaxY + tDeltaY;             
-                else
-                    z = z + stepZ;
-                    tMaxZ = tMaxZ + tDeltaZ;
-                end;
-            end;
-        end;        
-     end;
+        % TODO
+    end
+    
+end
+
+function [is_radial_hit, t_hit, t_exit] = radial_hit(ray_origin, ray_direction, max_radius)
+% Returns is_radial_hit = true if a radial_hit has occurred, false otherwise.
+% t_hit is the location where the ray has entered.
+% t_exit is the location where the ray exits.
+    assert(false);
+    % TODO
+end
+
+function [is_angular_hit, tMax_theta, delta_theta] = angular_hit(ray_origin, ray_direction, voxel_ID_theta)
+    % Determines whether the ray hits an angular section. Note that
+    % delta_theta = +1 or -1; either we increase or decrease in angular
+    % direction.
+    assert(false);
+    % TODO
+    
 end
