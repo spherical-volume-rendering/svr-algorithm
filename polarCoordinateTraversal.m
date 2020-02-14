@@ -90,43 +90,66 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
         end
     end
     
-    % If the ray does intersect the grid, calculate the 
-    % voxel_ID(r, theta) of entry. Note that the outermost shell is the
-    % first radial section. We are then guaranteed:
-    % 1 <= voxel_ID_r <= num_radial_sections
+    % INITIALIZATION PHASE:
+    %  I. Calculate Voxel ID R.
+    
+    % 1. if ((x - c)^2 + (y - c)^2 < (circle_max_radius)^2)) then loop until
+    % this is true. to determine which voxel_ID_r we are in. Start with
+    % smallest circles, go bigger by adding delta_radius.
+    % 2. Get first r for rad_hit(), and Get intersection point with first
+    % radius that it hits.
     voxel_ID_r = 1;
     
-    % Similarly, we can define unique angular sections. This guarantees us:
-    % 1 <= voxel_ID_theta <= num_angular_sections
+    % II. Calculate Voxel ID Theta.
     voxel_ID_theta = floor(atan2(ray_start_y, ray_start_x) * num_angular_sections / (2 * pi));
     if voxel_ID_theta < 0
         voxel_ID_theta = num_angular_sections + voxel_ID_theta;
     end
     
-    t = t_hit;
-    
-    
+                 % TODO: For loop conditional, can we just determine this by the current
+                 %       radius we are in?
     while t < t_exit
-        % [is_angular_hit, tMax_theta, delta_theta] = angular_hit(ray_origin, ray_direction, voxel_ID_theta);
-        break;
-        % TODO
+        % Calculate tMaxR (using radial_hit) 
+        % Calculate tMaxTheta (using theta_hit)
+        % Compare tMaxTheta, tMaxR
+        % Move in direction of less amount by tDelta_.
+        % Update new Voxel_ID.
     end
     
 end
 
-function [is_radial_hit, t_hit, t_exit] = radial_hit(ray_start, ray_direction, max_radius)
-% Returns is_radial_hit = true if a radial_hit has occurred, false otherwise.
-% t_hit is the location where the ray has entered.
-% t_exit is the location where the ray exits.
-    assert(false);
-    % TODO
+function [is_radial_hit, tMaxR, tDeltaR] = radial_hit(ray_start, ray_direction, current_radius, circle_center)
+% Determines whether a radial hit occurs for the given ray.
+%
+% Returns:
+%    is_radial_hit: true if a radial crossing has occurred, false otherwise.
+%    tMaxR: is the time at which a hit occurs for the ray at the next point of intersection.
+%    tDeltaR: TODO
+
+    % TODO: Implement
+    assert(false)
+    % (1)   (x - circle_center_x)^2 + (y - circle_center_y)^2 = current_radius^2
+    % (2)    x = ray_origin_x + ray_direction_x(t)
+    % (3)    y = ray_origin_y + ray_direction_y(t)
+    % Plug in x,y in equation (1), then solve for t.
+    % To get point of intersection, plug t back in parametric equation of a ray.
 end
 
-function [is_angular_hit, tMax_theta, delta_theta] = angular_hit(ray_start, ray_direction, voxel_ID_theta)
-    % Determines whether the ray hits an angular section. Note that
-    % delta_theta = +1 or -1; either we increase or decrease in angular
-    % direction.
-    assert(false);
-    % TODO
+function [is_angular_hit, tMaxTheta, tDeltaTheta] = angular_hit(ray_start, ray_direction, current_voxel_ID_theta)
+% Determines whether an angular hit occurs for the given ray.
+% UPDATE DOCUMENTATION.
+% Returns:
+%    is_angular_hit: true if an angular crossing has occurred, false otherwise.
+%    tMaxTheta: is the time at which a hit occurs for the ray at the next point of intersection.
+%    tDeltaTheta: TODO
+
+    % TODO: Implement
+    assert(false); 
+    % 1. Parametric equation of ray using origin and direction.
+    % Using voxID, calculate the theta interval. 
+    % i.e. voxID_theta = voxIDtheta * num_angular_sections / 2pi or
+    % something like this
+    %
+    % Calculate x, y using rcos(max[voxID_theta]), rsin(max[voxID_theta])
     
 end
