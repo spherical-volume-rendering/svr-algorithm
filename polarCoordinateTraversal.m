@@ -65,9 +65,10 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
         
         % Draw the radial sections.
         current_max_radius = circle_max_radius;
+        delta_radius = circle_max_radius / num_radial_sections;
         for k = 1:num_radial_sections
             viscircles(circle_center, current_max_radius, 'LineStyle', '--', 'Color', '#7E2F8E', 'LineWidth', 1);
-            current_max_radius = current_max_radius / 2; % TODO(cpg49): Fix this.
+            current_max_radius = current_max_radius - delta_radius;
         end
         
         % Draw the angular sections.
