@@ -15,12 +15,15 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
 %    max_bound > min_bound
 %    circle center is within max_bound and min_bound.
 %    t_end > t_begin >= 0.0
-%    max_radius > 0
+%    circle_max_radius > 0
 %    num_radial_sections > 0
 %    num_angular_sections > 0
 %
 % Notes: 
 %    Currently under construction.
+    close all;
+    circle_center_x = circle_center(1);
+    circle_center_y = circle_center(2);
     ray_origin_x = ray_origin(1);
     ray_origin_y = ray_origin(2);
     ray_direction_x = ray_direction(1);
@@ -48,14 +51,17 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
             % Mark the ray origin if the time does not start at 0.0
             text(ray_origin_x, ray_origin_y, ' ray origin');
             plot(ray_origin_x, ray_origin_y, 'k.', 'MarkerSize', 10);
-            quiver(ray_origin_x, ray_origin_y, ray_direction_x, ray_direction_y, t_begin - 0.0);
+            quiver(ray_origin_x, ray_origin_y, ray_direction_x, ray_direction_y, t_begin - 0.0, 'LineWidth', 1.5);
         end
         
+        % Draw the ray.
         text(ray_start_x, ray_start_y, ' ray start');
         text(ray_end_x, ray_end_y, ' ray end');
         plot(ray_end_x, ray_end_y, 'k.', 'MarkerSize', 10);
         plot(ray_start_x, ray_start_y, 'k.', 'MarkerSize', 10);
-        quiver(ray_start_x, ray_start_y, ray_direction_x, ray_direction_y, t_end - t_begin);
+        quiver(ray_start_x, ray_start_y, ray_direction_x, ray_direction_y, t_end - t_begin, 'LineWidth', 1.5);
+        
+        % Draw the axis.
         axis tight;
         xlim([min_bound_x, max_bound_x]);
         ylim([min_bound_y, max_bound_y]);
@@ -72,7 +78,16 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
         end
         
         % Draw the angular sections.
-        % TODO(cpg49)
+        N = num_angular_sections;
+        section = 2 * pi / num_angular_sections;
+        for ii = 1:N
+              t = linspace(section * (ii - 1), section * (ii));
+              x = circle_max_radius*cos(t) + circle_center_x;
+              y = circle_max_radius*sin(t) + circle_center_y;
+              x = [x circle_center_x x(1)];
+              y = [y circle_center_y y(1)];
+              line(x, y, 'LineStyle', '--', 'Color', '#7E2F8E', 'LineWidth', 0.5);
+        end
     end
     
     % If the ray does intersect the grid, calculate the 
