@@ -3,15 +3,15 @@ function polarCoordinateTraversalExample
     max_bound = [30.0, 30.0];
     
     ray_origin = [5.0, 5.0];
-    ray_direction = [1.0, 1.0];
+    ray_direction = [1.0, 2.0];
     
     circle_center = [15.0, 15.0];
     circle_max_radius = 10.0;
     num_radial_sections = 5;
-    num_angular_sections = 4;
+    num_angular_sections = 8;
     
-    t_begin = 0.0;
-    t_end = 15.0;
+    t_begin = 2.0;
+    t_end = 10.0;
     
     verbose = true;
     
