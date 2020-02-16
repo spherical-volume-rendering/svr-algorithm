@@ -96,7 +96,7 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
     delta_radius = circle_max_radius / num_radial_sections;
     current_position = (ray_start_x - circle_center_x)^2 + (ray_start_y - circle_center_y)^2;
     if current_position > circle_max_radius
-        voxel_ID_r = 1;
+        current_voxel_ID_r = 1;
     else
         current_delta_radius = delta_radius;
         current_voxel_ID_r = num_radial_sections;
