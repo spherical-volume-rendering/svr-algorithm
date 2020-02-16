@@ -1,4 +1,5 @@
-function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
+function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
+        circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
 %    max_bound: The upper right corner of the bounding box.
@@ -90,52 +91,110 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
         end
     end
     
-    % INITIALIZATION PHASE:
+    % INITIALIZATION PHASE
     %  I. Calculate Voxel ID R.
-    
-    % 1. if ((x - c)^2 + (y - c)^2 < (circle_max_radius)^2)) then loop until
-    % this is true. to determine which voxel_ID_r we are in. Start with
-    % smallest circles, go bigger by adding delta_radius.
-    % 2. Get first r for rad_hit(), and Get intersection point with first
-    % radius that it hits.
-    voxel_ID_r = 1;
-    
-    % II. Calculate Voxel ID Theta.
-    voxel_ID_theta = floor(atan2(ray_start_y, ray_start_x) * num_angular_sections / (2 * pi));
-    if voxel_ID_theta < 0
-        voxel_ID_theta = num_angular_sections + voxel_ID_theta;
+    delta_radius = circle_max_radius / num_radial_sections;
+    current_position = (ray_start_x - circle_center_x)^2 + (ray_start_y - circle_center_y)^2;
+    if current_position > circle_max_radius
+        voxel_ID_r = 1;
+    else
+        current_delta_radius = delta_radius;
+        current_voxel_ID_r = num_radial_sections;
+        while (current_position < current_delta_radius)
+            current_voxel_ID_r = current_voxel_ID_r - 1;
+            current_delta_radius = current_delta_radius + delta_radius;
+        end
     end
     
-                 % TODO: For loop conditional, can we just determine this by the current
-                 %       radius we are in?
-    while t < t_exit
+    % II. Calculate Voxel ID Theta.
+    current_voxel_ID_theta = floor(atan2(ray_start_y, ray_start_x) * num_angular_sections / (2 * pi));
+    if current_voxel_ID_theta < 0
+        current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
+    end
+    
+    % TRAVERSAL PHASE
+    current_ray_position = ray_start;
+    t = t_begin;
+    while t < t_end
         % Calculate tMaxR (using radial_hit) 
-        % Calculate tMaxTheta (using theta_hit)
+        [is_radial_hit, tMaxR, tDeltaR, new_voxel_ID_r] = radial_hit(current_ray_position, ray_direction, ...
+            current_voxel_ID_r, circle_center, circle_max_radius, delta_radius);
+        
+        % TODO: Calculate tMaxTheta (using angular_hit)
+        
         % Compare tMaxTheta, tMaxR
-        % Move in direction of less amount by tDelta_.
-        % Update new Voxel_ID.
+        if tMaxTheta < tMaxR
+            t = t + tDeltaTheta;
+        else
+            t = t + tDeltaR;
+        end
+        % Update new Voxel IDs.
+        current_voxel_ID_r = new_voxel_ID_r;
+        % TODO: update current theta voxel.
+        
     end
     
 end
 
-function [is_radial_hit, tMaxR, tDeltaR] = radial_hit(ray_start, ray_direction, current_radius, circle_center)
+function [is_radial_hit, tMaxR, tDeltaR, new_voxel_ID_r] = radial_hit(current_ray_position, ray_direction, ...
+        current_radial_voxel, circle_center, circle_max_radius, delta_radius)
 % Determines whether a radial hit occurs for the given ray.
+% Input:
+%    current_ray_position: The first location of the ray within the circle.
+%    ray_direction: The direction of the ray.
+%    current_radial_voxel: The current radial voxel the ray is located in.
+%    circle_center: The center of the circle.
+%    circle_max_radius: The max radius of the circle.
+%    num_radial_sections: The number of radial sections.
+%    delta_radius: The delta of the radial sections.
 %
 % Returns:
 %    is_radial_hit: true if a radial crossing has occurred, false otherwise.
 %    tMaxR: is the time at which a hit occurs for the ray at the next point of intersection.
-%    tDeltaR: TODO
-
-    % TODO: Implement
-    assert(false)
+%    tDeltaR: The different between the ray new position and the ray's
+%    initial position along its direction.
+%    new_voxel_ID_r: The new voxel ID that the ray is located in. If the
+%    ray hasn't changed, this remains the old voxel ID.
+    ray_pos_x = current_ray_position(1);
+    ray_pos_y = current_ray_position(2);
+    ray_direction_x = ray_direction(1);
+    ray_direction_y = ray_direction(2);
+    circle_center_x = circle_center(1);
+    circle_center_y = circle_center(2);
+    current_radius = circle_max_radius - (delta_radius * (current_radial_voxel - 1));
+    
     % (1)   (x - circle_center_x)^2 + (y - circle_center_y)^2 = current_radius^2
     % (2)    x = ray_origin_x + ray_direction_x(t)
     % (3)    y = ray_origin_y + ray_direction_y(t)
-    % Plug in x,y in equation (1), then solve for t.
+    % Plug in x, y in equation (1), then solve for t.
     % To get point of intersection, plug t back in parametric equation of a ray.
+    tMaxR = solve((ray_pos_x + ray_direction_x * t - circle_center_x)^2 + ...
+        (ray_pos_y + ray_direction_y * t - circle_center_y)^2 ...
+        - current_radius^2 == 0, t);
+    new_x_position = ray_pos_x + ray_direction_x * tMaxR;
+    new_y_position = ray_pos_y + ray_direction_y * tMaxR;
+    
+    % Determine whether is has switched to a new radial voxel.
+    current_position = (new_x_position - circle_center_x)^2 + (new_y_position - circle_center_y)^2;
+    if current_position >= current_radius + delta_radius
+        new_voxel_ID_r = current_radial_voxel + 1;
+        is_radial_hit = true;
+    elseif current_position < current_radius
+            new_voxel_ID_r = current_radial_voxel - 1;
+            is_radial_hit = true;
+    else
+        new_voxel_ID_r = current_radial_voxel;
+        is_radial_hit = false;
+    end
+    
+    % Calculate tDeltaR.
+    tDeltaR = 0;
+    if is_radial_hit
+        tDeltaR = current_ray_position - [new_x_position new_y_position];
+    end
 end
 
-function [is_angular_hit, tMaxTheta, tDeltaTheta] = angular_hit(ray_start, ray_direction, current_voxel_ID_theta)
+function [is_angular_hit, tMaxTheta, tDeltaTheta] = angular_hit(current_ray_pos, ray_direction, current_voxel_ID_theta)
 % Determines whether an angular hit occurs for the given ray.
 % UPDATE DOCUMENTATION.
 % Returns:
