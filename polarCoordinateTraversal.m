@@ -136,8 +136,8 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
     
 end
 
-function [is_radial_hit, tMaxR, tDeltaR, new_voxel_ID_r] = radial_hit(current_ray_position, ray_direction, ...
-        current_radial_voxel, circle_center, circle_max_radius, delta_radius)
+function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_x_position, new_y_position] = radial_hit(current_ray_position, ray_direction, ...
+        current_radial_voxel, circle_center, circle_max_radius, delta_radius, verbose)
 % Determines whether a radial hit occurs for the given ray.
 % Input:
 %    current_ray_position: The first location of the ray within the circle.
@@ -151,10 +151,12 @@ function [is_radial_hit, tMaxR, tDeltaR, new_voxel_ID_r] = radial_hit(current_ra
 % Returns:
 %    is_radial_hit: true if a radial crossing has occurred, false otherwise.
 %    tMaxR: is the time at which a hit occurs for the ray at the next point of intersection.
-%    tDeltaR: The different between the ray new position and the ray's
-%    initial position along its direction.
+%    tStepR: The direction the ray is stepping in.
 %    new_voxel_ID_r: The new voxel ID that the ray is located in. If the
 %    ray hasn't changed, this remains the old voxel ID.
+%    new_x_position: The new position of the ray in the x-direction.
+%    new_y_position: The new position of the ray in the y-direction.
+
     ray_pos_x = current_ray_position(1);
     ray_pos_y = current_ray_position(2);
     ray_direction_x = ray_direction(1);
@@ -163,34 +165,47 @@ function [is_radial_hit, tMaxR, tDeltaR, new_voxel_ID_r] = radial_hit(current_ra
     circle_center_y = circle_center(2);
     current_radius = circle_max_radius - (delta_radius * (current_radial_voxel - 1));
     
+    if verbose
+        fprintf('\nradial_hit from (%f, %f). Current Radial Voxel: %d\n', ray_pos_x, ray_pos_y, current_radial_voxel);
+    end
+        
     % (1)   (x - circle_center_x)^2 + (y - circle_center_y)^2 = current_radius^2
     % (2)    x = ray_origin_x + ray_direction_x(t)
     % (3)    y = ray_origin_y + ray_direction_y(t)
     % Plug in x, y in equation (1), then solve for t.
     % To get point of intersection, plug t back in parametric equation of a ray.
-    tMaxR = solve((ray_pos_x + ray_direction_x * t - circle_center_x)^2 + ...
-        (ray_pos_y + ray_direction_y * t - circle_center_y)^2 ...
-        - current_radius^2 == 0, t);
+    syms cT; % current time
+    intersections_t = solve((ray_pos_x + ray_direction_x * cT - circle_center_x)^2 + ...
+        (ray_pos_y + ray_direction_y * cT - circle_center_y)^2 ...
+        - current_radius^2 == 0, cT);
+    tMaxR = max(double(subs(intersections_t)));
     new_x_position = ray_pos_x + ray_direction_x * tMaxR;
     new_y_position = ray_pos_y + ray_direction_y * tMaxR;
+    
+    if verbose
+        fprintf('tMaxR %f\n', tMaxR);
+    end
     
     % Determine whether is has switched to a new radial voxel.
     current_position = (new_x_position - circle_center_x)^2 + (new_y_position - circle_center_y)^2;
     if current_position >= current_radius + delta_radius
         new_voxel_ID_r = current_radial_voxel + 1;
         is_radial_hit = true;
+        tStepR = 1;
     elseif current_position < current_radius
             new_voxel_ID_r = current_radial_voxel - 1;
             is_radial_hit = true;
+            tStepR = -1;
     else
         new_voxel_ID_r = current_radial_voxel;
         is_radial_hit = false;
+        tStepR = 0;
     end
     
-    % Calculate tDeltaR.
-    tDeltaR = 0;
-    if is_radial_hit
-        tDeltaR = current_ray_position - [new_x_position new_y_position];
+    if verbose
+        fprintf(['new_voxel_ID_r: %d \n' ...
+            'is_radial_hit: %d \n' ...
+            'tStepR: %d \n'], new_voxel_ID_r, is_radial_hit, tStepR);
     end
 end
 
