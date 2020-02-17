@@ -140,7 +140,7 @@ function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_x_position, new_y_po
         current_radial_voxel, circle_center, circle_max_radius, delta_radius, verbose)
 % Determines whether a radial hit occurs for the given ray.
 % Input:
-%    current_ray_position: The first location of the ray within the circle.
+%    current_ray_position: The current location of the ray within the circle.
 %    ray_direction: The direction of the ray.
 %    current_radial_voxel: The current radial voxel the ray is located in.
 %    circle_center: The center of the circle.
