@@ -236,21 +236,61 @@ function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_ray_position] = ...
     end
 end
 
-function [is_angular_hit, tMaxTheta, tDeltaTheta] = angular_hit(current_ray_pos, ray_direction, current_voxel_ID_theta)
+function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID,...
+        num_radial_sections)
 % Determines whether an angular hit occurs for the given ray.
-% UPDATE DOCUMENTATION.
+% Input:
+%    ray_origin: vector of the origin of the ray in cartesian coordinate
+%    ray_direction: vector of the direction of the ray in cartesian
+%                   coordinate
+%    current_voxel_ID: the (angular) ID of current voxel
+%    num_radial_sections: number of total radial sections on the grid
 % Returns:
 %    is_angular_hit: true if an angular crossing has occurred, false otherwise.
 %    tMaxTheta: is the time at which a hit occurs for the ray at the next point of intersection.
 %    tDeltaTheta: TODO
-
-    % TODO: Implement
-    assert(false); 
-    % 1. Parametric equation of ray using origin and direction.
-    % Using voxID, calculate the theta interval. 
-    % i.e. voxID_theta = voxIDtheta * num_angular_sections / 2pi or
-    % something like this
-    %
-    % Calculate x, y using rcos(max[voxID_theta]), rsin(max[voxID_theta])
     
+    % First calculate the angular interval that current voxID corresponds
+    % to
+    delta_theta = 2*pi/num_radial_sections;
+    interval_theta = [current_voxel_ID * delta_theta, (current_voxel_ID + 1) * delta_theta];
+    
+    % calculate the x and y components that correspond to the angular
+    % boundary for the angular interval
+    xmin = cos(min(interval_theta));
+    xmax = cos(max(interval_theta));
+    ymin = sin(min(interval_theta));
+    ymax = sin(max(interval_theta));
+    
+    %solve the systems Az=b to check for intersection
+    Amin = [xmin, -ray_direction(0); ymin, -ray_direction(1)];
+    Amax = [xmax, -ray_direction(0); ymax, -ray_direction(1)];
+    b = transpose([ray_origin(0), ray_origin(1)]);
+    zmin = inv(Amin)*b;
+    zmax = inv(Amax)*b;
+    
+    % We need the radius (r = z[0]) and time (t = z[0]) to be positive or
+    % else the intersection is null
+    is_angular_hit = true;
+    if zmin(0) < 0 | zmin(1) < 0
+        is_angular_hit = false;
+    end
+    if zmax(0) < 0 | zmin(1) < 0
+        is_angular_hit = false;
+    end
+    
+    % If we hit the min boundary then we decrement theta, else increment;
+    % assign tmaxtheta
+    if zmin(0) < 0 | zmin(1) < 0 
+        tStepTheta = -1;
+        tMaxTheta = zmin(1);
+    else
+        tStepTheta = 1;
+        tMaxTheta = zmax(1);
+    end
+    if verbose
+        fprintf(['tMaxTheta: %d \n' ...
+            'is_angular_hit: %d \n' ...
+            'tStepTheta: %d \n'], tMaxTheta, is_angular_hit, tStepTheta);
+    end
 end
