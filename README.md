@@ -1,5 +1,6 @@
 ### Algorithm Team Links
 - [Fast Voxel Traversal Algorithm Overview](https://docs.google.com/document/d/1QvWw81A0T5vcMAt1WElDeSdBmsw0KJvJdYNr7XfRHfw/edit)
+- [Modern C++ implementation of "A Fast Voxel Traversal Algorithm"](https://github.com/cgyurgyik/fast-voxel-traversal-algorithm)
 
 ### Project Links
 - [Initial Proposal](https://hackmd.io/VRyhXnAFQyaCytWCdKe_1Q)
