@@ -194,7 +194,7 @@ function [is_radial_hit, tMaxR, tDeltaR, new_voxel_ID_r] = radial_hit(current_ra
     end
 end
 
-function [is_angular_hit, tMaxTheta, tDeltaTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID,...
+function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID,...
         num_radial_sections)
 % Determines whether an angular hit occurs for the given ray.
 % Input:
@@ -240,11 +240,15 @@ function [is_angular_hit, tMaxTheta, tDeltaTheta] = angular_hit(ray_origin, ray_
     % If we hit the min boundary then we decrement theta, else increment;
     % assign tmaxtheta
     if zmin(0) < 0 | zmin(1) < 0 
-        tDeltaTheta = -1;
+        tStepTheta = -1;
         tMaxTheta = zmin(1);
     else
-        tDeltaTheta = 1;
+        tStepTheta = 1;
         tMaxTheta = zmax(1);
     end
-    
+    if verbose
+        fprintf(['tMaxTheta: %d \n' ...
+            'is_angular_hit: %d \n' ...
+            'tStepTheta: %d \n'], tMaxTheta, is_angular_hit, tStepTheta);
+    end
 end
