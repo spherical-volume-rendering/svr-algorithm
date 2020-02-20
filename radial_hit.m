@@ -69,22 +69,16 @@ function [is_radial_hit, tMaxR, tStepR] = ...
         is_radial_hit = true;
         tStepR = -1;
         if verbose
-            text(new_x_position, new_y_position, 'POI');
+            text(new_x_position, new_y_position, 'POI_r');
             fprintf('Ray moving toward voxel closer to perimeter (outward).\n');
         end
-    elseif  distance_from_origin < (current_radius - delta_radius)^2
-            is_radial_hit = true;
-            tStepR = +1;
-            if verbose
-                text(new_x_position, new_y_position, 'POI');
-                fprintf('Ray moving toward voxel closer to center (inward).\n');
-            end
-    else
-        % TODO: Remove
-        is_radial_hit = false;
-        tStepR = 0;
+    else  
+        % distance_from_origin < (current_radius - delta_radius)^2
+        is_radial_hit = true;
+        tStepR = +1;
         if verbose
-            fprintf('Ray does not traverse to new radial voxel.\n');
+            text(new_x_position, new_y_position, 'POI_r');
+            fprintf('Ray moving toward voxel closer to center (inward).\n');
         end
     end
     
