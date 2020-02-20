@@ -35,16 +35,18 @@ function [is_radial_hit, tMaxR, tStepR] = ...
     % Plug in x, y in equation (1), then solve for t.
     % To get point of intersection, plug t back in parametric equation of a ray.
     syms cT; % current time
-
-    intersections_t = solve((ray_origin_x + ray_direction_x * cT - circle_center_x)^2 + ...
+    intersections_t = solve( ...
+        (ray_origin_x + ray_direction_x * cT - circle_center_x)^2 + ...
         (ray_origin_y + ray_direction_y * cT - circle_center_y)^2 ...
-        - (current_radius - delta_radius)^2 == 0, cT);
+         - (current_radius - delta_radius)^2 == 0, cT);
     
     if isempty(double(subs(intersections_t)))
         % Case where no intersection between ray and new radial voxel
-        % occurs
+        % occurs.
         is_radial_hit = false;
-        tStepR = 0;
+        tStepR = -inf;
+        tMaxR = -inf;
+        return;
     end
     
     % TODO: 
