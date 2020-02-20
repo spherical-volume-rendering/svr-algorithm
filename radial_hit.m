@@ -15,8 +15,7 @@ function [is_radial_hit, tMaxR, tStepR] = ...
 % Returns:
 %    is_radial_hit: true if a radial crossing has occurred, false otherwise.
 %    tMaxR: is the time at which a hit occurs for the ray at the next point of intersection.
-%    tStepR: The direction of step into the next radial voxel, 0, +1, -1
-%    new_ray_position: The (x,y) coordinate of the ray after the traversal.
+%    tStepR: The direction of step into the next radial voxel, 0, +1, -1.
     ray_direction_x = ray_direction(1);
     ray_direction_y = ray_direction(2);
     circle_center_x = circle_center(1);
