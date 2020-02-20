@@ -64,7 +64,7 @@ function [is_radial_hit, tMaxR, tStepR] = ...
         fprintf('New position: (%f, %f). Calculated by ray_origin + ray_direction * tMaxR.\n ', new_x_position, new_y_position);
     end
     
-    distance_from_origin = (new_x_position - circle_center_x)^2 + (new_y_position - circle_center_y);
+    distance_from_origin = (new_x_position - circle_center_x)^2 + (new_y_position - circle_center_y)^2;
     
     if verbose
         fprintf("Distance from origin ^2: %f\n",  distance_from_origin);
@@ -92,6 +92,7 @@ function [is_radial_hit, tMaxR, tStepR] = ...
     if verbose
         fprintf(['new_voxel_ID_r: %d \n' ...
             'is_radial_hit: %d \n' ...
-            'tStepR: %d \n'], current_radial_voxel + tStepR, is_radial_hit, tStepR);
+            'tStepR: %d \n' ...
+            'tMaxR: %d \n'], current_radial_voxel + tStepR, is_radial_hit, tStepR, tMaxR);
     end
 end

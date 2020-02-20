@@ -115,11 +115,10 @@ function [radial_voxels, angular_voxels] = polarCoordinateTraversal(min_bound, m
     end
     
     % II. Calculate Voxel ID Theta.
-    current_voxel_ID_theta = floor(atan2(ray_start_y, ray_start_x) * num_angular_sections / (2 * pi));
+    current_voxel_ID_theta = floor(atan2(ray_start_y - circle_center_y, ray_start_x - circle_center_x) * num_angular_sections / (2 * pi));
     if current_voxel_ID_theta < 0
         current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
     end
-    
     angular_voxels = [current_voxel_ID_theta];
     radial_voxels = [current_voxel_ID_r];
     
@@ -130,9 +129,10 @@ function [radial_voxels, angular_voxels] = polarCoordinateTraversal(min_bound, m
         % 1. Calculate tMaxR, tMaxTheta
         [is_radial_hit, tMaxR, tStepR] = radial_hit(ray_origin, ray_direction, ...
             current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, verbose);
+        pause
         
         [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-        num_radial_sections, verbose);
+        num_angular_sections, circle_center, verbose);
 
         
         if ~is_radial_hit && ~is_angular_hit

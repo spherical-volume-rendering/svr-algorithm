@@ -1,5 +1,5 @@
 function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-        num_radial_sections, verbose)
+        num_radial_sections, circle_center, verbose)
 % Determines whether an angular hit occurs for the given ray.
 % Input:
 %    ray_origin: vector of the origin of the ray in cartesian coordinate
@@ -40,45 +40,47 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
     % Solve the systems Az=b to check for intersection
     Amin = [xmin, -ray_direction(1); ymin, -ray_direction(2)];
     Amax = [xmax, -ray_direction(1); ymax, -ray_direction(2)];
-    b = transpose([ray_origin(1), ray_origin(2)]);
+    b = [ray_origin(1)-circle_center(1), ray_origin(2)-circle_center(2)]';
     zmin = Amin\b; % inv(Amin) * b
     zmax = Amax\b; % inv(Amax) * b
     
     if verbose
-        fprintf("\nzmin_r: %f, zmin_t: %f \nzmax_r: %f, zmax_t: %f\n", zmin(1), zmin(2), zmax(1), zmax(2));    
+        fprintf(['\nzmin_r: %d \n', 'zmin_t: %d \n', 'nzmax_r: %d \n', ...
+            'zmax_t: %d \n'], ...
+            zmin(1), zmin(2), zmax(1), zmax(2));    
     end
     
     
-    % We need the radius (r = z[0]) and time (t = z[0]) to be positive or
+    % We need the radius (r = z[1]) and time (t = z[2]) to be positive or
     % else the intersection is null
     is_angular_hit = true;
-    if zmin(1) < 0 || zmin(2) < 0
+    if (zmin(1) < 0 || zmin(2) < 0) && (zmax(1) < 0 || zmax(2) < 0)
         is_angular_hit = false;
         tMaxTheta = -inf;
         tStepTheta = -inf;
         if verbose
-            fprintf("zmin(1) < 0 || zmin(2) < 0\n")
-        end
-        return;
-    end
-    if zmax(1) < 0 || zmax(2) < 0
-        is_angular_hit = false;
-        tMaxTheta = -inf;
-        tStepTheta = -inf;
-        if verbose
-            fprintf("zmax(1) < 0 || zmax(2) < 0\n")
+            fprintf("(zmin(1) < 0 || zmin(2) < 0\n) && (zmax(1) < 0 || zmax(2) < 0\n)")
         end
         return;
     end
     
     % If we hit the min boundary then we decrement theta, else increment;
     % assign tMaxTheta
-    if zmin(1) < 0 || zmin(2) < 0 
+    if zmin(1) > 0 && zmin(2) > 0 
         tStepTheta = -1;
-        tMaxTheta = zmin(1);
+        tMaxTheta = zmin(2);
+        if verbose
+            x_pt = zmin(1)*cos(xmin);
+            y_pt = zmin(1)*sin(ymin);
+            text(x_pt,y_pt, 'POI_\theta');
+          %  fprintf('Ray moving toward voxel closer to center (inward).\n');
+        end
     else
         tStepTheta = 1;
-        tMaxTheta = zmax(1);
+        tMaxTheta = zmax(2);
+        x_pt = zmax(1)*cos(xmax);
+        y_pt = zmax(1)*sin(ymax);
+        text(x_pt,y_pt, 'POI_\theta');
     end
     
     if verbose
