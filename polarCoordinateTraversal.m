@@ -1,4 +1,4 @@
-function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
+function list = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
         circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
@@ -19,6 +19,9 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
 %    circle_max_radius > 0
 %    num_radial_sections > 0
 %    num_angular_sections > 0
+%
+% Returns: 
+% The list of voxel indices given by (radial_voxel_ID, angular_voxel_ID).
 %
 % Notes: 
 %    Currently under construction.
@@ -95,12 +98,12 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
     %  I. Calculate Voxel ID R.
     delta_radius = circle_max_radius / num_radial_sections;
     current_position = (ray_start_x - circle_center_x)^2 + (ray_start_y - circle_center_y)^2;
-    if current_position > circle_max_radius
+    if current_position > circle_max_radius^2
         current_voxel_ID_r = 1;
     else
         current_delta_radius = delta_radius;
         current_voxel_ID_r = num_radial_sections;
-        while (current_position < current_delta_radius)
+        while (current_position > current_delta_radius^2)
             current_voxel_ID_r = current_voxel_ID_r - 1;
             current_delta_radius = current_delta_radius + delta_radius;
         end
@@ -112,12 +115,14 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
         current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
     end
     
+    list = [[current_voxel_ID_r, current_voxel_ID_theta]];
+    
     % TRAVERSAL PHASE
-    current_ray_position = ray_start;
     t = t_begin;
+    
     while t < t_end
         % 1. Calculate tMaxR (using radial_hit) 
-        [is_radial_hit, tMaxR, tDeltaR, new_voxel_ID_r] = radial_hit(ray_origin, ray_direction, ...
+        [is_radial_hit, tMaxR, tDeltaR, tStepR] = radial_hit(ray_origin, ray_direction, ...
             current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, verbose);
         
         [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
@@ -126,18 +131,17 @@ function polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_directio
         % 2. Compare tMaxTheta, tMaxR
         if tMaxTheta < tMaxR
             t = t + tDeltaTheta;
+            current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
         else
             t = t + tDeltaR;
-        end
-        
-        % 3. Update Voxel(theta, r).
-        current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
-        current_voxel_ID_r = new_voxel_ID_r;        
+            current_voxel_ID_r = current_voxel_ID_r + tStepR;   
+        end    
     end
     
+    list = [list, [current_voxel_ID_r, current_voxel_ID_theta]];
 end
 
-function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_ray_position] = ...
+function [is_radial_hit, tMaxR, tStepR, new_ray_position] = ...
         radial_hit(ray_origin, ray_direction, ...
         current_radial_voxel, circle_center, ...
         circle_max_radius, delta_radius, verbose)
@@ -150,14 +154,11 @@ function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_ray_position] = ...
 %    circle_max_radius: The max radius of the circle.
 %    num_radial_sections: The number of radial sections.
 %    delta_radius: The delta of the radial sections.
-%    current_position: TODO
 %
 % Returns:
 %    is_radial_hit: true if a radial crossing has occurred, false otherwise.
 %    tMaxR: is the time at which a hit occurs for the ray at the next point of intersection.
-%    tStepR: TODO
-%    new_voxel_ID_r: The new voxel ID that the ray is located in. If the
-%                    ray hasn't changed, this remains the old voxel ID.
+%    tStepR: The direction of step into the next radial voxel, 0, +1, -1
 %    new_ray_position: The (x,y) coordinate of the ray after the traversal.
     ray_direction_x = ray_direction(1);
     ray_direction_y = ray_direction(2);
@@ -201,7 +202,6 @@ function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_ray_position] = ...
     end
     
     if  distance_from_origin >= current_radius^2
-        new_voxel_ID_r = current_radial_voxel - 1;
         is_radial_hit = true;
         tStepR = -1;
         new_ray_position = [new_x_position new_y_position];
@@ -210,7 +210,6 @@ function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_ray_position] = ...
             fprintf('Ray moving toward voxel closer to perimeter (outward).\n');
         end
     elseif  distance_from_origin < (current_radius - delta_radius)^2
-            new_voxel_ID_r = current_radial_voxel + 1;
             is_radial_hit = true;
             tStepR = +1;
             new_ray_position = [new_x_position new_y_position];
@@ -219,7 +218,6 @@ function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_ray_position] = ...
                 fprintf('Ray moving toward voxel closer to center (inward).\n');
             end
     else
-        new_voxel_ID_r = current_radial_voxel;
         is_radial_hit = false;
         tStepR = 0;
         new_ray_position = current_position;
@@ -231,7 +229,7 @@ function [is_radial_hit, tMaxR, tStepR, new_voxel_ID_r, new_ray_position] = ...
     if verbose
         fprintf(['new_voxel_ID_r: %d \n' ...
             'is_radial_hit: %d \n' ...
-            'tStepR: %d \n'], new_voxel_ID_r, is_radial_hit, tStepR);
+            'tStepR: %d \n'], current_radial_voxel + tStepR, is_radial_hit, tStepR);
     end
 end
 
