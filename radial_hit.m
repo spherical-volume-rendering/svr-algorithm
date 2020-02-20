@@ -47,6 +47,9 @@ function [is_radial_hit, tMaxR, tStepR] = ...
         tStepR = 0;
     end
     
+    % TODO: 
+    % Current issue: When we hit the "middle", we need to switch from
+    % decreasing in voxels to increasing in voxels.
     tMaxR = min(double(subs(intersections_t)));
     
     new_x_position = ray_origin_x + ray_direction_x * tMaxR;
