@@ -97,13 +97,13 @@ function voxel_list = polarCoordinateTraversal(min_bound, max_bound, ray_origin,
     % INITIALIZATION PHASE
     %  I. Calculate Voxel ID R.
     delta_radius = circle_max_radius / num_radial_sections;
-    distance_from_origin = (ray_start_x - circle_center_x)^2 + (ray_start_y - circle_center_y)^2;
-    if distance_from_origin > circle_max_radius^2
+    distance_from_circle_origin = (ray_start_x - circle_center_x)^2 + (ray_start_y - circle_center_y)^2;
+    if distance_from_circle_origin > circle_max_radius^2
         current_voxel_ID_r = 1;
     else
         current_delta_radius = delta_radius;
         current_voxel_ID_r = num_radial_sections;
-        while (distance_from_origin > current_delta_radius^2)
+        while (distance_from_circle_origin > current_delta_radius^2)
             current_voxel_ID_r = current_voxel_ID_r - 1;
             current_delta_radius = current_delta_radius + delta_radius;
         end
