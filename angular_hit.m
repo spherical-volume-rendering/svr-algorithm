@@ -20,7 +20,13 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
     delta_theta = 2 * pi / num_radial_sections;
     interval_theta = [current_voxel_ID_theta * delta_theta, (current_voxel_ID_theta + 1) * delta_theta];
     
-    % calculate the x and y components that correspond to the angular
+    if verbose
+        fprintf("\nCurrent Voxel ID Theta: %d", current_voxel_ID_theta); 
+        fprintf("\nInterval Theta: [%f, %f]", interval_theta(1), interval_theta(2));
+    end
+   
+    
+    % Calculate the x and y components that correspond to the angular
     % boundary for the angular interval
     xmin = cos(min(interval_theta));
     xmax = cos(max(interval_theta));
@@ -28,11 +34,10 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
     ymax = sin(max(interval_theta));
     
     if verbose
-        fprintf("\ninterval_theta: %f \ncurrent_voxel_ID_theta: %f", interval_theta, current_voxel_ID_theta);
         fprintf("\nxmin: %f, xmax: %f \nymin: %f, ymax: %f", xmin, xmax, ymin, ymax);
     end
     
-    % solve the systems Az=b to check for intersection
+    % Solve the systems Az=b to check for intersection
     Amin = [xmin, -ray_direction(1); ymin, -ray_direction(2)];
     Amax = [xmax, -ray_direction(1); ymax, -ray_direction(2)];
     b = transpose([ray_origin(1), ray_origin(2)]);
@@ -69,6 +74,7 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
         tStepTheta = 1;
         tMaxTheta = zmax(1);
     end
+    
     if verbose
         fprintf([...
                  'tMaxTheta: %d \n' ...
