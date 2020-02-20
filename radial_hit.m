@@ -25,7 +25,7 @@ function [is_radial_hit, tMaxR, tStepR] = ...
     current_radius = circle_max_radius - (delta_radius * (current_radial_voxel - 1));
     
     if verbose
-        fprintf('\nradial_hit. \nCurrent Radial Voxel: %d\n', current_radial_voxel);
+        fprintf('\n--radial_hit-- \nCurrent Radial Voxel: %d\n', current_radial_voxel);
     end
         
     % (1)   (x - circle_center_x)^2 + (y - circle_center_y)^2 = current_radius^2
@@ -45,6 +45,9 @@ function [is_radial_hit, tMaxR, tStepR] = ...
         is_radial_hit = false;
         tStepR = -inf;
         tMaxR = -inf;
+        if verbose
+            fprintf("No intersection occurs.\n");
+        end
         return;
     end
     
