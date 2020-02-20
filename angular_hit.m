@@ -60,7 +60,7 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
     end
     if zmax(1) < 0 || zmin(2) < 0
         is_angular_hit = false;
-                tMaxTheta = -inf;
+        tMaxTheta = -inf;
         tStepTheta = -inf;
         return;
     end
@@ -80,5 +80,9 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
                  'tMaxTheta: %d \n' ...
                  'is_angular_hit: %d \n' ...
                  'tStepTheta: %d \n'], tMaxTheta, is_angular_hit, tStepTheta);
+             
+        new_x_position = ray_origin_x + ray_direction_x * tMaxTheta;
+        new_y_position = ray_origin_y + ray_direction_y * tMaxTheta;
+        text(new_x_position, new_y_position, 'POI_t');
     end
 end
