@@ -5,14 +5,14 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
 %    ray_origin: vector of the origin of the ray in cartesian coordinate
 %    ray_direction: vector of the direction of the ray in cartesian
 %                   coordinate
-%    current_voxel_ID: the (angular) ID of current voxel
+%    current_voxel_ID_theta: the (angular) ID of current voxel
 %    num_radial_sections: number of total radial sections on the grid
 % Returns:
 %    is_angular_hit: true if an angular crossing has occurred, false otherwise.
 %    tMaxTheta: is the time at which a hit occurs for the ray at the next point of intersection.
-%    tDeltaTheta: TODO
+%    tStepTheta: The direction the theta voxel steps. +1, -1, or 0.
     if verbose
-        fprintf("\nangular_hit.\n");
+        fprintf("\n-- angular_hit --");
     end
     
     % First calculate the angular interval that current voxID corresponds
@@ -45,7 +45,7 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
     zmax = Amax\b; % inv(Amax) * b
     
     if verbose
-        fprintf("\nzmin_r: %f, zmin_t: %f \nzmax_r: %f, zmax_t: %f", zmin(1), zmin(2), zmax(1), zmax(2));    
+        fprintf("\nzmin_r: %f, zmin_t: %f \nzmax_r: %f, zmax_t: %f\n", zmin(1), zmin(2), zmax(1), zmax(2));    
     end
     
     
@@ -56,17 +56,23 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
         is_angular_hit = false;
         tMaxTheta = -inf;
         tStepTheta = -inf;
+        if verbose
+            fprintf("zmin(1) < 0 || zmin(2) < 0\n")
+        end
         return;
     end
-    if zmax(1) < 0 || zmin(2) < 0
+    if zmax(1) < 0 || zmax(2) < 0
         is_angular_hit = false;
         tMaxTheta = -inf;
         tStepTheta = -inf;
+        if verbose
+            fprintf("zmax(1) < 0 || zmax(2) < 0\n")
+        end
         return;
     end
     
     % If we hit the min boundary then we decrement theta, else increment;
-    % assign tmaxtheta
+    % assign tMaxTheta
     if zmin(1) < 0 || zmin(2) < 0 
         tStepTheta = -1;
         tMaxTheta = zmin(1);
@@ -81,8 +87,8 @@ function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_d
                  'is_angular_hit: %d \n' ...
                  'tStepTheta: %d \n'], tMaxTheta, is_angular_hit, tStepTheta);
              
-        new_x_position = ray_origin_x + ray_direction_x * tMaxTheta;
-        new_y_position = ray_origin_y + ray_direction_y * tMaxTheta;
+        new_x_position = ray_origin(1) + ray_direction(1) * tMaxTheta;
+        new_y_position = ray_origin(2) + ray_direction(2) * tMaxTheta;
         text(new_x_position, new_y_position, 'POI_t');
     end
 end
