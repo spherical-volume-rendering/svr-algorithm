@@ -1,4 +1,4 @@
-function voxel_list = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
+function [radial_voxels, angular_voxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
         circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
@@ -21,7 +21,12 @@ function voxel_list = polarCoordinateTraversal(min_bound, max_bound, ray_origin,
 %    num_angular_sections > 0
 %
 % Returns: 
-%    voxel_list: The list of voxel indices given by (radial_voxel_ID, angular_voxel_ID).
+%    radial_voxels: A list of the radial voxels that were hit by the ray.
+%    angular_voxels: A list of the angular voxels that were hit by the ray.
+%    These lists, used in conjunction, will produce the path of the ray
+%    through the voxels using each point. For example,
+%    [radial_voxels(1), angular_voxels(1)] is the first voxel the ray
+%    travels through.
 %
 % Notes: 
 %    Currently under construction.
@@ -115,7 +120,8 @@ function voxel_list = polarCoordinateTraversal(min_bound, max_bound, ray_origin,
         current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
     end
     
-    voxel_list = [[current_voxel_ID_r, current_voxel_ID_theta]];
+    angular_voxels = [current_voxel_ID_theta];
+    radial_voxels = [current_voxel_ID_r];
     
     % TRAVERSAL PHASE
     t = t_begin;
@@ -137,12 +143,18 @@ function voxel_list = polarCoordinateTraversal(min_bound, max_bound, ray_origin,
         if ~is_radial_hit
             t = t + tMaxTheta;
             current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
+            
+            angular_voxels = [angular_voxels, current_voxel_ID_theta];
+            radial_voxels = [radial_voxels, current_voxel_ID_r];
             continue;
         end
         
         if ~is_angular_hit
             t = t + tMaxR;
-            current_voxel_ID_r = current_voxel_ID_r + tStepR;  
+            current_voxel_ID_r = current_voxel_ID_r + tStepR; 
+            
+            angular_voxels = [angular_voxels, current_voxel_ID_theta];
+            radial_voxels = [radial_voxels, current_voxel_ID_r];
             continue;
         end
         
@@ -153,8 +165,11 @@ function voxel_list = polarCoordinateTraversal(min_bound, max_bound, ray_origin,
         else
             t = t + tMaxR;
             current_voxel_ID_r = current_voxel_ID_r + tStepR;   
-        end    
+        end
+        
+        angular_voxels = [angular_voxels, current_voxel_ID_theta];
+        radial_voxels = [radial_voxels, current_voxel_ID_r];
     end
     
-    voxel_list = [voxel_list, [current_voxel_ID_r, current_voxel_ID_theta]];
+    
 end
