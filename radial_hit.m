@@ -1,6 +1,6 @@
 function[tMaxR, tStepR, is_radial_hit]=radial_hit(ray_origin, ray_direction, ...
     current_radial_voxel, circle_center, ...
-    circle_max_radius, delta_radius, jenkyR, t, verbose)
+    circle_max_radius, delta_radius, r, t, verbose)
 %[%is_radial_hit,
 ... tMaxR, %tStepR
     ... ]
@@ -27,7 +27,7 @@ ray_origin_x = ray_origin(1);
 ray_origin_y = ray_origin(2);
 
 if verbose
-    fprintf('\n--radial_hit-- \nCurrent Radial Voxel: %d\n', current_radial_voxel);
+    fprintf('\n--radial_hit-- \nCurrent Radial Voxel: %d', current_radial_voxel)
 end
 
 % (1)   (x - circle_center_x)^2 + (y - circle_center_y)^2 = current_radius^2
@@ -35,34 +35,52 @@ end
 % (3)    y = ray_origin_y + ray_direction_y(t)
 % Plug in x, y in equation (1), then solve for t.
 % To get point of intersection, plug t back in parametric equation of a ray.
-syms cT; % current time
-current_radius = circle_max_radius - (abs(delta_radius) * (current_radial_voxel - 1))
-cr = (current_radius - jenkyR)^2
- if (cr == 0 )
-      cr = current_radius^2;
- end
-intersections_t = solve( ...
-    (ray_origin_x + ray_direction_x * cT - circle_center_x)^2 + ...
-    (ray_origin_y + ray_direction_y * cT - circle_center_y)^2 ...
-    - cr == 0, cT);
-sect = double(subs(intersections_t))
-if (isempty(double(subs(intersections_t))) || imag(sect(1)) ~= 0 || imag(sect(2)) ~= 0)
-    % Case where no intersection between ray and new radial voxel
-    % occurs.
-    is_radial_hit = false;
-    tStepR = -inf;
-    tMaxR = -inf;
-    if verbose
-        fprintf("No intersection occurs.\n");
+p0 = ray_origin + t.*ray_direction
+r = max(r, delta_radius)
+ray_unit_vector = 1/sqrt(ray_direction(1)^2 + ray_direction(2)^2)...
+    .* [ray_direction(1);  ray_direction(2)]';
+ray_circle_vector = [circle_center(1) - ray_origin(1); circle_center(2) - ray_origin(2)]';
+v = dot(ray_circle_vector,ray_unit_vector);
+discr = r^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2)
+if (discr < 0 ) 
+    tMaxR = inf;
+    tStepR = 0;
+    return
+end
+d = sqrt(discr)
+if ((v - d) >= 0 && (v + d) >= 0)
+    ta = (v-d)
+    tb = (v+d)
+    pa = ray_origin + ta.*ray_unit_vector
+    pb = ray_origin + tb.*ray_unit_vector
+    t1= (pa(1) - ray_origin(1))/ray_direction(1)
+    t2 = (pb(1) - ray_origin(1))/ray_direction(1)
+    if (t1 > t && t2 > t)
+    	tMaxR = t1
+        p = pa
+    elseif (~(t1 > t) && (t2 > t))
+        tMaxR = t2
+        p = pb
     end
-    return;
+    distance_to_center1 = (circle_center(1)-p0(1))^2 + (circle_center(2)-p0(2))^2
+    distance_to_center2 = (circle_center(1)-p(1))^2 + (circle_center(2)-p(2))^2
+    distance_to_center1 - distance_to_center2
+    tol = 10^-6
+    if (distance_to_center1 - distance_to_center2 > tol) 
+       tStepR = 1;
+    elseif (distance_to_center2 - distance_to_center1 > tol)
+              tStepR = -1;
+    else
+        tStepR = 0;
+    end
+else
+    tMaxR = inf;
+    tStepR = 0;
 end
 
-if (t <  min(double(subs(intersections_t))))
-    tMaxR = min(double(subs(intersections_t)))
-    tStepR= 1
-else
-    tMaxR = max(double(subs(intersections_t)))
-    tStepR= -1
+
+if verbose
+    fprintf(['\ntMaxR: %d \n' ...
+        'tStepR: %d \n'], tMaxR, tStepR);
 end
 end
