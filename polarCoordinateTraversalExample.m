@@ -14,6 +14,7 @@ function polarCoordinateTraversalExample
     t_end = 15.0;
     
     verbose = true;
+   
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
 end
