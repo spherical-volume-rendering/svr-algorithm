@@ -36,9 +36,7 @@ syms cT; % current time
 current_radius = circle_max_radius - (abs(delta_radius) * (current_radial_voxel - 1))
 cr = (current_radius - jenkyR)^2;
 
-if cr == 0
-    cr = current_radius^2;
-end
+if (cr == 0), cr = current_radius^2; end
 
 intersections_t = solve( ...
     (ray_origin_x + ray_direction_x * cT - circle_center_x)^2 + ...
