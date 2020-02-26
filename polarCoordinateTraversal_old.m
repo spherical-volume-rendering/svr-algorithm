@@ -25,8 +25,8 @@ function [radial_voxels, angular_voxels] = polarCoordinateTraversal_old(min_boun
 %    angular_voxels: A list of the angular voxels that were hit by the ray.
 %    These lists, used in conjunction, will produce the path of the ray
 %    through the voxels using each point. For example,
-%    (radial_voxels(1), angular_voxels(1)) is the first voxel the ray
-%    travels through. This pair represents a unique voxel in the mapping.
+%    ( radial_voxels(1), angular_voxels(1) ) is the first voxel the ray
+%    travels through. This pair represents a unique voxel in the grid mapping.
 %
 % Notes:
 %    Currently under construction.
