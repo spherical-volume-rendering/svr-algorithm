@@ -167,9 +167,9 @@ while t < t_end
         t = tMaxR;
         if (tStepR < 0), jenkyR = 0; end
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        new_x_position = ray_origin_x + ray_direction_x * tMaxR;
-        new_y_position = ray_origin_y + ray_direction_y * tMaxR;
         if verbose
+            new_x_position = ray_origin_x + ray_direction_x * tMaxR;
+            new_y_position = ray_origin_y + ray_direction_y * tMaxR;
             if tStepR == 1
                 text(new_x_position, new_y_position, 'POI_r');
                 fprintf('Ray moving toward voxel closer to center (inward).\n');
