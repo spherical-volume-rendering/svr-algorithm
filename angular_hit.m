@@ -1,4 +1,4 @@
-function [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
+function [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
     num_angular_sections, circle_center, t, verbose)
 % Determines whether an angular hit occurs for the given ray.
 % Input:
@@ -35,7 +35,6 @@ ymax = sin(max(interval_theta));
 if (single(tan(min(interval_theta))) == ray_direction(2)/ray_direction(1) ...
         && single(tan(max(interval_theta))) == ray_direction(2)/ray_direction(1))
     fprintf("parallel")
-    is_angular_hit = false;
     tMaxTheta = inf;
     tStepTheta = 0;
     return;
@@ -46,28 +45,26 @@ Amin = [xmin, -ray_direction(1); ymin, -ray_direction(2)];
 Amax = [xmax, -ray_direction(1); ymax, -ray_direction(2)];
 b = [ray_origin(1)-circle_center(1), ray_origin(2)-circle_center(2)]';
 if (single(tan(min(interval_theta))) == ray_direction(2)/ray_direction(1))
-    zmax = Amax\b
-    zmin = [0 ; 0]
+    zmax = Amax\b;
+    zmin = [0 ; 0];
 elseif (single(tan(max(interval_theta))) == ray_direction(2)/ray_direction(1))
-    zmin = Amin\b
-    zmax = [0 ; 0]
+    zmin = Amin\b;
+    zmax = [0 ; 0];
 else
-    zmin = Amin\b
-    zmax = Amax\b
+    zmin = Amin\b;
+    zmax = Amax\b;
 end
 
 % We need the radius (r = z[1]) and time (t = z[2]) to be positive or
 % else the intersection is null. 
 % We need the time step of the traversal to be less than t = zmax(2) or 
 % else the intersection is null. 
-is_angular_hit = true;
 
 if (((zmin(1) < 0 || zmin(2) < 0) && (zmax(1) < 0 || zmax(2) < 0)) || (t >= max(zmax(2),zmin(2))))
-    is_angular_hit = false;
     tMaxTheta = inf;
     tStepTheta = 0;
     if verbose
-        fprintf("(zmin(1) < 0 || zmin(2) < 0\n) && (zmax(1) < 0 || zmax(2) < 0\n)")
+        fprintf("angular intersection is null")
     end
     return;
 end
@@ -78,13 +75,13 @@ if zmin(1) > 0 && zmin(2)>t
     tStepTheta = -1;
     tMaxTheta = zmin(2);
     if verbose
-        fprintf("FOR ARIEL: Hit min bound\n");
+        fprintf("Hit min angular bound\n");
     end
 else
     tStepTheta = 1;
     tMaxTheta = zmax(2);
         if verbose
-        fprintf("FOR ARIEL: Hit max bound\n");
+        fprintf("Hit max angular bound\n");
     end
 end
 
