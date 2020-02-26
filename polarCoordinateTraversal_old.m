@@ -1,4 +1,3 @@
- 
 function [radial_voxels, angular_voxels] = polarCoordinateTraversal_old(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
     circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
 % Input:
@@ -106,12 +105,15 @@ delta_radius = circle_max_radius / num_radial_sections;
 distance_from_circle_origin = (ray_start_x - circle_center_x)^2 + (ray_start_y - circle_center_y)^2;
 if distance_from_circle_origin > circle_max_radius^2
     current_voxel_ID_r = 1;
-    [tMaxR, tStepR] = radial_hit_old(ray_origin, ray_direction, ...
+    [tMaxR, ~] = radial_hit_old(ray_origin, ray_direction, ...
     current_voxel_ID_r, circle_center, ...
-    circle_max_radius, delta_radius, delta_radius, t, verbose)
-%if (is_radial_hit == false) 
- %   return; %
-%end
+    circle_max_radius, delta_radius, delta_radius, t, verbose);
+
+    if verbose
+        new_x_position = ray_origin(1) + ray_direction(1) * tMaxR;
+        new_y_position = ray_origin(2) + ray_direction(2) * tMaxR;
+        text(new_x_position, new_y_position, 'POI_r');
+    end
 else
     current_delta_radius = delta_radius;
     current_voxel_ID_r = num_radial_sections;
@@ -133,15 +135,14 @@ radial_voxels = [current_voxel_ID_r];
 % TRAVERSAL PHASE
 t = t_begin;
 jenkyR = delta_radius;
-while t < t_end
+while t < t_end && current_voxel_ID_r > 0
     pause
-    t
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR, tStepR] = radial_hit_old(ray_origin, ray_direction, ...
         current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, jenkyR, t, verbose);
     pause
     
-    [is_angular_hit, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
+    [~, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
         num_angular_sections, circle_center, t, verbose);
     pause  
     
@@ -156,7 +157,7 @@ while t < t_end
         end
     else
         t = tMaxR;
-        if (tStepR < 0) jenkyR = 0;end
+        if (tStepR < 0), jenkyR = 0; end
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         new_x_position = ray_origin_x + ray_direction_x * tMaxR;
         new_y_position = ray_origin_y + ray_direction_y * tMaxR;
@@ -173,7 +174,5 @@ while t < t_end
     
     angular_voxels = [angular_voxels, current_voxel_ID_theta];
     radial_voxels = [radial_voxels, current_voxel_ID_r];
-end
-
-
+end    
 end
