@@ -33,7 +33,7 @@ end
 % Plug in x, y in equation (1), then solve for t.
 % To get point of intersection, plug t back in parametric equation of a ray.
 syms cT; % current time
-current_radius = circle_max_radius - (abs(delta_radius) * (current_radial_voxel - 1))
+current_radius = circle_max_radius - (abs(delta_radius) * (current_radial_voxel - 1));
 cr = (current_radius - jenkyR)^2;
 
 if (cr == 0), cr = current_radius^2; end
