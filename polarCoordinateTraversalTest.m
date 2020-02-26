@@ -12,20 +12,18 @@ end
 function testRayDoesNotEnterCircle(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
-    
     ray_origin = [3.0, 3.0];
     ray_direction = [-2.0, -1.3];
-    
     circle_center = [15.0, 15.0];
     circle_max_radius = 10.0;
     num_radial_sections = 4;
     num_angular_sections = 8;
-    
     t_begin = 0.0;
     t_end = 15.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels] = polarCoordinateTraversal_old(min_bound, max_bound, ray_origin, ray_direction, circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal_old(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, []);
     verifyEqual(testCase, thetaVoxels, []);
 end
@@ -34,23 +32,19 @@ end
 function testRayEntersCircleAndGoesThroughOrigin(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
-    
     ray_origin = [3.0, 5.0];
-    ray_direction = [1.0, 1.0];
-    
+    ray_direction = [1.0, 1.0];  
     circle_center = [15.0, 15.0];
     circle_max_radius = 10.0;
     num_radial_sections = 2;
-    num_angular_sections = 4;
-    
+    num_angular_sections = 4; 
     t_begin = 0.0;
     t_end = 20.0;
-    
-    
     verbose = false;
     
-    [rVoxels, thetaVoxels] = polarCoordinateTraversal_old(min_bound, max_bound, ray_origin, ray_direction, circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-    expected_rVoxels =     [1,2,2,2,1];
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal_old(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+    expected_rVoxels     = [1,2,2,2,1];
     expected_thetaVoxels = [2,2,1,0,0];
     
     verifyEqual(testCase, rVoxels, expected_rVoxels);
