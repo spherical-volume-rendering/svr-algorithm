@@ -103,7 +103,9 @@ end
 
 % INITIALIZATION PHASE
 %  I. Calculate Voxel ID R.
+t = t_begin;
 delta_radius = circle_max_radius / num_radial_sections;
+
 distance_from_circle_origin = (ray_start_x - circle_center_x)^2 + (ray_start_y - circle_center_y)^2;
 if distance_from_circle_origin > circle_max_radius^2
     current_voxel_ID_r = 1;
@@ -142,19 +144,16 @@ angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
 % TRAVERSAL PHASE
-t = t_begin;
 jenkyR = delta_radius;
-while t < t_end && current_voxel_ID_r > 0
-    pause
+while t < t_end
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR, tStepR] = radial_hit_old(ray_origin, ray_direction, ...
         current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, jenkyR, t, verbose);
-    pause
+    if (current_voxel_ID_r + tStepR) <= 0, return; end
     
     [~, tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
         num_angular_sections, circle_center, t, verbose);
-    pause  
-    
+
     % 2. Compare tMaxTheta, tMaxR
     if (tMaxTheta < tMaxR)
         t = tMaxTheta;
