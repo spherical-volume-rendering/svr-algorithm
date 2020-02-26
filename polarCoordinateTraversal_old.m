@@ -50,6 +50,8 @@ ray_start_y = ray_start(2);
 ray_end = ray_origin + t_end * ray_direction;
 ray_end_x = ray_end(1);
 ray_end_y = ray_end(2);
+radial_voxels = [];
+angular_voxels = [];
 
 if (verbose)
     figure;
@@ -108,6 +110,13 @@ if distance_from_circle_origin > circle_max_radius^2
     [tMaxR, ~] = radial_hit_old(ray_origin, ray_direction, ...
     current_voxel_ID_r, circle_center, ...
     circle_max_radius, delta_radius, delta_radius, t, verbose);
+
+    if tMaxR < t_begin || tMaxR > t_end
+        if verbose
+            fprintf("\nRay does not intersect with the circle.");
+        end
+        return; 
+    end
 
     if verbose
         new_x_position = ray_origin(1) + ray_direction(1) * tMaxR;
