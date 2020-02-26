@@ -53,6 +53,7 @@ end
 
 % TODOs:
 % Ray begins outside of circle and does not go through origin.
+% Ray begins inside of circle and does not go through origin.
 % Ray with zero x-/y-direction.
 % Ray with negative x-/y-direction.
 % Ray begins at circle center.
