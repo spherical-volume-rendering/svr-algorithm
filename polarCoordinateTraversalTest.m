@@ -256,7 +256,7 @@ function testBeginAtRadialBoundaryInOrthogonal(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% Special Test. Ray goes along a ray boundary
+% Corner Test. Ray goes along a ray boundary
 function testRayGoesAlongRayBoundary(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
