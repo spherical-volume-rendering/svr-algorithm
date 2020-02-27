@@ -1,5 +1,4 @@
 % Tests for the PolarCoordinateTraversal function.
-% It currently uses polarCoordinateTraversal_old.
 % 
 % To run: 
 %       type <runtests> in the command window.
@@ -22,7 +21,7 @@ function testRayDoesNotEnterCircle(testCase)
     t_end = 15.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels] = polarCoordinateTraversal_old(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, []);
     verifyEqual(testCase, thetaVoxels, []);
@@ -42,7 +41,7 @@ function testRayEntersCircleAndGoesThroughOrigin(testCase)
     t_end = 20.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels] = polarCoordinateTraversal_old(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
     expected_rVoxels     = [1,2,2,2,1];
     expected_thetaVoxels = [2,2,1,0,0];
