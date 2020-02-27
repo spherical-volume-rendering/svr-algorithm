@@ -148,10 +148,8 @@ while (t < t_end)
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR] = radial_hit_dotprod(ray_origin, ray_direction, ...
         current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, t, verbose);
-    pause
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
         num_angular_sections, circle_center, t, verbose);
-    pause
     % 2. Compare tMaxTheta, tMaxR
     if (tMaxTheta < tMaxR)
         t = tMaxTheta;
