@@ -73,6 +73,7 @@ function testRayBeginsOutsideCircleAndDoesNotGoThroughOrigin(testCase)
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
+
 % Ray begins inside of circle and does not go through origin.
 function testRayBeginInsideCircleAndDoesNotGoThroughOrigin(testCase)
     min_bound = [0.0, 0.0];
@@ -95,6 +96,7 @@ function testRayBeginInsideCircleAndDoesNotGoThroughOrigin(testCase)
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
+
 % Ray with zero x-/y-direction.
 function testZeroX(testCase)
     min_bound = [0.0, 0.0];
@@ -230,6 +232,7 @@ function testBeginAtThetaBoundaryInOrthogonal(testCase)
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
+
 % Ray begins at a radial boundary (and goes in orthogonal directions).
 function testBeginAtRadialBoundaryInOrthogonal(testCase)
     min_bound = [0.0, 0.0];
