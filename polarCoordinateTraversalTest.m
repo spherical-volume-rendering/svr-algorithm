@@ -31,7 +31,7 @@ end
 function testRayEntersCircleAndGoesThroughOrigin(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
-    ray_origin = [3.0, 5.0];
+    ray_origin = [5.0, 5.0];
     ray_direction = [1.0, 1.0];  
     circle_center = [15.0, 15.0];
     circle_max_radius = 10.0;
