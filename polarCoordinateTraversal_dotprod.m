@@ -1,4 +1,4 @@
-function [radial_voxels, angular_voxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
+function [radial_voxels, angular_voxels] = polarCoordinateTraversal_dotprod(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
     circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
@@ -51,6 +51,8 @@ ray_end = ray_origin + t_end * ray_direction;
 ray_end_x = ray_end(1);
 ray_end_y = ray_end(2);
 
+delta_radius = circle_max_radius / num_radial_sections;
+
 if (verbose)
     figure;
     hold on;
@@ -80,7 +82,6 @@ if (verbose)
     
     % Draw the radial sections.
     current_max_radius = circle_max_radius;
-    delta_radius = circle_max_radius / num_radial_sections;
     for k = 1:num_radial_sections
         viscircles(circle_center, current_max_radius, 'LineStyle', '--', 'Color', '#7E2F8E', 'LineWidth', 1);
         current_max_radius = current_max_radius - delta_radius;
@@ -142,7 +143,6 @@ angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
 % III. TRAVERSAL PHASE
-tol = 10^-6;
 t = t_begin; 
 while (t < t_end)
     % 1. Calculate tMaxR, tMaxTheta
@@ -166,9 +166,9 @@ while (t < t_end)
         t = tMaxR;
         p = ray_origin + t.*ray_direction;
         r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
-        if (abs(r_new - r) < tol)
+        if (abs(r_new - r) < eps)
+        % Note that tStepR is only used for plotting, not computationally significant. 
             tStepR = 0; 
-            current_voxel_ID_r = current_voxel_ID_r; 
         elseif (r_new - r > 0) 
             tStepR = -1; 
             current_voxel_ID_r = current_voxel_ID_r -1;
@@ -177,9 +177,9 @@ while (t < t_end)
             current_voxel_ID_r = current_voxel_ID_r + 1;
         end
         r = r_new;
+        if verbose
         new_x_position = ray_origin_x + ray_direction_x * tMaxR;
         new_y_position = ray_origin_y + ray_direction_y * tMaxR;       
-        if verbose
             if tStepR == 1
                 text(new_x_position, new_y_position, 'POI_r');
                 fprintf('RADIAL HIT (inward).\n');
