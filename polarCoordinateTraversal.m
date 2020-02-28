@@ -146,11 +146,12 @@ angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
 % III. TRAVERSAL PHASE
+tol = 10^-10;
 t = t_begin; 
 while (t < t_end)
     % 1. Calculate tMaxR, tMaxTheta
-    [tMaxR] = radial_hit(ray_origin, ray_direction, ...
-        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, t, verbose);
+    [tMaxR, tStepR] = radial_hit(ray_origin, ray_direction, ...
+        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, r, t, verbose);
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
         num_angular_sections, circle_center, t, verbose);
     
@@ -158,7 +159,6 @@ while (t < t_end)
     if (tMaxTheta < tMaxR)
         t = tMaxTheta;
         current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
-        
         if verbose
             new_x_position = ray_origin(1) + ray_direction(1) * tMaxTheta;
             new_y_position = ray_origin(2) + ray_direction(2) * tMaxTheta;
@@ -169,30 +169,21 @@ while (t < t_end)
         t = tMaxR;
         p = ray_origin + t.*ray_direction;
         r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
-        if (abs(r_new - r) < eps)
-        % Note that tStepR is only used for plotting, not computationally significant. 
-            tStepR = 0; 
-        elseif (r_new - r > 0) 
-            tStepR = -1; 
-            current_voxel_ID_r = current_voxel_ID_r -1;
-        else
-            tStepR = 1; 
-            current_voxel_ID_r = current_voxel_ID_r + 1;
-        end
+        current_voxel_ID_r = current_voxel_ID_r + tStepR;
         r = r_new;
         
         if (current_voxel_ID_r <= 0), return; end
         
         if verbose
-            new_x_position = ray_origin_x + ray_direction_x * tMaxR;
-            new_y_position = ray_origin_y + ray_direction_y * tMaxR;       
-            if tStepR == 1
-                text(new_x_position, new_y_position, 'POI_r');
-                fprintf('RADIAL HIT (inward).\n');
-            else
-                text(new_x_position, new_y_position, 'POI_r');
-                fprintf('RADIAL HIT (outward).\n');
-            end
+          new_x_position = ray_origin_x + ray_direction_x * tMaxR;
+          new_y_position = ray_origin_y + ray_direction_y * tMaxR;       
+          if tStepR == 1
+            text(new_x_position, new_y_position, 'POI_r');
+            fprintf('RADIAL HIT (inward).\n');
+          else
+            text(new_x_position, new_y_position, 'POI_r');
+            fprintf('RADIAL HIT (outward).\n');
+          end
         end
     end
     

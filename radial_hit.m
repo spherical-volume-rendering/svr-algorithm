@@ -1,5 +1,5 @@
-function[tMaxR]=radial_hit(ray_origin, ray_direction, current_radial_voxel, ...
-        circle_center, circle_max_radius, delta_radius, t, verbose)
+function[tMaxR, tStepR]=radial_hit(ray_origin, ray_direction, current_radial_voxel, ...
+        circle_center, circle_max_radius, delta_radius, r, t, verbose)
 % Determines whether a radial hit occurs for the given ray.
 % Input:
 %    ray_origin: The origin of the ray.
@@ -28,7 +28,8 @@ ray_circle_vector = [circle_center(1) - ray_origin(1); circle_center(2) - ray_or
 v = dot(ray_circle_vector,ray_unit_vector);
 r_a = max(r - delta_radius , delta_radius);
 r_b = min(r + delta_radius, circle_max_radius);
-if (abs(r_a - r_b) < eps)
+tol = 10^-10;
+if (abs(r_a - r_b) < tol)
     r_b = r + 2 * delta_radius;
 end
 
@@ -76,14 +77,25 @@ time = time_array(time_array > t);
 
 if (isempty(time))
     tMaxR = inf;
+    tStepR = -1;
     if verbose
         fprintf("\nNo intersection for a radial hit for current r: %d", r);
     end
     return;
 end
 tMaxR = time(1);
-
+p = ray_origin + tMaxR.*ray_direction;
+r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
+if (abs(r_new - r) < tol)
+    tStepR = 0;
+elseif (r_new - r > 0)
+    tStepR = -1;
+else
+    tStepR = 1;
+end
+ 
 if verbose
     fprintf('\ntMaxR: %d \n', tMaxR);
 end
+
 end
