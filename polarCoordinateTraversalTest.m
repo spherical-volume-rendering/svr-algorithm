@@ -67,8 +67,8 @@ function testRayBeginsOutsideCircleAndDoesNotGoThroughOrigin(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,2,2,2,1];
-        expected_thetaVoxels = [4,4,3,2,2];
+        expected_rVoxels     = [1,2,2,1];
+        expected_thetaVoxels = [2,2,1,1];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
@@ -90,7 +90,7 @@ function testRayBeginInsideCircleAndDoesNotGoThroughOrigin(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [2,3,3,3,2,1];
+        expected_rVoxels     = [2,3,3,2,2,1];
         expected_thetaVoxels = [2,2,1,1,0,0];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
@@ -158,7 +158,7 @@ function testNegativeXandY(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,2,2,3,3];
+        expected_rVoxels     = [1,2,2,1,1];
         expected_thetaVoxels = [0,0,3,3,2];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
@@ -227,7 +227,7 @@ function testBeginAtThetaBoundaryInOrthogonal(testCase)
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
         expected_rVoxels     = [2,1];
-        expected_thetaVoxels = [1,1,1];
+        expected_thetaVoxels = [1,1];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
