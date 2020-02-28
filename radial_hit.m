@@ -77,7 +77,7 @@ time = time_array(time_array > t);
 
 if (isempty(time))
     tMaxR = inf;
-    tStepR = -1;
+    tStepR = 0;
     if verbose
         fprintf("\nNo intersection for a radial hit for current r: %d", r);
     end
