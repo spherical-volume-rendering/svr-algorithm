@@ -146,7 +146,6 @@ angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
 % III. TRAVERSAL PHASE
-tol = 10^-10;
 t = t_begin; 
 while (t < t_end)
     % 1. Calculate tMaxR, tMaxTheta
