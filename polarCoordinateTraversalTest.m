@@ -50,7 +50,6 @@ function testRayEntersCircleAndGoesThroughOrigin(testCase)
     verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% TODOs:
 % Ray begins outside of circle and does not go through origin.
 function testRayBeginsOutsideCircleAndDoesNotGoThroughOrigin(testCase)
     min_bound = [0.0, 0.0];
@@ -257,7 +256,7 @@ function testBeginAtRadialBoundaryInOrthogonal(testCase)
 end
 
 % Corner Test. Ray goes along a ray boundary
-function testRayGoesAlongRayBoundary(testCase)
+function testRayGoesAlongThetaBoundary(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [25.0, 15.0];
@@ -278,3 +277,16 @@ function testRayGoesAlongRayBoundary(testCase)
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
+
+% TODOs
+% - Ray intersects a “theta boundary” outside the circle, and ensure it does 
+%   NOT record this as a theta hit.
+% - Ray does not go through the innermost voxel.
+% - Ray that traverses a single voxel.
+% - Ray that ends inside the circle.
+% - Ray with positive x- and negative y- directions.
+% - Ray with negative x- and positive y- directions.
+% - Ray that has a t_begin time different than 0.0
+% - Ray that has an odd number of angular sections.
+% - Ray that tightly intersects a voxel to determine if floating point tolerances 
+%   will still deem it an intersection.
