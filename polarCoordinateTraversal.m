@@ -151,6 +151,7 @@ while (t < t_end)
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR, tStepR] = radial_hit(ray_origin, ray_direction, ...
         current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, r, t, verbose);
+    if (current_voxel_ID_r + tStepR <= 0), return; end
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
         num_angular_sections, circle_center, t, verbose);
     
@@ -170,8 +171,6 @@ while (t < t_end)
         r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         r = r_new;
-        
-        if (current_voxel_ID_r <= 0), return; end
         
         if verbose
           new_x_position = ray_origin_x + ray_direction_x * tMaxR;
