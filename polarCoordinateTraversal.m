@@ -125,14 +125,15 @@ t2 = (p2(1)-ray_origin(2))/ray_direction(2);
 % The ray may not intersect the grid at all. 
 % In particular, if the ray is outside the grid at t_begin.
 if (t1 < t_begin && t2 < t_begin )
-    fprintf("\nRay does not intersect polar grid for t_begin.");
+    if verbose
+        fprintf("\nRay does not intersect polar grid for t_begin.");
+    end
     return;
 end
 
 % If there is a ray/shell intersection, then set the radial voxel ID. 
 current_voxel_ID_r = 1 + (circle_max_radius - r)/delta_radius;
 if verbose
-    text(p1(1), p1(2), 'POI_r');
     fprintf('RADIAL HIT INITIALIZED.\n');
 end
 
@@ -146,15 +147,16 @@ angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
 % III. TRAVERSAL PHASE
-tol = 10^-10;
 t = t_begin; 
+previous_transition_flag = false;
 while (t < t_end)
     % 1. Calculate tMaxR, tMaxTheta
-    [tMaxR, tStepR] = radial_hit(ray_origin, ray_direction, ...
-        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, r, t, verbose);
+    [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
+        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, t, previous_transition_flag, verbose);
+        if (current_voxel_ID_r + tStepR <= 0), return; end
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-        num_angular_sections, circle_center, t, verbose);
-    
+        num_angular_sections, circle_center, t, false);
+    if (current_voxel_ID_r + tStepR == 0), return; end
     % 2. Compare tMaxTheta, tMaxR
     if (tMaxTheta < tMaxR)
         t = tMaxTheta;
@@ -171,9 +173,7 @@ while (t < t_end)
         r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         r = r_new;
-        
-        if (current_voxel_ID_r <= 0), return; end
-        
+                
         if verbose
           new_x_position = ray_origin_x + ray_direction_x * tMaxR;
           new_y_position = ray_origin_y + ray_direction_y * tMaxR;       
@@ -187,7 +187,7 @@ while (t < t_end)
         end
     end
     
-    angular_voxels = [angular_voxels, current_voxel_ID_theta];
-    radial_voxels = [radial_voxels, current_voxel_ID_r];
+    angular_voxels = [angular_voxels, current_voxel_ID_theta]
+    radial_voxels = [radial_voxels, current_voxel_ID_r]
 end
 end
