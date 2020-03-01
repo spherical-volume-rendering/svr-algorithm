@@ -1,5 +1,5 @@
-function[tMaxR, tStepR]=radial_hit(ray_origin, ray_direction, current_radial_voxel, ...
-        circle_center, circle_max_radius, delta_radius, r, t, verbose)
+function[tMaxR, tStepR, transitionFlag]=radial_hit(ray_origin, ray_direction, current_radial_voxel, ...
+        circle_center, circle_max_radius, delta_radius, t, prev_transitionFlag, verbose)
 % Determines whether a radial hit occurs for the given ray.
 % Input:
 %    ray_origin: The origin of the ray.
@@ -19,19 +19,25 @@ if verbose
 end
 
 % Recapture the current radius of ray.
-r = circle_max_radius - delta_radius*(current_radial_voxel - 1);
+r = circle_max_radius - delta_radius * (current_radial_voxel - 1);
 
 % Check for intersections with relevant radial neighbors.
+% TODO: ray_unit_vector, ray_circle_vector, v can be calculated during
+% initialization phase.
 ray_unit_vector = 1/sqrt(ray_direction(1)^2 + ray_direction(2)^2)...
     .* [ray_direction(1);  ray_direction(2)]';
 ray_circle_vector = [circle_center(1) - ray_origin(1); circle_center(2) - ray_origin(2)]';
 v = dot(ray_circle_vector,ray_unit_vector);
 r_a = max(r - delta_radius , delta_radius);
+% In the case that the ray has sequential hits with equal radii ensure that proper radii are
+% being checked: without this, code skips ahead one radial boundary.
+if prev_transitionFlag
+r_b = min(r, circle_max_radius);
+else
 r_b = min(r + delta_radius, circle_max_radius);
-tol = 10^-10;
-if (abs(r_a - r_b) < tol)
-    r_b = r + 2 * delta_radius;
 end
+
+tol = 10^-10;
 
 time_array_a = [];
 time_array_b = [];
@@ -74,10 +80,10 @@ if (discr >= 0 )
 end
 time_array = [time_array_a time_array_b];
 time = time_array(time_array > t);
-
 if (isempty(time))
     tMaxR = inf;
     tStepR = 0;
+    transitionFlag = false;
     if verbose
         fprintf("\nNo intersection for a radial hit for current r: %d", r);
     end
@@ -86,14 +92,19 @@ end
 tMaxR = time(1);
 p = ray_origin + tMaxR.*ray_direction;
 r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
-if (abs(r_new - r) < tol)
-    tStepR = 0;
-elseif (r_new - r > 0)
-    tStepR = -1;
+
+%Flag for case that the ray has sequential hits with equal radii.
+if (abs(r - r_new) < tol)
+    transitionFlag = true;
 else
-    tStepR = 1;
+    transitionFlag = false;
 end
- 
+
+if (r_new - r < 0 && abs(r_new - r) > tol) 
+    tStepR = 1;
+else
+    tStepR = -1;
+end
 if verbose
     fprintf('\ntMaxR: %d \n', tMaxR);
 end
