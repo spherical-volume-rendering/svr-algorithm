@@ -187,7 +187,7 @@ while (t < t_end)
         end
     end
     
-    angular_voxels = [angular_voxels, current_voxel_ID_theta]
-    radial_voxels = [radial_voxels, current_voxel_ID_r]
+    angular_voxels = [angular_voxels, current_voxel_ID_theta];
+    radial_voxels = [radial_voxels, current_voxel_ID_r];
 end
 end
