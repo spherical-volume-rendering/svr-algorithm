@@ -173,7 +173,7 @@ while (t < t_end)
         r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         r = r_new;
-                
+
         if verbose
           new_x_position = ray_origin_x + ray_direction_x * tMaxR;
           new_y_position = ray_origin_y + ray_direction_y * tMaxR;       
