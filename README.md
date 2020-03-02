@@ -1,3 +1,4 @@
+## Fast Voxel Traversal Over Spherical Coordinate Grid
 ![Example ray tracing in polar coordinates](images/polar_coordinate_example.png)
 
 _Traversal algorithm through the 2-dimensional voxel polar coordinate system_
