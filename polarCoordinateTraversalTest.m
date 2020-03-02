@@ -465,7 +465,7 @@ end
 
 % - Ray that tightly intersects a voxel to determine if floating point tolerances 
 %   will still deem it an intersection.
-function testRayWithOddNumAngularSections(testCase):
+function testRaySlightIntersect(testCase):
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [10.0, 24.96];

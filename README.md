@@ -1,3 +1,4 @@
+# Fast Voxel Traversal Algorithm Over Spherical Coordinate Grid
 ![Example ray tracing in polar coordinates](images/polar_coordinate_example.png)
 
 _Traversal algorithm through the 2-dimensional voxel polar coordinate system_
@@ -22,4 +23,4 @@ This project extends the yt open-source data analysis and visualization package,
 ### References
 - [MATLAB code for Amanatides & Woo's algorithm and Smit's algorithm](https://www.mathworks.com/matlabcentral/fileexchange/26852-a-fast-voxel-traversal-algorithm-for-ray-tracing)
 - John Amanatides and Andrew Woo. A fast voxel traversal algorithm for ray tracing. In In Eurographics ’87, pages 3–10, 1987.
-- Paul S. Heckbert, editor.Graphics Gems IV.  Academic Press Professional, Inc., USA, 1994.
+- Paul S. Heckbert, editor. Graphics Gems IV.  Academic Press Professional, Inc., USA, 1994.
