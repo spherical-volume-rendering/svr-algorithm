@@ -280,7 +280,7 @@ end
 
 % - Ray intersects a “theta boundary” outside the circle, and ensure it does 
 %   NOT record this as a theta hit.
-function testRayInterSectThetaBoundaryOutsideTheCircle(testCase)
+function testRayIntersectThetaBoundaryOutsideTheCircle(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 5.0];
