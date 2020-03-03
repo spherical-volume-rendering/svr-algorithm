@@ -255,7 +255,7 @@ function testBeginAtRadialBoundaryInOrthogonal(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% Corner Test. Ray goes along a ray boundary
+% Ray goes along a theta boundary.
 function testRayGoesAlongThetaBoundary(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -278,8 +278,8 @@ function testRayGoesAlongThetaBoundary(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray intersects a “theta boundary” outside the circle, and ensure it does 
-%   NOT record this as a theta hit.
+% Ray intersects a “theta boundary” outside the circle, and ensure it does 
+% NOT record this as a theta hit.
 function testRayIntersectThetaBoundaryOutsideTheCircle(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -302,7 +302,7 @@ function testRayIntersectThetaBoundaryOutsideTheCircle(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray does not go through the innermost voxel.
+% Ray does not go through the innermost voxel.
 function testRayDoesNotGoThroughTheInnermostVoxel(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -325,7 +325,7 @@ function testRayDoesNotGoThroughTheInnermostVoxel(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray that traverses a single voxel.
+% Ray that traverses a single voxel.
 function testRayTraverseSingleVoxel(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -348,7 +348,7 @@ function testRayTraverseSingleVoxel(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray that ends inside the circle.
+% Ray that ends inside the circle.
 function testRayEndsInsideCircle(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -371,7 +371,7 @@ function testRayEndsInsideCircle(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray with positive x- and negative y- directions.
+% Ray with positive x- and negative y- directions.
 function testRayWithPositiveXNegativeY(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -394,7 +394,7 @@ function testRayWithPositiveXNegativeY(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray with negative x- and positive y- directions.
+% Ray with negative x- and positive y- directions.
 function testRayWithNegativeXPositiveY(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -417,7 +417,7 @@ function testRayWithNegativeXPositiveY(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray that has a t_begin time different than 0.0
+% Ray that has a t_begin time different than 0.0
 function testRayBeginTimeDiffThan0(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -440,7 +440,7 @@ function testRayBeginTimeDiffThan0(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray that has an odd number of angular sections.
+% Ray that has an odd number of angular sections.
 function testRayWithOddNumAngularSections(testCase):
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
@@ -463,8 +463,8 @@ function testRayWithOddNumAngularSections(testCase):
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% - Ray that tightly intersects a voxel to determine if floating point tolerances 
-%   will still deem it an intersection.
+% Ray that tightly intersects a voxel to determine if floating point tolerances 
+% will still deem it an intersection.
 function testRaySlightIntersect(testCase):
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
