@@ -440,7 +440,7 @@ function testRayBeginTimeDiffThan0(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% Ray that has an odd number of angular sections.
+% Ray traversing through circle that has an odd number of angular sections.
 function testRayWithOddNumAngularSections(testCase):
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
