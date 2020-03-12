@@ -486,3 +486,67 @@ function testRaySlightIntersect(testCase):
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
+
+% Test for robustness of the algorithm: given a circle of given size, 
+% the expected path length (chord length) of a ray traversing that circle match 
+% the output of our algorithm
+% To test this, we test radial_hit in a circle with only one radial section and
+% various radius and angular section, to see if time still match up. 
+
+% Same Ray should have the same cord length given the same radius of circle but different
+% number of angular sections
+function testRobustSameRadiusDiffNumAngularSection(tesstCase):
+    min_bound = [0.0, 0.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [5.0, 15.0];
+    ray_direction = [1.0, 0.0];
+    circle_center = [15.0, 15.0];
+    circle_max_radius = 10.0;
+    current_radial_voxel = 1;
+    delta_radius = circle_max_radius;
+    num_radial_sections = 1;
+    num_angular_sections_1 = 4;
+    num_angular_sections_2 = 20;
+    t_begin = 0;
+    verbose = false;
+    ray_unit_vector = 1 / sqrt(ray_direction(1)^2 + ray_direction(2)^2).* [ray_direction(1);  ray_direction(2)]';
+    ray_circle_vector = [circle_center(1) - ray_origin(1); circle_center(2) - ray_origin(2)]';
+    v = dot(ray_circle_vector,ray_unit_vector);
+    prev_transition_flag = false;
+
+    [tMaxR_1, tStepR_1, transition_flag_1] = radial_hit(ray_origin, ray_direction, current_radial_voxel,
+    circle_center, circle_max_radius, delta_radius, t_begin, ray_unit_vector, ray_circle_vector, v, prev_transition_flag, verbose)
+
+    [tMaxR_2, tStepR_2, transition_flag_2] = radial_hit(ray_origin, ray_direction, current_radial_voxel,
+    circle_center, circle_max_radius, delta_radius, t_begin, ray_unit_vector, ray_circle_vector, v, prev_transition_flag, verbose)
+    verifyEqual(tMaxR_1, tMaxR_2);
+end
+
+% Same Ray should have the same cord length given the same small radius of circle
+% but different number of angular sections
+function testRobustSameSmallRadiusDiffNumAngularSection(tesstCase):
+    min_bound = [0.0, 0.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [14.5, 15.0];
+    ray_direction = [1.0, 0.0];
+    circle_center = [15.0, 15.0];
+    circle_max_radius = 0.5;
+    current_radial_voxel = 1;
+    delta_radius = circle_max_radius;
+    num_radial_sections = 1;
+    num_angular_sections_1 = 8;
+    num_angular_sections_2 = 100;
+    t_begin = 0;
+    verbose = false;
+    ray_unit_vector = 1 / sqrt(ray_direction(1)^2 + ray_direction(2)^2).* [ray_direction(1);  ray_direction(2)]';
+    ray_circle_vector = [circle_center(1) - ray_origin(1); circle_center(2) - ray_origin(2)]';
+    v = dot(ray_circle_vector,ray_unit_vector);
+    prev_transition_flag = false;
+
+    [tMaxR_1, tStepR_1, transition_flag_1] = radial_hit(ray_origin, ray_direction, current_radial_voxel,
+    circle_center, circle_max_radius, delta_radius, t_begin, ray_unit_vector, ray_circle_vector, v, prev_transition_flag, verbose)
+
+    [tMaxR_2, tStepR_2, transition_flag_2] = radial_hit(ray_origin, ray_direction, current_radial_voxel,
+    circle_center, circle_max_radius, delta_radius, t_begin, ray_unit_vector, ray_circle_vector, v, prev_transition_flag, verbose)
+    verifyEqual(tMaxR_1, tMaxR_2);
+end
