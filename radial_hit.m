@@ -1,6 +1,12 @@
-function[tMaxR, tStepR, transitionFlag]=radial_hit(ray_origin, ray_direction, current_radial_voxel, ...
-        circle_center, circle_max_radius, delta_radius, t, prev_transitionFlag, verbose)
+function[tMaxR, tStepR, transition_flag]=radial_hit(ray_origin, ray_direction, current_radial_voxel, ...
+        circle_center, circle_max_radius, delta_radius, t, ray_unit_vector, ray_circle_vector, v, prev_transition_flag, verbose)
 % Determines whether a radial hit occurs for the given ray.
+% This follows closely the mathematics presented in:
+% http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
+%
+% Note also we've currently provided a tolerance 'tol' below. This is used
+% to account for floating point error.
+%
 % Input:
 %    ray_origin: The origin of the ray.
 %    ray_direction: The direction of the ray.
@@ -9,10 +15,20 @@ function[tMaxR, tStepR, transitionFlag]=radial_hit(ray_origin, ray_direction, cu
 %    circle_max_radius: The max radius of the circle.
 %    delta_radius: The delta of the radial sections.
 %    t: The current time parameter of the ray.
+%    ray_unit_vector: The ray unit vector.
+%    ray_circle_vector: The vector difference between the ray origin and the circle origin.
+%    v: The dot product between the ray_unit_vector and the ray_circle_vector.
+%    prev_transition_flag: Determines whether the previous radial traversal
+%    was a 'transition.' A transition is defined as the turning point from
+%    inward movement to outward movement from the circle's origin. Another
+%    way this can be denoted is sequential hits with equal radii.
 %    verbose: Determines whether debug print statements are enabled.
 %
 % Returns:
 %    tMaxR: is the time at which a hit occurs for the ray at the next point of intersection.
+%    tStepR: The voxel traversal value: 0, +1, -1.
+%    transition_flag: Determines whether the current voxel traversal was a
+%    'transition.'
 
 if verbose
     fprintf('\n--radial_hit-- \nCurrent Radial Voxel: %d', current_radial_voxel)
@@ -23,17 +39,11 @@ end
 r = circle_max_radius - delta_radius * (current_radial_voxel - 1);
 
 % Check for intersections with relevant radial neighbors.
-
-% TODO: ray_unit_vector, ray_circle_vector, v can be calculated during
-% initialization phase.
-ray_unit_vector = 1/sqrt(ray_direction(1)^2 + ray_direction(2)^2)...
-    .* [ray_direction(1);  ray_direction(2)]';
-ray_circle_vector = [circle_center(1) - ray_origin(1); circle_center(2) - ray_origin(2)]';
-v = dot(ray_circle_vector,ray_unit_vector);
 r_a = max(r - delta_radius , delta_radius);
+
 % In the case that the ray has sequential hits with equal radii ensure that proper radii are
 % being checked: without this, code skips ahead one radial boundary.
-if prev_transitionFlag
+if prev_transition_flag
 r_b = min(r, circle_max_radius);
 else
 r_b = min(r + delta_radius, circle_max_radius);
@@ -108,9 +118,9 @@ if length(time)>1 &&  abs(time_array(1)-time_array(2)) < tol
     r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
     tStepR = 0;
     if (abs(r - r_new) < tol)
-        transitionFlag = true;
+        transition_flag = true;
     else
-        transitionFlag = false;
+        transition_flag = false;
     end
     if verbose
         fprintf("\nglancing blow\n")
@@ -121,7 +131,7 @@ end
 if isempty(time)
     tMaxR = inf;
     tStepR = 0;
-    transitionFlag = false;
+    transition_flag = false;
     if verbose
         fprintf("\nNo intersection for a radial hit for current r: %d", r)
     end
@@ -135,9 +145,9 @@ r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
 
 %Flag for case that the ray has sequential hits with equal radii.
 if (abs(r - r_new) < tol)
-    transitionFlag = true;
+    transition_flag = true;
 else
-    transitionFlag = false;
+    transition_flag = false;
 end
 
 if (r_new - r < 0 && abs(r_new - r) > tol && ~(abs(r_new-r)) < tol) 
