@@ -151,28 +151,20 @@ if verbose
     fprintf('RADIAL HIT INITIALIZED.\n')
 end
 
-% Pre-calculations for radial_hit. This is necessary to check for intersections with relevant radial neighbors.
-ray_unit_vector = 1 / sqrt(ray_direction(1)^2 + ray_direction(2)^2)...
-    .* [ray_direction(1);  ray_direction(2)]';
-ray_circle_vector = [circle_center(1) - ray_origin(1); circle_center(2) - ray_origin(2)]';
-v = dot(ray_circle_vector,ray_unit_vector);
-
 % II. Calculate Voxel ID Theta.
-current_voxel_ID_theta = floor(atan2(ray_start_y - circle_center_y, ray_start_x - circle_center_x) * num_angular_sections / (2 * pi));
-if current_voxel_ID_theta < 0
-    current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
-end
-% If the ray starts at the origin, we need to perturb slightly to find the
-% correct angular voxel
 tol = 10^-16;
 if abs(ray_origin - circle_center) < tol 
+    % If the ray starts at the origin, we need to perturb slightly along its path to find the
+    % correct angular voxel
     pert_t = 0.1;
     pert_x = ray_start_x + ray_direction_x * pert_t;
     pert_y = ray_start_y + ray_direction_y * pert_t;
     current_voxel_ID_theta = floor(atan2(pert_y - circle_center_y, pert_x - circle_center_x) * num_angular_sections / (2 * pi));
-    if current_voxel_ID_theta < 0
-        current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
-    end
+else
+    current_voxel_ID_theta = floor(atan2(ray_start_y - circle_center_y, ray_start_x - circle_center_x) * num_angular_sections / (2 * pi));
+end
+if current_voxel_ID_theta < 0
+    current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
 end
 
 angular_voxels = [current_voxel_ID_theta];
@@ -199,7 +191,7 @@ while t < min(t_grid,t_end)
     
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
-        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, t, previous_transition_flag, verbose);
+        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, t, ray_unit_vector, ray_circle_vector, v, previous_transition_flag, verbose);
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
         num_angular_sections, circle_center, t, verbose);
     
