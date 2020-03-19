@@ -1,28 +1,31 @@
-function [radial_voxels, angular_voxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
-    circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
+function [radial_voxels, angular_voxels, phi_voxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, sphere_center, ...
+    sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
 %    max_bound: The upper right corner of the bounding box.
-%    ray origin: The origin of the ray in (x, y) coordinates.
-%    ray direction: The direction of the ray in (x, y) coordinates.
-%    circle_center: The x, y location of the center of the circle.
-%    circle_max_radius: The largest that encompasses the circle.
-%    num_radial_sections: The number of radial sections in the circle.
-%    num_angular_sections: The number of angular sections in the circle.
+%    ray origin: The origin of the ray in (x, y, z) coordinates.
+%    ray direction: The direction of the ray in (x, y, z) coordinates.
+%    sphere_center: The x, y location of the center of the sphere.
+%    sphere_max_radius: The largest that encompasses the sphere.
+%    num_radial_sections: The number of radial sections in the sphere.
+%    num_angular_sections: The number of angular sections in the sphere.
+%    num_azimuthal_sections: The number of azimuthal sections in the sphere.
 %    t_begin: The beginning time of the ray.
 %    t_end: The end time of the ray.
 %
 % Requires:
 %    max_bound > min_bound
-%    The entire circle is within min_bound and max_bound.
+%    The entire sphere is within min_bound and max_bound.
 %    t_end > t_begin >= 0.0
-%    circle_max_radius > 0
+%    sphere_max_radius > 0
 %    num_radial_sections > 0
 %    num_angular_sections > 0
+%    num_azimuthal_sections > 0
 %
 % Returns:
 %    radial_voxels: A list of the radial voxels that were hit by the ray.
 %    angular_voxels: A list of the angular voxels that were hit by the ray.
+%    phi_voxels: A list of the phi voelx that were hit by the ray.
 %    Note: These lists, used in conjunction, will produce the path of the ray
 %    through the voxels using each point. For example,
 %    [radial_voxels(1), angular_voxels(1)] is the first voxel the ray
@@ -30,83 +33,44 @@ function [radial_voxels, angular_voxels] = polarCoordinateTraversal(min_bound, m
 close all;
 circle_center_x = circle_center(1);
 circle_center_y = circle_center(2);
+circle_center_z = circle_center(3);
 ray_origin_x = ray_origin(1);
 ray_origin_y = ray_origin(2);
+ray_origin_z = ray_origin(3);
 ray_direction_x = ray_direction(1);
 ray_direction_y = ray_direction(2);
+ray_direction_z = ray_direction(3);
 
 min_bound_x = min_bound(1);
 min_bound_y = min_bound(2);
+min_bound_z = min_bound(3);
 max_bound_x = max_bound(1);
 max_bound_y = max_bound(2);
+max_bound_z = max_bound(3);
 
 ray_start = ray_origin + t_begin * ray_direction;
 ray_start_x = ray_start(1);
 ray_start_y = ray_start(2);
+ray_start_z = ray_start(3);
 
 ray_end = ray_origin + t_end * ray_direction;
 ray_end_x = ray_end(1);
 ray_end_y = ray_end(2);
+ray_end_z = ray_end(3);
 
 angular_voxels = [];
 radial_voxels = [];
+phi_voxels = [];
 
-delta_radius = circle_max_radius / num_radial_sections;
-
-if (verbose)
-    figure;
-    hold on;
-    title('Polar Coordinate Voxel Traversal')
-    
-    if (t_begin ~= 0.0)
-        % Mark the ray origin if the time does not start at 0.0
-        text(ray_origin_x, ray_origin_y, ' ray origin');
-        plot(ray_origin_x, ray_origin_y, 'k.', 'MarkerSize', 10);
-        quiver(ray_origin_x, ray_origin_y, ray_direction_x, ray_direction_y, t_begin - 0.0, 'LineWidth', 1.5);
-    end
-    
-    % Draw the ray.
-    text(ray_start_x, ray_start_y, ' ray start');
-    text(ray_end_x, ray_end_y, ' ray end');
-    plot(ray_end_x, ray_end_y, 'k.', 'MarkerSize', 10);
-    plot(ray_start_x, ray_start_y, 'k.', 'MarkerSize', 10);
-    quiver(ray_start_x, ray_start_y, ray_direction_x, ray_direction_y, t_end - t_begin, 'LineWidth', 1.5);
-    
-    % Draw the axis.
-    axis tight;
-    xlim([min_bound_x, max_bound_x]);
-    ylim([min_bound_y, max_bound_y]);
-    xlabel('x');
-    ylabel('y');
-    grid on;
-    
-    % Draw the radial sections.
-    current_max_radius = circle_max_radius;
-    for k = 1:num_radial_sections
-        viscircles(circle_center, current_max_radius, 'LineStyle', '--', 'Color', '#7E2F8E', 'LineWidth', 1);
-        current_max_radius = current_max_radius - delta_radius;
-    end
-    
-    % Draw the angular sections.
-    N = num_angular_sections;
-    section = 2 * pi / num_angular_sections;
-    for ii = 1:N
-        t = linspace(section * (ii - 1), section * (ii));
-        x = circle_max_radius*cos(t) + circle_center_x;
-        y = circle_max_radius*sin(t) + circle_center_y;
-        x = [x circle_center_x x(1)];
-        y = [y circle_center_y y(1)];
-        line(x, y, 'LineStyle', '--', 'Color', '#7E2F8E', 'LineWidth', 0.5);
-    end
-end
+delta_radius = sphere_max_radius / num_radial_sections;
 
 % INITIALIZATION PHASE
 % Determine ray location at t_begin.
 p = ray_origin + t_begin.*ray_direction;
-ray_circle_vector = [circle_center(1) - p(1); circle_center(2) - p(2)]';
+ray_sphere_vector = [sphere_center(1) - p(1); sphere_center(2) - p(2); sphere_center(3) - p(3)]';
 % Find the radial shell containing the ray at t_begin.
 r = delta_radius;
-while (ray_circle_vector(1)^2 + ray_circle_vector(2)^2 > r^2) && r < circle_max_radius
+while (ray_sphere_vector(1)^2 + ray_sphere_vector(2)^2 + ray_sphere_vector(3) > r^2) && r < sphere_max_radius
     r = r + delta_radius;
 end
 
