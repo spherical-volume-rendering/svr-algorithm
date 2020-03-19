@@ -61,7 +61,7 @@ if (discr >= 0 )
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
     
-    if ray_direction(1) < tol
+    if abs(ray_direction(1)) < tol
         t1 = (pa(2) - ray_origin(2))/ray_direction(2);
         t2 = (pb(2) - ray_origin(2))/ray_direction(2);
     else
@@ -79,7 +79,7 @@ else
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
-    if ray_direction(1) < tol
+    if abs(ray_direction(1)) < tol
         t1 = (pa(2) - ray_origin(2))/ray_direction(2);
         t2 = (pb(2) - ray_origin(2))/ray_direction(2);
     else
@@ -97,7 +97,7 @@ if discr >= 0
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
-    if ray_direction(1) < tol
+    if abs(ray_direction(1)) < tol
         t1 = (pa(2) - ray_origin(2))/ray_direction(2);
         t2 = (pb(2) - ray_origin(2))/ray_direction(2);
     else
