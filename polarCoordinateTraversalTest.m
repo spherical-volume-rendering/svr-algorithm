@@ -9,6 +9,7 @@ end
 
 % Ray doesn't enter circle
 function testRayDoesNotEnterCircle(testCase)
+    fprintf("Ray doesn't enter circle\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [3.0, 3.0];
@@ -29,6 +30,7 @@ end
 
 % Ray begins outside and travels through the origin.
 function testRayEntersCircleAndGoesThroughOrigin(testCase)
+    fprintf("Ray begins outside and travels through the origin\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 5.0];
@@ -52,6 +54,7 @@ end
 
 % Ray begins outside of circle and does not go through origin.
 function testRayBeginsOutsideCircleAndDoesNotGoThroughOrigin(testCase)
+    fprintf("Ray begins outside of circle and does not go through origin\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 6.0];
@@ -75,6 +78,7 @@ end
 
 % Ray begins inside of circle and does not go through origin.
 function testRayBeginInsideCircleAndDoesNotGoThroughOrigin(testCase)
+    fprintf("Ray begins inside of circle and does not go through origin\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [12.0, 10.0];
@@ -98,6 +102,7 @@ end
 
 % Ray with zero x-/y-direction.
 function testZeroX(testCase)
+    fprintf("Ray with zero x-direction\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [10.0, 5.0];
@@ -120,6 +125,7 @@ function testZeroX(testCase)
 end
 
 function testZeroY(testCase)
+    fprintf("Ray with zero y-direction\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 10.0];
@@ -143,6 +149,7 @@ end
 
 % Ray with negative x-/y-direction.
 function testNegativeXandY(testCase)
+    fprintf("Ray with negative x-/y-direction\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [25.0, 25.0];
@@ -166,6 +173,7 @@ end
 
 % Ray begins at circle center.
 function testBeginAtCircleCenterNegativeXY(testCase)
+    fprintf("Ray begins at circle center\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [15.0, 15.0];
@@ -188,6 +196,7 @@ function testBeginAtCircleCenterNegativeXY(testCase)
 end
 
 function testBeginAtCircleCenterPositiveXY(testCase)
+    fprintf("BeginAtCircleCenterPositiveXY\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [15.0, 15.0];
@@ -211,6 +220,7 @@ end
 
 % Ray begins at a theta boundary (and goes in orthogonal directions).
 function testBeginAtThetaBoundaryInOrthogonal(testCase)
+    fprintf("Ray begins at a theta boundary (and goes in orthogonal directions\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [10.0, 15.0];
@@ -234,6 +244,7 @@ end
 
 % Ray begins at a radial boundary (and goes in orthogonal directions).
 function testBeginAtRadialBoundaryInOrthogonal(testCase)
+    fprintf("Ray begins at a radial boundary (and goes in orthogonal directions)\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [22.07, 22.07];
@@ -257,6 +268,7 @@ end
 
 % Ray goes along a theta boundary.
 function testRayGoesAlongThetaBoundary(testCase)
+    fprintf("Ray goes along a theta boundary\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [25.0, 15.0];
@@ -281,6 +293,7 @@ end
 % Ray intersects a “theta boundary” outside the circle, and ensure it does 
 % NOT record this as a theta hit.
 function testRayIntersectThetaBoundaryOutsideTheCircle(testCase)
+    fprintf("Ray intersects a “theta boundary” outside the circle, and ensure it does NOT record this as a theta hit\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 5.0];
@@ -295,35 +308,13 @@ function testRayIntersectThetaBoundaryOutsideTheCircle(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,2,3,3,2,1];
-        expected_thetaVoxels = [0,0,0,1,1,1];
+        expected_rVoxels     = [];
+        expected_thetaVoxels = [];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% Ray does not go through the innermost voxel.
-function testRayDoesNotGoThroughTheInnermostVoxel(testCase)
-    min_bound = [0.0, 0.0];
-    max_bound = [30.0, 30.0];
-    ray_origin = [5.0, 5.0];
-    ray_direction = [1.0, 0.0];
-    circle_center = [15.0, 15.0];
-    circle_max_radius = 10.0;
-    num_radial_sections = 3;
-    num_angular_sections = 4;
-    t_begin = 0.0;
-    t_end = 20.0;
-    verbose = false;
-    
-    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
-        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,2,3,3,2,1];
-        expected_thetaVoxels = [0,0,0,1,1,1];
-        
-        verifyEqual(testCase, rVoxels, expected_rVoxels);
-        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
-end
 
 % Ray that traverses a single voxel.
 function testRayTraverseSingleVoxel(testCase)
@@ -410,8 +401,8 @@ function testRayWithNegativeXPositiveY(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,1];
-        expected_thetaVoxels = [3,2];
+        expected_rVoxels     = [1,2,2,2,1];
+        expected_thetaVoxels = [1,1,0,3,3];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
@@ -433,15 +424,15 @@ function testRayBeginTimeDiffThan0(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [2,2,1];
-        expected_thetaVoxels = [1,2,2];
+        expected_rVoxels     = [];
+        expected_thetaVoxels = [];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
 % Ray traversing through circle that has an odd number of angular sections.
-function testRayWithOddNumAngularSections(testCase):
+function testRayWithOddNumAngularSections(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 10.0];
@@ -465,7 +456,7 @@ end
 
 % Ray that tightly intersects a voxel to determine if floating point tolerances 
 % will still deem it an intersection.
-function testRaySlightIntersect(testCase):
+function testRaySlightIntersect(testCase)
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [10.0, 24.96];
@@ -481,7 +472,7 @@ function testRaySlightIntersect(testCase):
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
         expected_rVoxels     = [1,1];
-        expected_thetaVoxels = [1,2];
+        expected_thetaVoxels = [1,0];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);

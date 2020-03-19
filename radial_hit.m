@@ -34,18 +34,22 @@ if verbose
     fprintf('\n--radial_hit-- \nCurrent Radial Voxel: %d', current_radial_voxel)
 end
 
+
 % Recapture the current radius of ray.
 r = circle_max_radius - delta_radius * (current_radial_voxel - 1);
 
+% Check for intersections with relevant radial neighbors.
 r_a = max(r - delta_radius , delta_radius);
 
 % In the case that the ray has sequential hits with equal radii ensure that proper radii are
 % being checked: without this, code skips ahead one radial boundary.
 if prev_transition_flag
-    r_b = min(r, circle_max_radius);
+r_b = min(r, circle_max_radius);
 else
-    r_b = min(r + delta_radius, circle_max_radius);
+r_b = min(r + delta_radius, circle_max_radius);
 end
+
+tol = 10e-15;
 
 time_array_a = [];
 time_array_b = [];
@@ -56,10 +60,17 @@ if (discr >= 0 )
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
-    t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-    t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    
+    if ray_direction(1) < tol
+        t1 = (pa(2) - ray_origin(2))/ray_direction(2);
+        t2 = (pb(2) - ray_origin(2))/ray_direction(2);
+    else
+        t1 = (pa(1) - ray_origin(1))/ray_direction(1);
+        t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    end
     time_array_a(1) = t1;
     time_array_a(2) = t2;
+    
 else
     r_a = r_a + delta_radius;
     discr = r_a^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
@@ -68,50 +79,78 @@ else
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
-    t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-    t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    if ray_direction(1) < tol
+        t1 = (pa(2) - ray_origin(2))/ray_direction(2);
+        t2 = (pb(2) - ray_origin(2))/ray_direction(2);
+    else
+        t1 = (pa(1) - ray_origin(1))/ray_direction(1);
+        t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    end
     time_array_a(1) = t1;
     time_array_a(2) = t2;
 end
 
 discr = r_b^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
-if (discr >= 0)        
+if discr >= 0      
     d = sqrt(discr);
     ta = (v-d);
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
-    t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-    t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    if ray_direction(1) < tol
+        t1 = (pa(2) - ray_origin(2))/ray_direction(2);
+        t2 = (pb(2) - ray_origin(2))/ray_direction(2);
+    else
+        t1 = (pa(1) - ray_origin(1))/ray_direction(1);
+        t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    end
     time_array_b(1) = t1;
     time_array_b(2) = t2;
 end
-
 time_array = [time_array_a time_array_b];
 time = time_array(time_array > t);
-if (isempty(time))
-    tMaxR = inf;
+
+% If it is a "glancing" blow (i.e. ray is tangent to the circle). This
+% occurs when the two intersections times are equal.
+if length(time)>1 &&  abs(time_array(1)-time_array(2)) < tol
+    tMaxR = time(1);
+    p = ray_origin + tMaxR.*ray_direction;
+    r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
     tStepR = 0;
-    transition_flag = false;
+    if (abs(r - r_new) < tol)
+        transition_flag = true;
+    else
+        transition_flag = false;
+    end
     if verbose
-        fprintf("\nNo intersection for a radial hit for current r: %d", r);
+        fprintf("\nglancing blow\n")
     end
     return;
 end
 
+if isempty(time)
+    tMaxR = inf;
+    tStepR = 0;
+    transition_flag = false;
+    if verbose
+        fprintf("\nNo intersection for a radial hit for current r: %d", r)
+    end
+    return;
+end
+
+
 tMaxR = time(1);
-p = ray_origin + tMaxR .* ray_direction;
+p = ray_origin + tMaxR.*ray_direction;
 r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
 
-% Flag for case that the ray has sequential hits with equal radii.
-tol = 10^-10;
+%Flag for case that the ray has sequential hits with equal radii.
 if (abs(r - r_new) < tol)
     transition_flag = true;
 else
     transition_flag = false;
 end
 
-if (r_new - r < 0 && abs(r_new - r) > tol) 
+if (r_new - r < 0 && abs(r_new - r) > tol && ~(abs(r_new-r)) < tol) 
     tStepR = 1;
 else
     tStepR = -1;
