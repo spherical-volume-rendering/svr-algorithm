@@ -196,7 +196,7 @@ while t < min(t_grid,t_end)
         num_angular_sections, circle_center, t, verbose);
     
     % 2. Compare tMaxTheta, tMaxR
-    if tMaxTheta < tMaxR || current_voxel_ID_r + tStepR == 0 && t < tMaxTheta && tMaxTheta < min(t_grid,t_end)
+    if (tMaxTheta < tMaxR || current_voxel_ID_r + tStepR == 0) && t < tMaxTheta && tMaxTheta < min(t_grid,t_end)
         % when the ray only intersects one radial shell but crosses an
         % angular boundary, we need the second half of conditional
         t = tMaxTheta;
