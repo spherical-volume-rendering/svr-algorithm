@@ -50,11 +50,9 @@ tol = 10^-12;
 Amin = [xmin, -ray_direction(1); ymin, -ray_direction(2)];
 Amax = [xmax, -ray_direction(1); ymax, -ray_direction(2)];
 b = [ray_origin(1)-circle_center(1), ray_origin(2)-circle_center(2)]';
-%if (single(tan(min(interval_theta))) == ray_direction(2)/ray_direction(1))
 if abs(det(Amin)) < tol
     zmax = Amax \ b;
     zmin = [0 ; 0];
-%elseif (single(tan(max(interval_theta))) == ray_direction(2)/ray_direction(1))
 elseif abs(det(Amax)) < tol
     zmin = Amin\b;
     zmax = [0 ; 0];
