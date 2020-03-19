@@ -120,7 +120,7 @@ d = sqrt(discr);
 pa = ray_origin + (v-d).*ray_unit_vector;
 pb = ray_origin + (v+d).*ray_unit_vector;
 tol = 10^-16;
-if (ray_direction(1) < tol)
+if (abs(ray_direction(1)) < tol)
     t1 = (pa(2) - ray_origin(2))/ray_direction(2);
     t2 = (pb(2) - ray_origin(2))/ray_direction(2);
 else
@@ -252,7 +252,7 @@ while t < min(t_grid,t_end)
         end
         angular_voxels = [angular_voxels, current_voxel_ID_theta];
         radial_voxels = [radial_voxels, current_voxel_ID_r];
-    else 
+    else
         t = min(t2,t_end);
         if verbose
           fprintf('Grid exit.\n');
