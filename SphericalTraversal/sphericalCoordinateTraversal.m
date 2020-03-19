@@ -31,9 +31,9 @@ function [radial_voxels, angular_voxels, phi_voxels] = sphericalCoordinateTraver
 %    [radial_voxels(1), angular_voxels(1)] is the first voxel the ray
 %    travels through.
 close all;
-circle_center_x = circle_center(1);
-circle_center_y = circle_center(2);
-circle_center_z = circle_center(3);
+sphere_center_x = sphere_center(1);
+sphere_center_y = sphere_center(2);
+sphere_center_z = sphere_center(3);
 ray_origin_x = ray_origin(1);
 ray_origin_y = ray_origin(2);
 ray_origin_z = ray_origin(3);
@@ -70,33 +70,36 @@ p = ray_origin + t_begin.*ray_direction;
 ray_sphere_vector = [sphere_center(1) - p(1); sphere_center(2) - p(2); sphere_center(3) - p(3)]';
 % Find the radial shell containing the ray at t_begin.
 r = delta_radius;
-while (ray_sphere_vector(1)^2 + ray_sphere_vector(2)^2 + ray_sphere_vector(3) > r^2) && r < sphere_max_radius
+while (ray_sphere_vector(1)^2 + ray_sphere_vector(2)^2 + ray_sphere_vector(3)^2 > r^2) && r < sphere_max_radius
     r = r + delta_radius;
 end
 
 % Find the intersection times for the ray and the radial shell containing the ray
 % at t_begin; in order to determine if ray intersects grid.
-ray_unit_vector = 1 / sqrt(ray_direction(1)^2 + ray_direction(2)^2)...
-    .* [ray_direction(1);  ray_direction(2)]';
-v = dot(ray_circle_vector,ray_unit_vector);
-discr = r^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
+ray_unit_vector = 1 / sqrt(ray_direction(1)^2 + ray_direction(2)^2 + ray_direction(3)^2)...
+    .* [ray_direction(1);  ray_direction(2); ray_direction(3)]';
+v = dot(ray_sphere_vector,ray_unit_vector);
+discr = r^2 - (dot(ray_sphere_vector,ray_sphere_vector) - v^2);
 d = sqrt(discr);
 pa = ray_origin + (v-d).*ray_unit_vector;
 pb = ray_origin + (v+d).*ray_unit_vector;
 tol = 10^-16;
-if (abs(ray_direction(1)) < tol)
+if (abs(ray_direction(2)) > tol)
     t1 = (pa(2) - ray_origin(2))/ray_direction(2);
     t2 = (pb(2) - ray_origin(2))/ray_direction(2);
-else
+elseif (abs(ray_direction(1)) > tol)
     t1 = (pa(1) - ray_origin(1))/ray_direction(1);
     t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+else
+    t1 = (pa(3) - ray_origin(3))/ray_direction(3);
+    t2 = (pb(3) - ray_origin(3))/ray_direction(3);
 end
 
 % The ray may not intersect the grid at all. 
 % In particular, if the ray is outside the grid at t_begin.
 if t1 < t_begin && t2 < t_begin 
     if verbose
-        fprintf("\nRay does not intersect polar grid for t_begin.")
+        fprintf("\nRay does not intersect spherical grid for t_begin.")
     end
     return;
 end
@@ -110,32 +113,47 @@ end
 end
 
 % If there is a ray/shell intersection, then set the radial voxel ID. 
-current_voxel_ID_r = 1 + (circle_max_radius - r)/delta_radius;
+current_voxel_ID_r = 1 + (sphere_max_radius - r)/delta_radius;
 if verbose
     fprintf('RADIAL HIT INITIALIZED.\n')
 end
 
 % II. Calculate Voxel ID Theta.
 tol = 10^-16;
-if abs(ray_origin - circle_center) < tol 
+if abs(ray_origin - sphere_center) < tol 
     % If the ray starts at the origin, we need to perturb slightly along its path to find the
     % correct angular voxel
     pert_t = 0.1;
     pert_x = ray_start_x + ray_direction_x * pert_t;
     pert_y = ray_start_y + ray_direction_y * pert_t;
-    current_voxel_ID_theta = floor(atan2(pert_y - circle_center_y, pert_x - circle_center_x) * num_angular_sections / (2 * pi));
+    current_voxel_ID_theta = floor(atan2(pert_y - sphere_center_y, pert_x - sphere_center_x) * num_angular_sections / (2 * pi));
 else
-    current_voxel_ID_theta = floor(atan2(ray_start_y - circle_center_y, ray_start_x - circle_center_x) * num_angular_sections / (2 * pi));
+    current_voxel_ID_theta = floor(atan2(ray_start_y - sphere_center_y, ray_start_x - sphere_center_x) * num_angular_sections / (2 * pi));
 end
 if current_voxel_ID_theta < 0
     current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
 end
 
+if abs(ray_origin - sphere_center) < tol 
+    % If the ray starts at the origin, we need to perturb slightly along its path to find the
+    % correct azimuthal voxel
+    pert_t = 0.1;
+    pert_x = ray_start_x + ray_direction_x * pert_t;
+    pert_z = ray_start_z + ray_direction_z * pert_t;
+    current_voxel_ID_theta = floor(atan2(pert_z - sphere_center_z, pert_x - sphere_center_x) * num_angular_sections / (2 * pi));
+else
+    current_voxel_ID_phi = floor(atan2(ray_start_z - sphere_center_z, ray_start_x - sphere_center_x) * num_angular_sections / (2 * pi));
+end
+if current_voxel_ID_phi < 0
+    current_voxel_ID_phi = num_angular_sections + current_voxel_ID_phi;
+end
+
+azimuthal_voxels = [current_voxel_ID_phi];
 angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
 % Find the maximum time the ray will be in the grid
-discr = circle_max_radius^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
+discr = sphere_max_radius^2 - (dot(ray_sphere_vector,ray_sphere_vector) - v^2);
 d = sqrt(discr);
 pa_max = ray_origin + (v-d).*ray_unit_vector;
 pb_max = ray_origin + (v+d).*ray_unit_vector;
@@ -155,9 +173,9 @@ while t < min(t_grid,t_end)
     
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
-        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, t, ray_unit_vector, ray_circle_vector, v, previous_transition_flag, verbose);
+        current_voxel_ID_r, sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ray_sphere_vector, v, previous_transition_flag, verbose);
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-        num_angular_sections, circle_center, t, verbose);
+        num_angular_sections, sphere_center, t, verbose);
     
     % 2. Compare tMaxTheta, tMaxR
     if (tMaxTheta < tMaxR || current_voxel_ID_r + tStepR == 0) && t < tMaxTheta && tMaxTheta < min(t_grid,t_end)
