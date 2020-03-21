@@ -32,8 +32,8 @@ function [radial_voxels, angular_voxels, azimuthal_voxels] = sphericalCoordinate
 %    Note: These lists, used in conjunction, will produce the path of the ray
 %    through the voxels using each voxel transition. For example,
 %    [radial_voxels(1), angular_voxels(1), azimuthal_voxels(1)]
-%    is the first voxel the ray travels through. If the next voxel is a radial hit,
-%    angular_voxels(2) and azimuthal_voxels(2) will be the same.
+%    is the first voxel the ray travels through. If the next traversal is a radial hit,
+%    angular_voxels(2) and azimuthal_voxels(2) will remain the same.
 close all;
 sphere_center_x = sphere_center(1);
 sphere_center_y = sphere_center(2);
