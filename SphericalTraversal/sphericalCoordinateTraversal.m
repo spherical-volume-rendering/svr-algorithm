@@ -27,12 +27,13 @@ function [radial_voxels, angular_voxels, azimuthal_voxels] = sphericalCoordinate
 % Returns:
 %    radial_voxels: A list of the radial voxels that were hit by the ray.
 %    angular_voxels: A list of the angular voxels that were hit by the ray.
-%    azimuthal_voxels: A list of the phi voelx that were hit by the ray.
+%    azimuthal_voxels: A list of the phi voxels that were hit by the ray.
 %
 %    Note: These lists, used in conjunction, will produce the path of the ray
-%    through the voxels using each point. For example,
-%    [radial_voxels(1), angular_voxels(1), azimuthal_voxels(1)] 
-%    is the first voxel the ray travels through.
+%    through the voxels using each voxel transition. For example,
+%    [radial_voxels(1), angular_voxels(1), azimuthal_voxels(1)]
+%    is the first voxel the ray travels through. If the next voxel is a radial hit,
+%    angular_voxels(2) and azimuthal_voxels(2) will be the same.
 close all;
 sphere_center_x = sphere_center(1);
 sphere_center_y = sphere_center(2);
@@ -65,12 +66,12 @@ angular_voxels = [];
 radial_voxels = [];
 azimuthal_voxels = [];
 
+% INITIALIZATION PHASE
+tol = 10^-16;
 delta_radius = sphere_max_radius / num_radial_sections;
 
-% INITIALIZATION PHASE
-
 % Determine ray location at t_begin.
-p = ray_origin + t_begin.*ray_direction;
+p = ray_origin + t_begin .* ray_direction;
 ray_sphere_vector = [sphere_center(1) - p(1); sphere_center(2) - p(2); sphere_center(3) - p(3)]';
 % Find the radial shell containing the ray at t_begin.
 r = delta_radius;
@@ -82,26 +83,25 @@ end
 % the ray at t_begin; in order to determine if ray intersects grid.
 ray_unit_vector = 1 / sqrt(ray_direction(1)^2 + ray_direction(2)^2 + ray_direction(3)^2)...
     .* [ray_direction(1);  ray_direction(2); ray_direction(3)]';
-v = dot(ray_sphere_vector,ray_unit_vector);
+v = dot(ray_sphere_vector, ray_unit_vector);
 discr = r^2 - (dot(ray_sphere_vector,ray_sphere_vector) - v^2);
 d = sqrt(discr);
-pa = ray_origin + (v-d).*ray_unit_vector;
-pb = ray_origin + (v+d).*ray_unit_vector;
-tol = 10^-16;
+pa = ray_origin + (v-d) .* ray_unit_vector;
+pb = ray_origin + (v+d) .* ray_unit_vector;
 
 % Calculate the time of entrance and exit of the ray.
 if (abs(ray_direction(2)) > tol)
     % Use the y-direction if it is non-zero.
-    t1 = (pa(2) - ray_origin(2))/ray_direction(2);
-    t2 = (pb(2) - ray_origin(2))/ray_direction(2);
+    t1 = (pa(2) - ray_origin(2)) / ray_direction(2);
+    t2 = (pb(2) - ray_origin(2)) / ray_direction(2);
 elseif (abs(ray_direction(1)) > tol)
     % Use the x-direction if it is non-zero.
-    t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-    t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    t1 = (pa(1) - ray_origin(1)) / ray_direction(1);
+    t2 = (pb(1) - ray_origin(1)) / ray_direction(1);
 else
     % Use the z-direction if it is non-zero.
-    t1 = (pa(3) - ray_origin(3))/ray_direction(3);
-    t2 = (pb(3) - ray_origin(3))/ray_direction(3);
+    t1 = (pa(3) - ray_origin(3)) / ray_direction(3);
+    t2 = (pb(3) - ray_origin(3)) / ray_direction(3);
 end
 
 % The ray may not intersect the grid at all. 
