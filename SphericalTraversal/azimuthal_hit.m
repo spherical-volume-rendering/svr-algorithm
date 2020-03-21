@@ -7,7 +7,7 @@ function [tMaxPhi, tStepPhi] = azimuthal_hit(ray_origin, ray_direction, ...
 %    ray_origin: vector of the origin of the ray in cartesian coordinates.
 %    ray_direction: vector of the direction of the ray in cartesian coordinates.
 %    current_voxel_ID_phi: the (azimuthal) ID of current voxel.
-%    num_angular_sections: number of total angular sections on the grid.
+%    num_azimuthal_sections: number of total azimuthal sections of the grid.
 %    sphere_center: The center of the sphere.
 %    t: The current time parameter of the ray.
 %    verbose: Determines whether debug print statements are enabled.
