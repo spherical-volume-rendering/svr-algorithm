@@ -220,6 +220,7 @@ while t < t_end
             current_voxel_ID_phi = num_azimuthal_sections + current_voxel_ID_phi;
         end
     else
+        % No hits are within the bounds [t, t_end].
         return;
     end    
     radial_voxels = [radial_voxels, current_voxel_ID_r];
