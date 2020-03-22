@@ -27,12 +27,13 @@ function [radial_voxels, angular_voxels, azimuthal_voxels] = sphericalCoordinate
 % Returns:
 %    radial_voxels: A list of the radial voxels that were hit by the ray.
 %    angular_voxels: A list of the angular voxels that were hit by the ray.
-%    azimuthal_voxels: A list of the phi voelx that were hit by the ray.
+%    azimuthal_voxels: A list of the phi voxels that were hit by the ray.
 %
 %    Note: These lists, used in conjunction, will produce the path of the ray
-%    through the voxels using each point. For example,
-%    [radial_voxels(1), angular_voxels(1), azimuthal_voxels(1)] 
-%    is the first voxel the ray travels through.
+%    through the voxels using each voxel transition. For example,
+%    [radial_voxels(1), angular_voxels(1), azimuthal_voxels(1)]
+%    is the first voxel the ray travels through. If the next traversal is a radial hit,
+%    angular_voxels(2) and azimuthal_voxels(2) will remain the same.
 close all;
 sphere_center_x = sphere_center(1);
 sphere_center_y = sphere_center(2);
@@ -65,12 +66,12 @@ angular_voxels = [];
 radial_voxels = [];
 azimuthal_voxels = [];
 
+% INITIALIZATION PHASE
+tol = 10^-16;
 delta_radius = sphere_max_radius / num_radial_sections;
 
-% INITIALIZATION PHASE
-
 % Determine ray location at t_begin.
-p = ray_origin + t_begin.*ray_direction;
+p = ray_origin + t_begin .* ray_direction;
 ray_sphere_vector = [sphere_center(1) - p(1); sphere_center(2) - p(2); sphere_center(3) - p(3)]';
 % Find the radial shell containing the ray at t_begin.
 r = delta_radius;
@@ -82,26 +83,25 @@ end
 % the ray at t_begin; in order to determine if ray intersects grid.
 ray_unit_vector = 1 / sqrt(ray_direction(1)^2 + ray_direction(2)^2 + ray_direction(3)^2)...
     .* [ray_direction(1);  ray_direction(2); ray_direction(3)]';
-v = dot(ray_sphere_vector,ray_unit_vector);
+v = dot(ray_sphere_vector, ray_unit_vector);
 discr = r^2 - (dot(ray_sphere_vector,ray_sphere_vector) - v^2);
 d = sqrt(discr);
-pa = ray_origin + (v-d).*ray_unit_vector;
-pb = ray_origin + (v+d).*ray_unit_vector;
-tol = 10^-16;
+pa = ray_origin + (v-d) .* ray_unit_vector;
+pb = ray_origin + (v+d) .* ray_unit_vector;
 
 % Calculate the time of entrance and exit of the ray.
 if (abs(ray_direction(2)) > tol)
     % Use the y-direction if it is non-zero.
-    t1 = (pa(2) - ray_origin(2))/ray_direction(2);
-    t2 = (pb(2) - ray_origin(2))/ray_direction(2);
+    t1 = (pa(2) - ray_origin(2)) / ray_direction(2);
+    t2 = (pb(2) - ray_origin(2)) / ray_direction(2);
 elseif (abs(ray_direction(1)) > tol)
     % Use the x-direction if it is non-zero.
-    t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-    t2 = (pb(1) - ray_origin(1))/ray_direction(1);
+    t1 = (pa(1) - ray_origin(1)) / ray_direction(1);
+    t2 = (pb(1) - ray_origin(1)) / ray_direction(1);
 else
     % Use the z-direction if it is non-zero.
-    t1 = (pa(3) - ray_origin(3))/ray_direction(3);
-    t2 = (pb(3) - ray_origin(3))/ray_direction(3);
+    t1 = (pa(3) - ray_origin(3)) / ray_direction(3);
+    t2 = (pb(3) - ray_origin(3)) / ray_direction(3);
 end
 
 % The ray may not intersect the grid at all. 
@@ -184,91 +184,47 @@ t_grid = max(t1,t2);
 
 % TRAVERSAL PHASE
 t = t_begin;
+t_end = min(t_grid, t_end);
 previous_transition_flag = false;
 
-while t < min(t_grid,t_end)
-    % TODO:
-    % if: tMaxTheta < tMaxR && tMaxTheta < tMaxPhi
-    % elseif: tMaxR < tMaxPhi
-    % else: % tMaxPhi is smallest.
-    
+while t < t_end
     % 1. Calculate tMaxR, tMaxTheta, tMaxPhi
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
         current_voxel_ID_r, sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ray_sphere_vector, v, previous_transition_flag, verbose);
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
         num_angular_sections, sphere_center, t, verbose);
-    % [tMaxPhi, tStepPhi] = azimuthal_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-    %   num_angular_sections, sphere_center, t, verbose)
+    [tMaxPhi, tStepPhi] = azimuthal_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
+      num_angular_sections, sphere_center, t, verbose)
     
-    % 2. Compare tMaxTheta with tMaxR and tMaxPhi.
-    if (tMaxTheta < tMaxR && tMaxTheta < tMaxPhi || current_voxel_ID_r + tStepR == 0) ...
-            && t < tMaxTheta && tMaxTheta < min(t_grid,t_end) ... 
-        % when the ray only intersects one radial shell but crosses an
-        % angular boundary, we need the second half of conditional
-        t = tMaxTheta;
+    % 2. Compare tMaxR, tMaxTheta, tMaxPhi
+    if tMaxR <= tMaxTheta && tMaxR <= tMaxPhi && t < tMaxR && tMaxR < t_end ...
+            && current_voxel_ID_r + tStepR ~= 0
+        % tMaxR is the minimum, the next radial step is 
+        % within bounds [t, t_end], and the next step is not a radial exit.
+        t = tMaxR;
+        current_voxel_ID_r = current_voxel_ID_r + tStepR;
+    elseif tMaxTheta <= tMaxPhi && t < tMaxTheta  && tMaxTheta < t_end
+        % tMaxTheta is the minimum and the next angular step is within
+        % bounds [t, t_end].
+        t = tMaxR;
         current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
         if current_voxel_ID_theta < 0
             current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
         end
-        if verbose
-            new_x_position = ray_origin(1) + ray_direction(1) * tMaxTheta;
-            new_y_position = ray_origin(2) + ray_direction(2) * tMaxTheta;
-            new_z_position = ray_origin(3) + ray_direction(3) * tMaxTheta;
-            text(new_x_position, new_y_position, new_z_position, 'POI_t');
-            fprintf('ANGULAR HIT.\n')
+    elseif t < tMaxPhi && tMaxPhi < t_end
+        % tMaxPhi is the minimum and the next azimuthal step is within
+        % bounds [t, t_end].
+        t = tMaxPhi;
+        current_voxel_ID_phi = current_voxel_ID_phi + tStepPhi;
+        if current_voxel_ID_phi < 0
+            current_voxel_ID_phi = num_azimuthal_sections + current_voxel_ID_phi;
         end
-        angular_voxels = [angular_voxels, current_voxel_ID_theta];
-        radial_voxels = [radial_voxels, current_voxel_ID_r];
-        azimuthal_voxels = [azimuthal_voxels, current_voxel_ID_phi];
-        
-    elseif tMaxTheta - tMaxR < tol && tMaxR < min(t2,t_end)
-        % For the case when the ray simultaneously hits a radial and
-        % angular boundary.
-        t = tMaxR;
-        p = ray_origin + t.*ray_direction;
-        current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
-        if current_voxel_ID_theta < 0
-            current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
-        end
-        if verbose
-            new_x_position = ray_origin_x + ray_direction_x * tMaxR;
-            new_y_position = ray_origin_y + ray_direction_y * tMaxR;       
-            if tStepR == 1
-                text(new_x_position, new_y_position, 'POI_{rt}');
-                fprintf('DOUBLE HIT (inward).\n');
-            else
-                text(new_x_position, new_y_position, 'POI_{rt}');
-                fprintf('DOUBLE HIT (outward).\n');
-            end
-        end
-        angular_voxels = [angular_voxels, current_voxel_ID_theta];
-        radial_voxels = [radial_voxels, current_voxel_ID_r];
-    elseif tMaxR < min(t_grid,t_end) && tMaxR < tMaxPhi && current_voxel_ID_r + tStepR ~= 0
-        % tMaxR case.
-        t = tMaxR;
-        p = ray_origin + t.*ray_direction;
-        current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        if verbose
-          new_x_position = ray_origin_x + ray_direction_x * tMaxR;
-          new_y_position = ray_origin_y + ray_direction_y * tMaxR;       
-          if tStepR == 1
-            text(new_x_position, new_y_position, 'POI_r');
-            fprintf('RADIAL HIT (inward).\n');
-          else
-            text(new_x_position, new_y_position, 'POI_r');
-            fprintf('RADIAL HIT (outward).\n');
-          end
-        end
-        angular_voxels = [angular_voxels, current_voxel_ID_theta];
-        radial_voxels = [radial_voxels, current_voxel_ID_r];
-    elseif t < tMaxPhi && tMaxPhi < min(t_grid, t_end) || current_voxel_ID_r + tStepR == 0
-        
     else
-        t = min(t_grid,t_end);
-        if verbose
-          fprintf('Grid exit.\n');
-        end
+        % No hits are within the bounds [t, t_end].
+        return;
     end    
+    radial_voxels = [radial_voxels, current_voxel_ID_r];
+    angular_voxels = [angular_voxels, current_voxel_ID_theta];
+    azimuthal_voxels = [azimuthal_voxels, current_voxel_ID_phi];
 end
 end
