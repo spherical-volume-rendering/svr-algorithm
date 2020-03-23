@@ -26,19 +26,29 @@ public:
             inv_num_radial_voxels_{1.0 / num_radial_voxels},
             inv_num_angular_voxels_{1.0 / num_angular_voxels},
             inv_num_azimuthal_voxels_{1.0 / num_azimuthal_voxels},
-            delta_radius_{sphere_max_radius / num_radial_voxels}
+            delta_radius_{sphere_max_radius * inv_num_radial_voxels}
             {}
 
     [[nodiscard]] inline constexpr size_t numRadialVoxels() const { return num_radial_voxels_; }
+
     [[nodiscard]] inline constexpr size_t numAngularVoxels() const { return num_angular_voxels_; }
+
     [[nodiscard]] inline constexpr size_t numAzimuthalVoxels() const { return num_azimuthal_voxels_; }
+
     [[nodiscard]] inline constexpr double invNumRadialVoxels() const { return inv_num_radial_voxels_; }
+
     [[nodiscard]] inline constexpr double invNumAngularVoxels() const { return inv_num_angular_voxels_; }
+
     [[nodiscard]] inline constexpr double invNumAzimuthalVoxels() const { return inv_num_azimuthal_voxels_; }
+
     [[nodiscard]] inline constexpr BoundVec3 minBound() const { return min_bound_; }
+
     [[nodiscard]] inline constexpr BoundVec3 maxBound() const { return max_bound_; }
+
     [[nodiscard]] inline constexpr double sphereMaxRadius() const { return sphere_max_radius_; }
+
     [[nodiscard]] inline constexpr BoundVec3 sphereCenter() const { return sphere_center_; }
+
     [[nodiscard]] inline constexpr double deltaRadius() const { return delta_radius_; }
 
 private:
