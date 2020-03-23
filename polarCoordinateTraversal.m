@@ -209,10 +209,8 @@ while t < t_end
         % tMaxTheta is the minimum and the next angular step is within
         % bounds.
         t = tMaxTheta;
-        current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
-        if current_voxel_ID_theta < 0
-            current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
-        end
+        current_voxel_ID_theta = mod(current_voxel_ID_theta + ...
+            tStepTheta, num_angular_sections);
     else
         % tMaxR and tMaxTheta are outside of the bounds.
         return

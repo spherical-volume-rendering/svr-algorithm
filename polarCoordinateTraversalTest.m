@@ -477,3 +477,26 @@ function testRaySlightIntersect(testCase)
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
+
+% Grid centered at origin; ray traverses through origin
+function testRaySlightIntersect(testCase)
+    min_bound = [-15, 15];
+    max_bound = [15, 15];
+    ray_origin = [-13, -13];
+    ray_direction = [1.0, 1.0];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,3,3,2,1];
+        expected_thetaVoxels = [2,2,2,0,0,0];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end

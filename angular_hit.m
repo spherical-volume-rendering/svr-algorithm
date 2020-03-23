@@ -34,17 +34,6 @@ xmax = cos(max(interval_theta));
 ymin = sin(min(interval_theta));
 ymax = sin(max(interval_theta));
 
-if (single(tan(min(interval_theta))) == ray_direction(2)/ray_direction(1) ...
-        && single(tan(max(interval_theta))) == ray_direction(2)/ray_direction(1))
-    if verbose
-        fprintf("parallel");
-    end
-    tMaxTheta = inf;
-    tStepTheta = 0;
-    return;
-end
-
-
 % Solve the systems Az=b to check for intersection.
 tol = 10^-12;
 Amin = [xmin, -ray_direction(1); ymin, -ray_direction(2)];
@@ -81,7 +70,7 @@ elseif abs(zmax(1) - zmin(1)) < tol && zmax(2) -t > tol
         if verbose
           fprintf("hit origin max t\n")
         end
-    if ray_direction(2)>0
+    if ray_direction(2) > tol
         % change in theta is dependent on the slope of the line
         interval_theta = interval_theta - pi;
         tStepTheta = - abs(current_voxel_ID_theta - interval_theta(1)/delta_theta);
@@ -95,7 +84,7 @@ elseif abs(zmax(1) - zmin(1)) < tol && zmin(2) -t > tol
     if verbose
         fprintf("hit origin min t\n")
     end
-    if ray_direction(2)>0
+    if ray_direction(2) > tol
         % change in theta is dependent on the slope of the line
         interval_theta = interval_theta - pi;
         tStepTheta = - abs(current_voxel_ID_theta - interval_theta(1)/delta_theta);
