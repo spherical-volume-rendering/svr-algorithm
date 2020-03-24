@@ -3,7 +3,7 @@
 
 // Takes the absolute value of 'value' and determines if it is less than the tolerance.
 // In this case, we assume tolerance is an arbitrary small value.
-// This is used when floating point mathematics carries some rounding errors.
+// This is used when floating point mathematics carries rounding error.
 inline bool isNearZero(double value, double tolerance) {
     return std::abs(value) < tolerance;
 }
@@ -12,7 +12,7 @@ inline bool isNearZero(double value, double tolerance) {
 svr::sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid, double t_begin,
                                        double t_end, double tol) noexcept {
     std::vector<svr::SphericalVoxel> voxels;
-    voxels.reserve(grid.numRadialVoxels() * 3);
+    voxels.reserve(grid.numRadialVoxels() * 3); // magic number
 
     /* INITIALIZATION PHASE */
 

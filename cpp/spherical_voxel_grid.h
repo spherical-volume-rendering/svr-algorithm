@@ -79,11 +79,8 @@ private:
     // The maximum sphere radius divided by the number of radial sections.
     const double delta_radius_;
 
-    // Sphere's area divided by the number of angular sections.
-    const double delta_theta_;
-
-    // Sphere's area divided by the number of azimuthal sections;
-    const double delta_phi_;
+    // Sphere's area divided by the number of angular sections and number of azimuthal sections respectively.
+    const double delta_theta_, delta_phi_;
 };
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H
