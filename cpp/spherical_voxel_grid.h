@@ -26,7 +26,9 @@ public:
             inv_num_radial_voxels_{1.0 / num_radial_voxels},
             inv_num_angular_voxels_{1.0 / num_angular_voxels},
             inv_num_azimuthal_voxels_{1.0 / num_azimuthal_voxels},
-            delta_radius_{sphere_max_radius * inv_num_radial_voxels}
+            delta_radius_{sphere_max_radius * inv_num_radial_voxels_},
+            delta_theta_{2 * M_PI * inv_num_angular_voxels_},
+            delta_phi_{2 * M_PI * inv_num_azimuthal_voxels_}
             {}
 
     [[nodiscard]] inline constexpr size_t numRadialVoxels() const { return num_radial_voxels_; }
@@ -51,6 +53,10 @@ public:
 
     [[nodiscard]] inline constexpr double deltaRadius() const { return delta_radius_; }
 
+    [[nodiscard]] inline constexpr double deltaTheta() const { return delta_theta_; }
+
+    [[nodiscard]] inline constexpr double deltaPhi() const { return delta_phi_; }
+
 private:
     // The minimum bound vector of the voxel grid.
     const BoundVec3 min_bound_;
@@ -71,7 +77,13 @@ private:
     const double sphere_max_radius_;
 
     // The maximum sphere radius divided by the number of radial sections.
-    const float delta_radius_;
+    const double delta_radius_;
+
+    // Sphere's area divided by the number of angular sections.
+    const double delta_theta_;
+
+    // Sphere's area divided by the number of azimuthal sections;
+    const double delta_phi_;
 };
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H
