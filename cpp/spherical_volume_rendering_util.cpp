@@ -1,7 +1,6 @@
 #include "spherical_volume_rendering_util.h"
 #include <vector>
 #include <cmath>
-#include "stdio.h" // REMOVE
 
 // Takes the absolute value of 'value' and determines if it is less than the tolerance.
 // In this case, we assume tolerance is an arbitrary small value.
@@ -94,7 +93,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         t2 = (pb.z() - ray.origin().z()) * ray.inv_direction().z();
     }
 
-    printf("\nt1: %f\nt2: %f\nt_begin:%f", t1, t2, t_begin);
     if ((t1 < t_begin && t2 < t_begin) || isNearZero(t1 - t2, tol)) {
         // Case 1: No intersection.
         // Case 2: Tangent hit.
