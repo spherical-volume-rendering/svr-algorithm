@@ -1,6 +1,7 @@
 #include "spherical_volume_rendering_util.h"
 #include <vector>
 #include <cmath>
+#include "stdio.h" // REMOVE
 
 // Takes the absolute value of 'value' and determines if it is less than the tolerance.
 // In this case, we assume tolerance is an arbitrary small value.
@@ -72,7 +73,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
     // This will determine if the ray intersects the sphere.
     const double v = ray_sphere_vector.dot(ray.direction().to_free());
-    const double discriminant = current_r * current_r - (ray_sphere_vector_dot - v * v);
+    const double discriminant = (current_r * current_r) - ray_sphere_vector_dot - (v * v);
+    if (discriminant <= 0) { return voxels; }
     const double d = std::sqrt(discriminant);
     const BoundVec3 pa = ray.origin() + ray.direction() * (v - d);
     const BoundVec3 pb = ray.origin() + ray.direction() * (v + d);
@@ -92,6 +94,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         t2 = (pb.z() - ray.origin().z()) * ray.inv_direction().z();
     }
 
+    printf("\nt1: %f\nt2: %f\nt_begin:%f", t1, t2, t_begin);
     if ((t1 < t_begin && t2 < t_begin) || isNearZero(t1 - t2, tol)) {
         // Case 1: No intersection.
         // Case 2: Tangent hit.
