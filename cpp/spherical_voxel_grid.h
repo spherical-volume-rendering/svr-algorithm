@@ -15,7 +15,7 @@ struct SphericalVoxelGrid {
 public:
     constexpr SphericalVoxelGrid(const BoundVec3& min_bound, const BoundVec3& max_bound,
             size_t num_radial_voxels, size_t num_angular_voxels, size_t num_azimuthal_voxels,
-            const BoundVec3& sphere_center, float sphere_max_radius) :
+            const BoundVec3& sphere_center, double sphere_max_radius) :
             min_bound_{min_bound},
             max_bound_{max_bound},
             num_radial_voxels_{num_radial_voxels},

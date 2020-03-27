@@ -33,27 +33,28 @@ struct AzimuthalHitParameters {
 };
 
 // TODO(cgyurgyik): Documentation, implementation.
-RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_voxel_ID_r,
-                              const FreeVec3& ray_sphere_vector, double t, double v, bool previous_transition_flag) {
+[[nodiscard]] RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_voxel_ID_r,
+                              const FreeVec3& ray_sphere_vector, double t, double v,
+                              bool previous_transition_flag) noexcept {
     assert(false);
 }
 
 // TODO(cgyurgyik): Documentation, implementation.
-AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_voxel_ID_theta,
-                                double t) {
+[[nodiscard]] AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid,
+        size_t current_voxel_ID_theta, double t) noexcept {
     assert(false);
 }
 
 // TODO(cgyurgyik): Documentation, implementation.
-AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_phi_ID_theta,
-                                    double t) {
+[[nodiscard]] AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& grid,
+        size_t current_phi_ID_theta, double t) noexcept {
     assert(false);
 }
 
-[[nodiscard]] static std::vector<svr::SphericalVoxel>
-svr::sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid, double t_begin,
+[[nodiscard]] std::vector<SphericalVoxel>
+sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid, double t_begin,
                                        double t_end, double tol) noexcept {
-    std::vector<svr::SphericalVoxel> voxels;
+    std::vector<SphericalVoxel> voxels;
     voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
 
     /* INITIALIZATION PHASE */

@@ -6,8 +6,6 @@
 #include "spherical_voxel_grid.h"
 #include <vector>
 
-namespace svr {
-
 // Represents a spherical voxel coordinate.
     struct SphericalVoxel {
         size_t radial_voxel;
@@ -26,11 +24,9 @@ namespace svr {
 // Returns:
 //    A vector of the spherical coordinate voxels traversed. Recall that if a radial hit occurs,
 //    The azimuthal and angular voxels will remain the same as before.
-    [[nodiscard]] static std::vector<svr::SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray,
+    [[nodiscard]] std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray,
                                                                                        const SphericalVoxelGrid &grid,
                                                                                        double t_begin, double t_end,
                                                                                        double tol) noexcept;
-
-} // svr
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOLUMERENDERINGUTIL_H
