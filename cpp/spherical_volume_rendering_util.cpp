@@ -13,15 +13,48 @@
 // TODO(cgyurgyik): Update documentation, provide link to better description.
 [[nodiscard]] inline size_t getInitialVoxelID(double y, double x, size_t num_sections) {
     const size_t current_voxel_ID = std::floor(std::atan2(y, x) * num_sections / ( 2 * M_PI));
-    if (current_voxel_ID >= 0) return current_voxel_ID;
-    return current_voxel_ID + num_sections;
+    return (current_voxel_ID + num_sections) % num_sections;
+}
+
+struct RadialHitParameters {
+    double tMaxR;
+    size_t tStepR;
+    bool previous_transition_flag;
+};
+
+struct AngularHitParameters {
+    double tMaxTheta;
+    size_t tStepTheta;
+};
+
+struct AzimuthalHitParameters {
+    double tMaxPhi;
+    size_t tStepPhi;
+};
+
+// TODO(cgyurgyik): Documentation, implementation.
+RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_voxel_ID_r,
+                              const FreeVec3& ray_sphere_vector, double t, double v, bool previous_transition_flag) {
+    assert(false);
+}
+
+// TODO(cgyurgyik): Documentation, implementation.
+AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_voxel_ID_theta,
+                                double t) {
+    assert(false);
+}
+
+// TODO(cgyurgyik): Documentation, implementation.
+AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_phi_ID_theta,
+                                    double t) {
+    assert(false);
 }
 
 [[nodiscard]] static std::vector<svr::SphericalVoxel>
 svr::sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid, double t_begin,
                                        double t_end, double tol) noexcept {
     std::vector<svr::SphericalVoxel> voxels;
-    voxels.reserve(grid.numRadialVoxels() * 3); // magic number
+    voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
 
     /* INITIALIZATION PHASE */
 
@@ -106,13 +139,45 @@ svr::sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid 
         t1 = (pa_max.z() - ray.origin().z()) * ray.inv_direction().z();
         t2 = (pb_max.z() - ray.origin().z()) * ray.inv_direction().z();
     }
-    const double t_grid_end = std::max(t1, t2);
+    const double t_grid_end = std::min(t1, t2);
 
     /* TRAVERSAL PHASE */
     double t = t_begin;
     t_end = std::min(t_grid_end, t_end);
     bool previous_transition_flag = false;
-    assert(false);
 
+    while (t < t_end) {
+        const RadialHitParameters radial_params = radialHit(ray, grid, current_voxel_ID_r,
+                ray_sphere_vector, t, v, previous_transition_flag);
+        previous_transition_flag = radial_params.previous_transition_flag;
+        const AngularHitParameters angular_params = angularHit(ray, grid, current_voxel_ID_theta, t);
+        const AzimuthalHitParameters azimuthal_params = azimuthalHit(ray, grid, current_voxel_ID_phi, t);
+
+        if (radial_params.tMaxR <= angular_params.tMaxTheta &&
+            radial_params.tMaxR <= azimuthal_params.tMaxPhi &&
+            t < radial_params.tMaxR && radial_params.tMaxR < t_end &&
+            current_voxel_ID_r + radial_params.tStepR != 0) {
+            // tMaxR is the minimum, the next radial step is within bounds (t, t_end),
+            // and the next step is not a radial exit.
+            t = radial_params.tMaxR;
+            current_voxel_ID_r += radial_params.tStepR;
+        } else if (angular_params.tMaxTheta <= azimuthal_params.tMaxPhi &&
+                  t < angular_params.tMaxTheta && angular_params.tMaxTheta <= t_end) {
+            // tMaxTheta is the minimum and the next angular step is within bounds (t, t_end).
+            t = angular_params.tMaxTheta;
+            current_voxel_ID_theta += angular_params.tStepTheta % grid.numAngularVoxels();
+        } else if (t < azimuthal_params.tMaxPhi && azimuthal_params.tMaxPhi < t_end) {
+            // tMaxPhi is the minimum and the next azimuthal step is within bounds (t, t_end).
+            t = azimuthal_params.tMaxPhi;
+            current_voxel_ID_phi += azimuthal_params.tStepPhi % grid.numAzimuthalVoxels();
+        } else {
+            // No hits are within the bounds (t, t_end).
+            return voxels;
+        }
+        voxels.push_back({.radial_voxel=current_voxel_ID_r,
+                          .angular_voxel=current_voxel_ID_theta,
+                          .azimuthal_voxel=current_voxel_ID_phi});
+    }
     return voxels;
 }
+
