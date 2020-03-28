@@ -13,49 +13,48 @@
 //   sphere_max_radius > 0.0
 struct SphericalVoxelGrid {
 public:
-    constexpr SphericalVoxelGrid(const BoundVec3& min_bound, const BoundVec3& max_bound,
+    SphericalVoxelGrid(const BoundVec3& min_bound, const BoundVec3& max_bound,
             size_t num_radial_voxels, size_t num_angular_voxels, size_t num_azimuthal_voxels,
             const BoundVec3& sphere_center, double sphere_max_radius) :
-            min_bound_{min_bound},
-            max_bound_{max_bound},
-            num_radial_voxels_{num_radial_voxels},
-            num_angular_voxels_{num_angular_voxels},
-            num_azimuthal_voxels_{num_angular_voxels},
-            sphere_center_{sphere_center},
-            sphere_max_radius_{sphere_max_radius},
-            inv_num_radial_voxels_{1.0 / num_radial_voxels},
-            inv_num_angular_voxels_{1.0 / num_angular_voxels},
-            inv_num_azimuthal_voxels_{1.0 / num_azimuthal_voxels},
-            delta_radius_{sphere_max_radius * inv_num_radial_voxels_},
-            delta_theta_{2 * M_PI * inv_num_angular_voxels_},
-            delta_phi_{2 * M_PI * inv_num_azimuthal_voxels_}
-            {}
+            min_bound_(min_bound),
+            max_bound_(max_bound),
+            num_radial_voxels_(num_radial_voxels),
+            num_angular_voxels_(num_angular_voxels),
+            num_azimuthal_voxels_(num_angular_voxels),
+            inv_num_radial_voxels_(1.0 / num_radial_voxels),
+            inv_num_angular_voxels_(1.0 / num_angular_voxels),
+            inv_num_azimuthal_voxels_(1.0 / num_azimuthal_voxels),
+            sphere_center_(sphere_center),
+            sphere_max_radius_(sphere_max_radius),
+            delta_radius_(sphere_max_radius * inv_num_radial_voxels_),
+            delta_theta_(2 * M_PI * inv_num_angular_voxels_),
+            delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_) {}
 
-    [[nodiscard]] inline constexpr size_t numRadialVoxels() const { return num_radial_voxels_; }
+    inline size_t numRadialVoxels() const { return num_radial_voxels_; }
 
-    [[nodiscard]] inline constexpr size_t numAngularVoxels() const { return num_angular_voxels_; }
+    inline size_t numAngularVoxels() const { return num_angular_voxels_; }
 
-    [[nodiscard]] inline constexpr size_t numAzimuthalVoxels() const { return num_azimuthal_voxels_; }
+    inline size_t numAzimuthalVoxels() const { return num_azimuthal_voxels_; }
 
-    [[nodiscard]] inline constexpr double invNumRadialVoxels() const { return inv_num_radial_voxels_; }
+    inline double invNumRadialVoxels() const { return inv_num_radial_voxels_; }
 
-    [[nodiscard]] inline constexpr double invNumAngularVoxels() const { return inv_num_angular_voxels_; }
+    inline double invNumAngularVoxels() const { return inv_num_angular_voxels_; }
 
-    [[nodiscard]] inline constexpr double invNumAzimuthalVoxels() const { return inv_num_azimuthal_voxels_; }
+    inline double invNumAzimuthalVoxels() const { return inv_num_azimuthal_voxels_; }
 
-    [[nodiscard]] inline constexpr BoundVec3 minBound() const { return min_bound_; }
+    inline BoundVec3 minBound() const { return min_bound_; }
 
-    [[nodiscard]] inline constexpr BoundVec3 maxBound() const { return max_bound_; }
+    inline BoundVec3 maxBound() const { return max_bound_; }
 
-    [[nodiscard]] inline constexpr double sphereMaxRadius() const { return sphere_max_radius_; }
+    inline double sphereMaxRadius() const { return sphere_max_radius_; }
 
-    [[nodiscard]] inline constexpr BoundVec3 sphereCenter() const { return sphere_center_; }
+    inline BoundVec3 sphereCenter() const { return sphere_center_; }
 
-    [[nodiscard]] inline constexpr double deltaRadius() const { return delta_radius_; }
+    inline double deltaRadius() const { return delta_radius_; }
 
-    [[nodiscard]] inline constexpr double deltaTheta() const { return delta_theta_; }
+    inline double deltaTheta() const { return delta_theta_; }
 
-    [[nodiscard]] inline constexpr double deltaPhi() const { return delta_phi_; }
+    inline double deltaPhi() const { return delta_phi_; }
 
 private:
     // The minimum bound vector of the voxel grid.
