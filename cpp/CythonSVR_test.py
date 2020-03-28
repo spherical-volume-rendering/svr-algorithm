@@ -8,6 +8,7 @@ import CythonSVR
 
 
 def test_ray_does_not_enter_sphere():
+    print("Testing 'Ray does not enter_sphere' ...")
     ray_origin = np.array([3.0, 3.0, 3.0])
     ray_direction = np.array([-2.0, -1.3, 1.0])
     min_bound = np.array([0.0, 0.0, 0.0])
@@ -25,6 +26,6 @@ def test_ray_does_not_enter_sphere():
                                  t_begin, t_end, tol)
     empty = np.array([])
     assert np.array_equal(voxels, empty)
-    print("Ray does not enter sphere passed.")
+    print("... 'Ray does not enter sphere' passed.")
 
 test_ray_does_not_enter_sphere()

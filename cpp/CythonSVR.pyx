@@ -66,7 +66,7 @@ def walk_spherical_volume(np.ndarray[double, ndim=1, mode="c"] ray_origin, np.nd
                                             num_radial_voxels, num_angular_voxels, num_azimuthal_voxels,
                                             &sphere_center[0], sphere_max_radius, t_begin, t_end, tol)
 
-    cdef np.ndarray voxels = np.empty(v.size(), dtype=int)
+    cdef np.ndarray voxels = np.empty(v.size() * 3, dtype=int)
     for i in range(v.size()):
         voxels[i * 3] = v[i].radial_voxel
         voxels[i * 3 + 1] = v[i].angular_voxel
