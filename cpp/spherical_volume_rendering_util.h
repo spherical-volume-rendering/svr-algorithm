@@ -24,9 +24,15 @@
 // Returns:
 //    A vector of the spherical coordinate voxels traversed. Recall that if a radial hit occurs,
 //    The azimuthal and angular voxels will remain the same as before.
-    [[nodiscard]] std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray,
-                                                                                       const SphericalVoxelGrid &grid,
-                                                                                       double t_begin, double t_end,
-                                                                                       double tol) noexcept;
+std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid,
+                                                              double t_begin, double t_end, double tol) noexcept;
+
+// Simplified version to Cythonize.
+std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
+                                                              double* min_bound, double* max_bound,
+                                                              size_t num_radial_voxels, size_t num_angular_voxels,
+                                                              size_t num_azimuthal_voxels, double* sphere_center,
+                                                              double sphere_max_radius, double t_begin, double t_end,
+                                                              double tol) noexcept;
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOLUMERENDERINGUTIL_H
