@@ -20,7 +20,7 @@ cdef extern from "spherical_volume_rendering_util.h":
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def CythonSVR(np.ndarray[double, ndim=1, mode="c"] ray_origin, np.ndarray[double, ndim=1, mode="c"] ray_direction,
+def walk_spherical_volume(np.ndarray[double, ndim=1, mode="c"] ray_origin, np.ndarray[double, ndim=1, mode="c"] ray_direction,
               np.ndarray[double, ndim=1, mode="c"] min_bound, np.ndarray[double, ndim=1, mode="c"] max_bound,
               int num_radial_voxels, int num_angular_voxels, int num_azimuthal_voxels,
               np.ndarray[double, ndim=1, mode="c"] sphere_center, double sphere_max_radius,

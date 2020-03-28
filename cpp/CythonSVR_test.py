@@ -20,10 +20,11 @@ def test_ray_does_not_enter_sphere():
     t_begin = 0.0
     t_end = 15.0
     tol = 10e-16
-    voxels = CythonSVR.CythonSVR(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,
+    voxels = CythonSVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,
                                  num_angular_sections, num_azimuthal_sections, sphere_center, sphere_max_radius,
                                  t_begin, t_end, tol)
     empty = np.array([])
     assert np.array_equal(voxels, empty)
+    print("Ray does not enter sphere passed.")
 
 test_ray_does_not_enter_sphere()
