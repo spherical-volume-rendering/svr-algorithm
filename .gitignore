@@ -1,0 +1,4 @@
+/cpp/cmake-build-debug/
+/cpp/testing/cmake-build-debug/
+/cpp/testing/googletest/
+.idea/
