@@ -322,8 +322,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double* ray_orig
             return voxels;
         }
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
-                                 .angular_voxel=current_voxel_ID_theta,
-                                 .azimuthal_voxel=current_voxel_ID_phi});
+                          .angular_voxel=current_voxel_ID_theta,
+                          .azimuthal_voxel=current_voxel_ID_phi});
     }
     return voxels;
 }
