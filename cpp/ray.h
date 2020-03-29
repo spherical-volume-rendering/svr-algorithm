@@ -8,8 +8,8 @@
 // and the direction of the ray.
 struct Ray final {
      Ray(const BoundVec3& origin, const UnitVec3& direction)
-            : origin_(origin), direction_(direction), x_dir_is_non_zero_(std::abs(direction.x()) > 0),
-            y_dir_is_non_zero_(std::abs(direction.y()) > 0), z_dir_is_non_zero_(std::abs(direction.z()) > 0),
+            : origin_(origin), direction_(direction), x_dir_is_non_zero_(std::abs(direction.x()) > 0.0),
+            y_dir_is_non_zero_(std::abs(direction.y()) > 0.0), z_dir_is_non_zero_(std::abs(direction.z()) > 0.0),
             inverse_direction_(UnitVec3(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z())) {}
 
     // Represents the function p(t) = origin + t * direction,
