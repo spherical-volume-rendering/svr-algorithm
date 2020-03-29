@@ -16,18 +16,23 @@
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the 'ray' over the spherical voxel grid
 // provided. 't_begin' is the time the ray begins, and 't_end' is the time the ray ends.
 // 'tol' is the tolerance allowed for error that carries with any floating point operations.
+//
 // Requires:
 //    'ray' is a valid Ray.
 //    'grid' is a valid SphericalVoxelGrid.
 //    t_end > t_begin >= 0.0
 //    'tol' >= 0.0
+//
 // Returns:
 //    A vector of the spherical coordinate voxels traversed. Recall that if a radial hit occurs,
 //    The azimuthal and angular voxels will remain the same as before.
+//
+// Notes: For further documentation and visualization, see the Progress Report for the algorithm:
+// https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?usp=sharing
 std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid,
                                                               double t_begin, double t_end, double tol) noexcept;
 
-// Simplified version to Cythonize.
+// Simplified parameters to Cythonize the function; implementation remains the same as above.
 std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
                                                               double* min_bound, double* max_bound,
                                                               size_t num_radial_voxels, size_t num_angular_voxels,
