@@ -203,19 +203,13 @@ while t < t_end
         % when the ray only intersects one radial shell but crosses an
         % angular boundary, we need the second half of conditional
         t = tMaxTheta;
-        current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
-        if current_voxel_ID_theta < 0
-            current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
-        end
+        current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
     elseif abs(tMaxTheta - tMaxR) < tol && t < tMaxR && tMaxR < t_end
         % For the case when the ray simultaneously hits a radial and
         % angular boundary.
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
-        if current_voxel_ID_theta < 0
-            current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
-        end
+        current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
     elseif tMaxR < t_end && current_voxel_ID_r + tStepR ~= 0
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
