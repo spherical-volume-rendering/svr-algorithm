@@ -119,7 +119,7 @@ discr = r^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
 d = sqrt(discr);
 pa = ray_origin + (v-d).*ray_unit_vector;
 pb = ray_origin + (v+d).*ray_unit_vector;
-tol = 10^-16;
+tol = 10^-15;
 if (abs(ray_direction(1)) < tol)
     t1 = (pa(2) - ray_origin(2))/ray_direction(2);
     t2 = (pb(2) - ray_origin(2))/ray_direction(2);
@@ -152,7 +152,6 @@ if verbose
 end
 
 % II. Calculate Voxel ID Theta.
-tol = 10^-16;
 if abs(ray_origin - circle_center) < tol 
     % If the ray starts at the origin, we need to perturb slightly along its path to find the
     % correct angular voxel
@@ -200,22 +199,29 @@ while t < t_end
         t, verbose);
     
     % 2. Compare tMaxR, tMaxTheta
-    if tMaxR <= tMaxTheta && t < tMaxR && tMaxR < t_end ...
-            && current_voxel_ID_r + tStepR ~= 0
-        % tMaxR is the minimum and the next radial step is within bounds.
+    if (tMaxTheta < tMaxR || current_voxel_ID_r + tStepR == 0) && t < tMaxTheta && tMaxTheta < t_end
+        % when the ray only intersects one radial shell but crosses an
+        % angular boundary, we need the second half of conditional
+        t = tMaxTheta;
+        current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
+        if current_voxel_ID_theta < 0
+            current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
+        end
+    elseif abs(tMaxTheta - tMaxR) < tol && t < tMaxR && tMaxR < t_end
+        % For the case when the ray simultaneously hits a radial and
+        % angular boundary.
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
-    elseif t < tMaxTheta && tMaxTheta < t_end
-        % tMaxTheta is the minimum and the next angular step is within
-        % bounds.
-        t = tMaxTheta;
-        current_voxel_ID_theta = mod(current_voxel_ID_theta + ...
-            tStepTheta, num_angular_sections);
-    else
-        % tMaxR and tMaxTheta are outside of the bounds.
-        return
-    end    
-    angular_voxels = [angular_voxels, current_voxel_ID_theta];
-    radial_voxels = [radial_voxels, current_voxel_ID_r];
-end
+        current_voxel_ID_theta = current_voxel_ID_theta + tStepTheta;
+        if current_voxel_ID_theta < 0
+            current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
+        end
+    elseif tMaxR < t_end && current_voxel_ID_r + tStepR ~= 0
+        t = tMaxR;
+        current_voxel_ID_r = current_voxel_ID_r + tStepR;
+    else 
+       return;
+    end 
+        angular_voxels = [angular_voxels, current_voxel_ID_theta];
+        radial_voxels = [radial_voxels, current_voxel_ID_r];
 end
