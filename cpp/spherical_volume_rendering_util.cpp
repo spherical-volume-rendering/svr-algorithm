@@ -253,8 +253,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         const AzimuthalHitParameters azimuthal_params = azimuthalHit(ray, grid, current_voxel_ID_phi, t);
         const bool radial_hit_out_of_bounds = current_voxel_ID_r + radial_params.tStepR == 0;
 
-        if (((radial_params.tMaxR <= angular_params.tMaxTheta && radial_params.tMaxR <= azimuthal_params.tMaxPhi)
-            || radial_hit_out_of_bounds) && t < radial_params.tMaxR && radial_params.tMaxR < t_end) {
+        if (radial_params.tMaxR <= angular_params.tMaxTheta && radial_params.tMaxR <= azimuthal_params.tMaxPhi &&
+            t < radial_params.tMaxR && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds) {
             // tMaxR is the minimum, the next radial step is within bounds (t, t_end),
             // and the next step is not a radial exit.
             t = radial_params.tMaxR;
