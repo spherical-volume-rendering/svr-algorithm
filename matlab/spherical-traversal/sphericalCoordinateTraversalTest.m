@@ -19,7 +19,7 @@ function testRayDoesNotEnterSphere(testCase)
     
     num_radial_sections = 4;
     num_angular_sections = 8;
-    num_azimuthal_sections = 4
+    num_azimuthal_sections = 4;
     t_begin = 0.0;
     t_end = 15.0;
     verbose = false;
@@ -31,7 +31,9 @@ function testRayDoesNotEnterSphere(testCase)
     verifyEqual(testCase, phiVoxels, []);
 end
 
-function SphereCenteredAtOrigin(testCase)
+% Ray passes through origin
+function testSphereCenteredAtOrigin(testCase)
+    fprintf("Sphere at Origin\n")
     min_bound = [-20, -20.0, -20.0];
     max_bound = [20.0, 20.0, 20.0];
     ray_origin = [-13.0, -13.0, -13.0];
