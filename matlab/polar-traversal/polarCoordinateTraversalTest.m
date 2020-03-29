@@ -100,7 +100,7 @@ function testRayBeginInsideCircleAndDoesNotGoThroughOrigin(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% Ray with zero x-/y-direction.
+% Ray with zero x-direction.
 function testZeroX(testCase)
     fprintf("Ray with zero x-direction\n")
     min_bound = [0.0, 0.0];
@@ -124,6 +124,7 @@ function testZeroX(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
+% Ray with zero y-direction.
 function testZeroY(testCase)
     fprintf("Ray with zero y-direction\n")
     min_bound = [0.0, 0.0];
@@ -147,9 +148,9 @@ function testZeroY(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% Ray with negative x-/y-direction.
+% Ray with negative x-&y-direction.
 function testNegativeXandY(testCase)
-    fprintf("Ray with negative x-/y-direction\n")
+    fprintf("Ray with negative x-&y-direction\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [25.0, 25.0];
@@ -473,6 +474,52 @@ function testRaySlightIntersect(testCase)
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
         expected_rVoxels     = [1,1];
         expected_thetaVoxels = [1,0];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% Grid centered at origin; ray traverses through origin
+function testSphereCenteredAtOrigin(testCase)
+    min_bound = [-15, -15];
+    max_bound = [15, 15];
+    ray_origin = [-13, -13];
+    ray_direction = [1.0, 1.0];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,3,3,2,1];
+        expected_thetaVoxels = [2,2,2,0,0,0];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% Intersect radial and angular boundary simultaneously multiple times
+function testSimulhits(testCase)
+    min_bound = [-15, -15];
+    max_bound = [15, 15];
+    ray_origin = [-6, 2];
+    ray_direction = [1, 0];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 4*sqrt(2);
+    num_radial_sections = 2;
+    num_angular_sections = 8;
+    t_begin = 0.0;
+    t_end = 30.0;
+    verbose = true;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
+        expected_rVoxels     = [1,2,2,1];
+        expected_thetaVoxels = [3,2,1,0];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);

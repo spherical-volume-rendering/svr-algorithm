@@ -34,19 +34,6 @@ xmax = cos(max(interval_theta));
 ymin = sin(min(interval_theta));
 ymax = sin(max(interval_theta));
 
-if (single(tan(min(interval_theta))) == ray_direction(2)/ray_direction(1) ...
-        && single(tan(max(interval_theta))) == ray_direction(2)/ray_direction(1))
-    if verbose
-        fprintf("parallel");
-    end
-    tMaxTheta = inf;
-    tStepTheta = 0;
-    return;
-end
-
-tol= 10^-16;
-BOOLY = ray_direction(2) > tol
-
 % Solve the systems Az=b to check for intersection.
 tol = 10^-12;
 Amin = [xmin, -ray_direction(1); ymin, -ray_direction(2)];

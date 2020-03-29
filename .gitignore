@@ -1,0 +1,9 @@
+/cpp/cmake-build-debug/
+/cpp/testing/cmake-build-debug/
+/cpp/testing/googletest/
+.idea/
+/cpp/CythonSVR.c
+/cpp/CythonSVR.cpp
+/cpp/CythonSVR.so
+/cpp/build/
+.DS_Store
