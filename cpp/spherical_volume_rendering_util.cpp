@@ -216,8 +216,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         isNearZero(ray.origin().z() - grid.sphereCenter().z(), tol)) {
         // If the ray starts at the sphere's center, we need to perturb slightly along
         // the path to determine the correct angular and azimuthal voxel.
-        const double perturbed_t = 0.
-                1;
+        const double perturbed_t = 0.1;
         const double perturbed_x = point_at_t_begin.x() + ray.direction().x() * perturbed_t;
         const double perturbed_y = point_at_t_begin.y() + ray.direction().y() * perturbed_t;
         const double perturbed_z = point_at_t_begin.z() + ray.direction().z() * perturbed_t;
