@@ -45,7 +45,6 @@ struct Ray final {
     inline bool yDirectionIsNonZero() const { return y_dir_is_non_zero_; }
     inline bool zDirectionIsNonZero() const { return z_dir_is_non_zero_; }
 
-
 private:
     // The origin of the ray.
     const BoundVec3 origin_;

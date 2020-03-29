@@ -251,24 +251,44 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         previous_transition_flag = radial_params.previous_transition_flag;
         const AngularHitParameters angular_params = angularHit(ray, grid, current_voxel_ID_theta, t);
         const AzimuthalHitParameters azimuthal_params = azimuthalHit(ray, grid, current_voxel_ID_phi, t);
+        const bool radial_hit_out_of_bounds = current_voxel_ID_r + radial_params.tStepR == 0;
 
-        if (radial_params.tMaxR <= angular_params.tMaxTheta &&
-            radial_params.tMaxR <= azimuthal_params.tMaxPhi &&
-            t < radial_params.tMaxR && radial_params.tMaxR < t_end &&
-            current_voxel_ID_r + radial_params.tStepR != 0) {
+        if (((radial_params.tMaxR <= angular_params.tMaxTheta && radial_params.tMaxR <= azimuthal_params.tMaxPhi)
+            || radial_hit_out_of_bounds) && t < radial_params.tMaxR && radial_params.tMaxR < t_end) {
             // tMaxR is the minimum, the next radial step is within bounds (t, t_end),
             // and the next step is not a radial exit.
             t = radial_params.tMaxR;
             current_voxel_ID_r += radial_params.tStepR;
+
+            if (isNearZero(radial_params.tMaxR - angular_params.tMaxTheta, tol)) {
+                current_voxel_ID_theta += angular_params.tStepTheta % grid.numAngularVoxels();
+            }
+            if (isNearZero(radial_params.tMaxR - azimuthal_params.tMaxPhi, tol)) {
+                current_voxel_ID_phi += azimuthal_params.tStepPhi % grid.numAzimuthalVoxels();
+            }
         } else if (angular_params.tMaxTheta <= azimuthal_params.tMaxPhi &&
                   t < angular_params.tMaxTheta && angular_params.tMaxTheta <= t_end) {
             // tMaxTheta is the minimum and the next angular step is within bounds (t, t_end).
             t = angular_params.tMaxTheta;
             current_voxel_ID_theta += angular_params.tStepTheta % grid.numAngularVoxels();
+
+            if (isNearZero(angular_params.tMaxTheta - radial_params.tMaxR, tol) && !radial_hit_out_of_bounds) {
+                current_voxel_ID_r += radial_params.tStepR;
+            }
+            if (isNearZero(angular_params.tMaxTheta - azimuthal_params.tMaxPhi, tol)) {
+                current_voxel_ID_phi += azimuthal_params.tStepPhi % grid.numAzimuthalVoxels();
+            }
         } else if (t < azimuthal_params.tMaxPhi && azimuthal_params.tMaxPhi < t_end) {
             // tMaxPhi is the minimum and the next azimuthal step is within bounds (t, t_end).
             t = azimuthal_params.tMaxPhi;
             current_voxel_ID_phi += azimuthal_params.tStepPhi % grid.numAzimuthalVoxels();
+
+            if (isNearZero(azimuthal_params.tMaxPhi - radial_params.tMaxR, tol) && !radial_hit_out_of_bounds) {
+                current_voxel_ID_r += radial_params.tStepR;
+            }
+            if (isNearZero(azimuthal_params.tMaxPhi - angular_params.tMaxTheta, tol)) {
+                current_voxel_ID_theta += angular_params.tStepTheta % grid.numAngularVoxels();
+            }
         } else {
             // No hits are within the bounds (t, t_end).
             return voxels;
