@@ -68,7 +68,7 @@ struct AzimuthalHitParameters {
 //    tol: The allowed tolerance for float point error.
 //    prev_transition_flag: Determines whether the previous radial traversal was a 'transition'. A transition
 //                          is defined as the change in sign of tStepR. Another way this can be determined is
-//                          sequentil hits with equal radii.
+//                          sequential hits with equal radii.
 //
 // Returns: The corresponding radial hit parameters.
 RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, size_t current_voxel_ID_r,
@@ -156,18 +156,141 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
 
 // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
 // the ray and an angular section. The angular sections live in the XY plane.
+// Input:
+//    ray: The given ray to check for intersection.
+//    grid: The grid that the ray is intersecting with.
+//    current_voxel_ID_theta: The current angular voxel ID.
+//    t: The current time.
+//    v: The dot product between the ray's direction and the ray_sphere_vector.
+//    tol: The allowed tolerance for float point error.
+//
 // Returns: the corresponding angular hit parameters.
 AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid,
-        size_t current_voxel_ID_theta, double t) noexcept {
-    assert(false);
+        size_t current_voxel_ID_theta, double t, double tol) noexcept {
+    const double interval_theta_one = current_voxel_ID_theta * grid.deltaTheta();
+    const double interval_theta_two = (current_voxel_ID_theta + 1) * grid.deltaTheta();
+    const double interval_theta_min = std::min(interval_theta_one, interval_theta_two);
+    const double interval_theta_max = std::max(interval_theta_one, interval_theta_two);
+
+    const double x_min = std::cos(interval_theta_min);
+    const double x_max = std::cos(interval_theta_max);
+    const double y_min = std::sin(interval_theta_min);
+    const double y_max = std::sin(interval_theta_max);
+    // TODO: Amin
+    // TODO: Amax
+    const std::vector<double> b = {ray.origin().x() - grid.sphereCenter().x(),
+                                   ray.origin().y() - grid.sphereCenter().y()};
+    // TODO: initialize zmax, zmin
+    // if isNearZero()
+    // else if isNearZero()
+    // else
+    const std::vector<double> zmin = {0.0, 0.0};
+    const std::vector<double> zmax = {0.0, 0.0};
+
+    AngularHitParameters angular_params;
+    if (zmin[0] > tol && zmin[1] > t) {
+        // Hit with minimum boundary, decrement theta.
+        angular_params.tStepTheta = -1;
+        angular_params.tMaxTheta = zmin[2];
+    } else if (zmax[0] > tol && zmax[1] > t) {
+        // Hit with maximum boundary, increment theta.
+        angular_params.tStepTheta = 1;
+        angular_params.tMaxTheta = zmax[2];
+    } else if (isNearZero(zmax[0] - zmin[0], tol) && zmax[1] - t > tol) {
+        // Hit the minimum and maximum boundaries simultaneously with zmax.
+        angular_params.tMaxTheta = zmax[2];
+        if (ray.yDirectionIsNonZero()) {
+            const double new_interval_theta = interval_theta_one - M_PI;
+            angular_params.tStepTheta = -std::abs(current_voxel_ID_theta - new_interval_theta / grid.deltaTheta());
+        } else {
+            const double new_interval_theta = interval_theta_one + M_PI;
+            angular_params.tStepTheta = std::abs(current_voxel_ID_theta - new_interval_theta / grid.deltaTheta());
+        }
+    } else if (isNearZero(zmin[0] - zmax[0], tol) && zmin[1] - t > tol) {
+        // Hit minimum and maximum boundaries simultaneously with zmin.
+        angular_params.tMaxTheta = zmin[1];
+        if (ray.yDirectionIsNonZero()) {
+            const double new_interval_theta = interval_theta_one - M_PI;
+            angular_params.tStepTheta = -std::abs(current_voxel_ID_theta - new_interval_theta / grid.deltaTheta());
+        } else {
+            const double new_interval_theta = interval_theta_one + M_PI;
+            angular_params.tStepTheta = std::abs(current_voxel_ID_theta - new_interval_theta / grid.deltaTheta());
+        }
+    } else {
+        angular_params.tStepTheta = 0;
+        angular_params.tMaxTheta = std::numeric_limits<double>::infinity();
+    }
+    return angular_params;
 }
 
 // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is considered an intersection with
 // the ray and an azimuthal section. The azimuthal sections live in the XZ plane.
+// Input:
+//    ray: The given ray to check for intersection.
+//    grid: The grid that the ray is intersecting with.
+//    current_voxel_ID_phi: The current azimuthal voxel ID.
+//    t: The current time.
+//    v: The dot product between the ray's direction and the ray_sphere_vector.
+//    tol: The allowed tolerance for float point error.
+//
 // Returns: the corresponding azimuthal hit parameters.
 AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& grid,
-        size_t current_phi_ID_theta, double t) noexcept {
-    assert(false);
+        size_t current_voxel_ID_phi, double t, double tol) noexcept {
+    const double interval_phi_one = current_voxel_ID_phi * grid.deltaPhi();
+    const double interval_phi_two = (current_voxel_ID_phi + 1) * grid.deltaPhi();
+    const double interval_phi_min = std::min(interval_phi_one, interval_phi_two);
+    const double interval_phi_max = std::max(interval_phi_one, interval_phi_two);
+
+    const double x_min = std::cos(interval_phi_min);
+    const double x_max = std::cos(interval_phi_max);
+    const double z_min = std::sin(interval_phi_min);
+    const double z_max = std::sin(interval_phi_max);
+    // TODO: Amin
+    // TODO: Amax
+    const std::vector<double> b = {ray.origin().x() - grid.sphereCenter().x(),
+                                   ray.origin().z() - grid.sphereCenter().z()};
+    // TODO: initialize umax, umin
+    // if isNearZero()
+    // else if isNearZero()
+    // else
+    const std::vector<double> umin = {0.0, 0.0};
+    const std::vector<double> umax = {0.0, 0.0};
+
+    AzimuthalHitParameters azimuthal_params;
+    if (umin[0] > tol && umin[1] > t) {
+        // Hit with minimum boundary, decrement phi.
+        azimuthal_params.tStepPhi = -1;
+        azimuthal_params.tMaxPhi = umin[1];
+    } else if (umax[0] > tol && umax[1] > t) {
+        // Hit with maximum boundary, increment phi.
+        azimuthal_params.tStepPhi = 1;
+        azimuthal_params.tMaxPhi = umax[1];
+    } else if (isNearZero(umax[0] - umin[0], tol) && umax[1] - t > tol) {
+        // Hit the minimum and maximum boundaries simultaneously with zmax.
+        azimuthal_params.tMaxPhi = umax[1];
+        if (ray.yDirectionIsNonZero()) {
+            const double new_interval_phi = interval_phi_one - M_PI;
+            azimuthal_params.tStepPhi = -std::abs(current_voxel_ID_phi - new_interval_phi / grid.deltaPhi());
+        } else {
+            const double new_interval_phi = interval_phi_one + M_PI;
+            azimuthal_params.tStepPhi = std::abs(current_voxel_ID_phi - new_interval_phi / grid.deltaPhi());
+        }
+    } else if (isNearZero(umin[0] - umax[0], tol) && umin[1] - t > tol) {
+        // Hit minimum and maximum boundaries simultaneously with zmin.
+        azimuthal_params.tMaxPhi = umin[1];
+        if (ray.yDirectionIsNonZero()) {
+            // TODO(cgyurgyik): Verify this should be checking the y-direction.
+            const double new_interval_phi = interval_phi_one - M_PI;
+            azimuthal_params.tStepPhi = -std::abs(current_voxel_ID_phi - new_interval_phi / grid.deltaPhi());
+        } else {
+            const double new_interval_phi= interval_phi_one + M_PI;
+            azimuthal_params.tStepPhi = std::abs(current_voxel_ID_phi - new_interval_phi / grid.deltaPhi());
+        }
+    } else {
+        azimuthal_params.tStepPhi = 0;
+        azimuthal_params.tMaxPhi = std::numeric_limits<double>::infinity();
+    }
+    return azimuthal_params;
 }
 
 std::vector<SphericalVoxel>
@@ -249,8 +372,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         const RadialHitParameters radial_params = radialHit(ray, grid, current_voxel_ID_r,
                 ray_sphere_vector_dot, t, v, tol, previous_transition_flag);
         previous_transition_flag = radial_params.previous_transition_flag;
-        const AngularHitParameters angular_params = angularHit(ray, grid, current_voxel_ID_theta, t);
-        const AzimuthalHitParameters azimuthal_params = azimuthalHit(ray, grid, current_voxel_ID_phi, t);
+        const AngularHitParameters angular_params = angularHit(ray, grid, current_voxel_ID_theta, t, tol);
+        const AzimuthalHitParameters azimuthal_params = azimuthalHit(ray, grid, current_voxel_ID_phi, t, tol);
         const bool radial_hit_out_of_bounds = current_voxel_ID_r + radial_params.tStepR == 0;
 
         if (radial_params.tMaxR <= angular_params.tMaxTheta && radial_params.tMaxR <= azimuthal_params.tMaxPhi &&
