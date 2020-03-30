@@ -307,6 +307,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     double current_r = grid.deltaRadius();
 
     const double ray_sphere_vector_dot = ray_sphere_vector.dot(ray_sphere_vector);
+
     while (ray_sphere_vector_dot > (current_r * current_r) && current_r < grid.sphereMaxRadius()) {
         current_r += grid.deltaRadius();
     }
@@ -314,8 +315,9 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
     // This will determine if the ray intersects the sphere.
     const double v = ray_sphere_vector.dot(ray.direction().to_free());
-    const double discriminant = (current_r * current_r) - ray_sphere_vector_dot - (v * v);
-    if (discriminant <= 0) { return voxels; }
+    const double discriminant = (current_r * current_r) - (ray_sphere_vector_dot - v * v);
+
+    if (discriminant <= 0.0) { return voxels; }
     const double d = std::sqrt(discriminant);
 
     // Calculate the time of entrance and exit of the ray.
