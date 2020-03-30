@@ -88,7 +88,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
     // Find the intersection times for the ray and the previous and next radial discs.
     const double ray_sphere_dot_minus_v_squared = ray_sphere_vector_dot - v * v;
     double discriminant_a = r_a * r_a - ray_sphere_dot_minus_v_squared;
-    if (discriminant_a < 0) {
+    if (discriminant_a < 0.0) {
         r_a += grid.deltaRadius();
         discriminant_a = r_a * r_a - ray_sphere_dot_minus_v_squared;
     }
@@ -133,9 +133,11 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
     } else {
         // Radial intersection.
         radial_params.tMaxR = intersection_times[0];
-        const BoundVec3 p = ray.origin() + ray.direction() * radial_params.tMaxR;
-        const double r_new = std::sqrt(p.x() - grid.sphereCenter().x() + p.y() - grid.sphereCenter().y() +
-                                       p.z() - grid.sphereCenter().z());
+        const BoundVec3 p = ray.pointAtParameter(radial_params.tMaxR);
+        const double p_x_new = p.x() - grid.sphereCenter().x();
+        const double p_y_new = p.y() - grid.sphereCenter().y();
+        const double p_z_new = p.z() - grid.sphereCenter().z();
+        const double r_new = std::sqrt(p_x_new * p_x_new + p_y_new * p_y_new + p_z_new * p_z_new);
 
         const double radial_difference = r_new - current_radius;
         const bool radial_difference_is_near_zero = isNearZero(radial_difference, tol);
@@ -353,7 +355,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
                                                    point_at_t_begin.x() - grid.sphereCenter().x(),
                                                    grid.numAzimuthalVoxels());
     }
-
     voxels.push_back({.radial_voxel=current_voxel_ID_r,
                       .angular_voxel=current_voxel_ID_theta,
                       .azimuthal_voxel=current_voxel_ID_phi});
@@ -361,7 +362,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // Find the maximum time the ray will be in the grid.
     const double max_discriminant = grid.sphereMaxRadius() * grid.sphereMaxRadius() - (ray_sphere_vector_dot - v * v);
     const double max_d = std::sqrt(max_discriminant);
-
     t1 = ray.timeOfIntersectionAt(v - max_d);
     t2 = ray.timeOfIntersectionAt(v + max_d);
     const double t_grid_end = std::max(t1, t2);
@@ -372,8 +372,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     bool previous_transition_flag = false;
 
     while (t < t_end) {
-        const RadialHitParameters radial_params = radialHit(ray, grid, current_voxel_ID_r,
-                ray_sphere_vector_dot, t, v, tol, previous_transition_flag);
+        const RadialHitParameters radial_params = radialHit(ray, grid, current_voxel_ID_r,ray_sphere_vector_dot, t,
+                                                            v, tol, previous_transition_flag);
         previous_transition_flag = radial_params.previous_transition_flag;
         const AngularHitParameters angular_params = angularHit(ray, grid, current_voxel_ID_theta, t, tol);
         const AzimuthalHitParameters azimuthal_params = azimuthalHit(ray, grid, current_voxel_ID_phi, t, tol);
