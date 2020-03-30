@@ -568,8 +568,8 @@ function testSecondQuadrantNegativeXNegativeY(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,1,2,1];
-        expected_thetaVoxels = [0,3,3,3];
+        expected_rVoxels     = [1,1,2,1,1];
+        expected_thetaVoxels = [2,1,1,1,0];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
@@ -743,7 +743,7 @@ function testSmallVoxel(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,2,3,4,5,6,7,8,9,9,10,11,12,13,13,14,14,14,14,13,13,12,11,11,10,9,8,7,6,5,4, 4, 3, 2,1];
+        expected_rVoxels     = [1,2,3,4,5,6,7,8,9,9,10,11,12,13,13,14,14,14,14,13,13,12,11,11,10,9,8,7,6,5,4, 4, 3, 2, 1];
         expected_thetaVoxels = [2,2,2,2,2,2,2,2,2,3,3, 3, 3, 3, 4, 4, 5, 6, 7, 7, 8, 8, 8, 9, 9, 9,9,9,9,9,9,10,10,10,10];
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
