@@ -314,7 +314,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
     // This will determine if the ray intersects the sphere.
-    const double v = ray_sphere_vector.dot(ray.direction().to_free());
+    const double v = ray_sphere_vector.dot(ray.unitDirection().to_free());
     const double discriminant = (current_r * current_r) - (ray_sphere_vector_dot - v * v);
 
     if (discriminant <= 0.0) { return voxels; }
@@ -361,9 +361,10 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // Find the maximum time the ray will be in the grid.
     const double max_discriminant = grid.sphereMaxRadius() * grid.sphereMaxRadius() - (ray_sphere_vector_dot - v * v);
     const double max_d = std::sqrt(max_discriminant);
+
     t1 = ray.timeOfIntersectionAt(v - max_d);
     t2 = ray.timeOfIntersectionAt(v + max_d);
-    const double t_grid_end = std::min(t1, t2);
+    const double t_grid_end = std::max(t1, t2);
 
     /* TRAVERSAL PHASE */
     double t = t_begin;
@@ -432,7 +433,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double* ray_orig
                                                                 double sphere_max_radius, double t_begin, double t_end,
                                                                 double tol) noexcept {
     const BoundVec3 ray_origin_t (ray_origin[0], ray_origin[1], ray_origin[2]);
-    const UnitVec3 ray_direction_t (ray_direction[0], ray_direction[1], ray_direction[2]);
+    const FreeVec3 ray_direction_t (ray_direction[0], ray_direction[1], ray_direction[2]);
     const Ray ray(ray_origin_t, ray_direction_t);
 
     const BoundVec3 max_bound_t(max_bound[0], max_bound[1], max_bound[2]);
