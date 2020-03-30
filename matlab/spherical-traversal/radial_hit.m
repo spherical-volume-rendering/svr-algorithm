@@ -55,7 +55,7 @@ end
 % and neighboring (preiovus and next) spherical discs.
 time_array_a = [];
 time_array_b = [];
-tol = 10^-16;
+tol = 10^-13;
 discr = r_a^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
 if (discr >= 0 )        
     d = sqrt(discr);
@@ -152,15 +152,15 @@ tMaxR = time(1);
 p = ray_origin + tMaxR.*ray_direction;
     r_new = sqrt((p(1) - sphere_center(1))^2 + (p(2) - sphere_center(2))^2 + ...
         (p(3) - sphere_center(3))^2);
-    
-%Flag for case that the ray has sequential hits with equal radii.
+
+    %Flag for case that the ray has sequential hits with equal radii.
 if (abs(r - r_new) < tol)
     transition_flag = true;
 else
     transition_flag = false;
 end
 
-if (r_new - r < 0 && abs(r_new - r) > tol && ~(abs(r_new-r)) < tol) 
+if r_new - r < 0 && abs(r_new - r) > tol && ~(abs(r_new-r)) < tol
     tStepR = 1;
 else
     tStepR = -1;
