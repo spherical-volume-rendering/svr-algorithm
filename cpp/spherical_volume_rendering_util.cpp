@@ -116,9 +116,12 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
     if (intersection_times.size() >= 2 && isNearZero(intersection_times[0] - intersection_times[1], tol)) {
         // Ray is tangent to the circle, i.e. two intersection times are equal.
         radial_params.tMaxR = intersection_times[0];
-        const BoundVec3 p = ray.origin() + ray.direction() * radial_params.tMaxR;
-        const double r_new = std::sqrt(p.x() - grid.sphereCenter().x() + p.y() - grid.sphereCenter().y() +
-                                       p.z() - grid.sphereCenter().z());
+        const BoundVec3 p = ray.pointAtParameter(radial_params.tMaxR);
+        const double p_x_new = p.x() - grid.sphereCenter().x();
+        const double p_y_new = p.y() - grid.sphereCenter().y();
+        const double p_z_new = p.z() - grid.sphereCenter().z();
+        const double r_new = std::sqrt(p_x_new * p_x_new + p_y_new * p_y_new + p_z_new * p_z_new);
+
         radial_params.tStepR = 0;
         if (isNearZero(current_radius - r_new, tol)) {
             radial_params.previous_transition_flag = true;
@@ -147,7 +150,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
             radial_params.previous_transition_flag = false;
         }
 
-        if (radial_difference < 0 && std::abs(radial_difference) > tol && !radial_difference_is_near_zero) {
+        if (radial_difference < 0.0 && std::abs(radial_difference) > tol && !radial_difference_is_near_zero) {
             radial_params.tStepR = 1;
         } else {
             radial_params.tStepR = -1;

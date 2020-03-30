@@ -12,6 +12,10 @@
 // For examples of Google Test, see: https://github.com/google/googletest/tree/master/googletest/samples
 
 namespace {
+    // The tolerance provided for the floating point error carried during the
+    // spherical coordinate traversal algorithm.
+    constexpr double tolerance = 10e-14;
+
     // Determines equality amongst actual voxels, and the expected voxels.
     void expectEqualVoxels(const std::vector<SphericalVoxel>& actual_voxels,
                            const std::vector<size_t>& expected_radial_voxels,
@@ -30,10 +34,6 @@ namespace {
             ++i;
         }
     }
-
-    // The tolerance provided for the floating point error carried during the
-    // spherical coordinate traversal algorithm.
-    constexpr double tolerance = 10e-20;
 
     TEST(SphericalCoordinateTraversal, RayDoesNotEnterSphere) {
         const BoundVec3 min_bound(0.0, 0.0, 0.0);
