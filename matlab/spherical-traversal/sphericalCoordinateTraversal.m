@@ -38,29 +38,14 @@ close all;
 sphere_center_x = sphere_center(1);
 sphere_center_y = sphere_center(2);
 sphere_center_z = sphere_center(3);
-ray_origin_x = ray_origin(1);
-ray_origin_y = ray_origin(2);
-ray_origin_z = ray_origin(3);
 ray_direction_x = ray_direction(1);
 ray_direction_y = ray_direction(2);
 ray_direction_z = ray_direction(3);
-
-min_bound_x = min_bound(1);
-min_bound_y = min_bound(2);
-min_bound_z = min_bound(3);
-max_bound_x = max_bound(1);
-max_bound_y = max_bound(2);
-max_bound_z = max_bound(3);
 
 ray_start = ray_origin + t_begin * ray_direction;
 ray_start_x = ray_start(1);
 ray_start_y = ray_start(2);
 ray_start_z = ray_start(3);
-
-ray_end = ray_origin + t_end * ray_direction;
-ray_end_x = ray_end(1);
-ray_end_y = ray_end(2);
-ray_end_z = ray_end(3);
 
 angular_voxels = [];
 radial_voxels = [];
@@ -127,7 +112,7 @@ if verbose
 end
 
 % Calculate Voxel ID Theta.
-tol = 10^-16; % Tolerance, to avoid floating point carry.
+tol = 10^-16; % Tolerance, to account for floating point rounding error.
 if abs(ray_origin - sphere_center) < tol 
     % If the ray starts at the origin, we need to perturb slightly along 
     % its path to find the correct angular voxel.
@@ -188,7 +173,7 @@ t = t_begin;
 t_end = min(t_grid, t_end);
 previous_transition_flag = false;
 
-while t < t_end
+while t < t_end    
     % 1. Calculate tMaxR, tMaxTheta, tMaxPhi
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
         current_voxel_ID_r, sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ...
@@ -197,26 +182,70 @@ while t < t_end
         num_angular_sections, sphere_center, t, verbose);
     [tMaxPhi, tStepPhi] = azimuthal_hit(ray_origin, ray_direction, current_voxel_ID_phi,...
       num_azimuthal_sections, sphere_center, t, verbose);
+    
+    rStepViolation = current_voxel_ID_r + tStepR == 0;
+  
     % 2. Compare tMaxR, tMaxTheta, tMaxPhi
-    if tMaxR <= tMaxTheta && tMaxR <= tMaxPhi && t < tMaxR && t < tMaxR ...
-            && current_voxel_ID_r + tStepR ~= 0
-        % tMaxR is the minimum, the next radial step is 
-        % within bounds [t, t_end], and the next step is not a radial exit.
-        t = tMaxR;
-        current_voxel_ID_r = current_voxel_ID_r + tStepR;
-    elseif tMaxTheta <= tMaxPhi && t < tMaxTheta  && tMaxTheta < t_end
-        % tMaxTheta is the minimum and the next angular step is within
-        % bounds [t, t_end].
+    if ((tMaxTheta < tMaxR && tMaxR < tMaxPhi) || rStepViolation) ...
+            && t < tMaxTheta && tMaxTheta < t_end
+        % Note 1: Case tMaxTheta is a minimum
+        % Note 2: When the ray only intersects one radial shell but crosses an
+        % angular boundary, we need the second half of disjunction
         t = tMaxTheta;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-    elseif t < tMaxPhi && tMaxPhi < t_end
-        % tMaxPhi is the minimum and the next azimuthal step is within
-        % bounds [t, t_end].
+    elseif tMaxR < tMaxTheta && tMaxR < tMaxPhi && t < tMaxR && tMaxR < t_end ...
+            && ~rStepViolation
+        % Case tMaxR is minimum
+        t = tMaxR;
+        current_voxel_ID_r = current_voxel_ID_r + tStepR;   
+    elseif tMaxPhi < tMaxTheta && tMaxPhi < tMaxR && t < tMaxPhi && tMaxPhi < t_end
+        % Case tMaxPhi is minimum
         t = tMaxPhi;
-        current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
+        current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);   
+    elseif abs(tMaxPhi - tMaxTheta) < tol && abs(tMaxPhi - tMaxR) < tol && ...
+            t < tMaxR && tMaxR < t_end && ~rStepViolation
+        % Triple boundary intersection
+        t = tMaxPhi;
+        current_voxel_ID_r = current_voxel_ID_r + tStepR;
+        current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
+        current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);   
+    elseif abs(tMaxPhi - tMaxTheta) < tol && t < tMaxPhi && tMaxPhi < t_end
+        % Phi, Theta equal
+        if tMaxR < tMaxPhi && t < tMaxR && ~rStepViolation
+            % R min
+            t = tMaxR;
+            current_voxel_ID_r = current_voxel_ID_r + tStepR;
+        else
+            t = tMaxPhi;
+            current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
+            current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
+        end
+    elseif abs(tMaxTheta - tMaxR) < tol && t < tMaxR && tMaxR < t_end && ...
+            ~rStepViolation
+        % R, Theta equal
+        if tMaxPhi < tMaxTheta && t < tMaxPhi
+            % Phi min
+            t = tMaxPhi;
+            current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
+        else
+            t = tMaxTheta;
+            current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
+            current_voxel_ID_r = current_voxel_ID_r + tStepR;
+        end
+    elseif abs(tMaxR - tMaxPhi) < tol && t < tMaxR && tMaxR < t_end && ...
+            ~rStepViolation
+        % R, Phi equal
+        if tMaxTheta < tMaxR && t < tMaxTheta
+            % Theta min
+            t = tMaxTheta;
+            current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
+        else
+            t = tMaxR;
+            current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
+            current_voxel_ID_r = current_voxel_ID_r + tStepR;
+        end
     else
-        % No hits are within the bounds [t, t_end].
-        return;
+       return;
     end    
     radial_voxels = [radial_voxels, current_voxel_ID_r];
     angular_voxels = [angular_voxels, current_voxel_ID_theta];
