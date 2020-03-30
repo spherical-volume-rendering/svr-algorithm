@@ -625,9 +625,9 @@ function testThirdQuadrantNegativeXNegativeY(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% The center of the circle is on the forth quadrant with positive x and y
+% The center of the circle is on the fourth quadrant with positive x and y
 % direction
-function testForthQuadrantPositiveXPositiveY(testCase)
+function testFourthQuadrantPositiveXPositiveY(testCase)
     min_bound = [-30.0, -30.0];
     max_bound = [30.0, 30.0];
     ray_origin = [10.0, -25.0];
@@ -650,9 +650,9 @@ function testForthQuadrantPositiveXPositiveY(testCase)
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
 
-% The center of the circle is on the forth quadrant with negative x and y
+% The center of the circle is on the fourth quadrant with negative x and y
 % direction
-function testForthQuadrantNegativeXNegativeY(testCase)
+function testFourthQuadrantNegativeXNegativeY(testCase)
     min_bound = [-30.0, -30.0];
     max_bound = [30.0, 30.0];
     ray_origin = [26.0, -7.0];
