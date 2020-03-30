@@ -20,8 +20,8 @@ struct Ray final {
     }
 
     // Returns the time of intersection at a Point p.
-    // The calculation: t = [p.a() - ray.origin().a()] / ray.direction().a()
-    //                  where a is a non-zero direction of the ray.
+    // The calculation: t = [p.a() - ray.origin().a()] / ray.unitDirection().a()
+    //                  where a is a non-zero unit direction of the ray.
     // To reduce a vector multiplication to a single multiplication for the given direction,
     // we can do the following:
     // Since Point p = ray.origin() + ray.direction() * (v +/- discriminant),
