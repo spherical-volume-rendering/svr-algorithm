@@ -373,8 +373,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     /* TRAVERSAL PHASE */
     double t = t_begin;
-    t_end = std::min(t_grid_exit, t_end);
     bool previous_transition_flag = false;
+    t_end = std::min(t_grid_exit, t_end);
 
     while (t < t_end) {
         const RadialHitParameters radial_params = radialHit(ray, grid, current_voxel_ID_r,ray_sphere_vector_dot, t,

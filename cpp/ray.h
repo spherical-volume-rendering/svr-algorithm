@@ -8,10 +8,10 @@
 // and the direction of the ray.
 struct Ray final {
      Ray(const BoundVec3& origin, const FreeVec3& direction)
-            : origin_(origin), direction_(direction), x_dir_is_non_zero_(std::abs(direction.x()) > 0.0),
-            y_dir_is_non_zero_(std::abs(direction.y()) > 0.0), z_dir_is_non_zero_(std::abs(direction.z()) > 0.0),
+            : origin_(origin), direction_(direction), unit_direction_(direction),
             inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z())),
-            unit_direction_(direction) {}
+              x_dir_is_non_zero_(std::abs(direction.x()) > 0.0), y_dir_is_non_zero_(std::abs(direction.y()) > 0.0),
+              z_dir_is_non_zero_(std::abs(direction.z()) > 0.0) {}
 
     // Represents the function p(t) = origin + t * direction,
     // where p is a 3-dimensional position, and t is a scalar.
@@ -52,10 +52,10 @@ private:
     const BoundVec3 origin_;
     // The direction of the ray.
     const FreeVec3 direction_;
-    // The inverse direction of the ray.
-    const FreeVec3 inverse_direction_;
     // The normalized direction of the ray.
     const UnitVec3 unit_direction_;
+    // The inverse direction of the ray.
+    const FreeVec3 inverse_direction_;
     // Determines whether the given direction is non-zero to avoid division by 0.
     const bool x_dir_is_non_zero_, y_dir_is_non_zero_, z_dir_is_non_zero_;
 };
