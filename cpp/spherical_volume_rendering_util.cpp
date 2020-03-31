@@ -115,7 +115,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
     RadialHitParameters radial_params;
     if (intersection_times.size() >= 2 && isNearZero(intersection_times[0] - intersection_times[1], tol)) {
         // TODO(cgyurgyik): There's a lot of duplication between this case and the radial intersection case.
-        //                  Once we have more tests, this can likely be reduced by switching things around.git ad
+        //                  Once we have more tests, this can likely be reduced by switching things around.
         // Ray is tangent to the circle, i.e. two intersection times are equal.
         radial_params.tMaxR = intersection_times[0];
         const BoundVec3 p = ray.pointAtParameter(radial_params.tMaxR);
