@@ -2,8 +2,8 @@
 /cpp/testing/cmake-build-debug/
 /cpp/testing/googletest/
 .idea/
-/cpp/CythonSVR.c
-/cpp/CythonSVR.cpp
+/cpp/CythonSVR.cgit
 /cpp/CythonSVR.so
 /cpp/build/
 .DS_Store
+/cpp/CythonSVR.cpython-37m-darwin.so
