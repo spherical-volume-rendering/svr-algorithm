@@ -4,6 +4,8 @@
 .idea/
 /cpp/CythonSVR.cgit
 /cpp/CythonSVR.so
+/cpp/.DS_Store
+/cpp/CythonSVR.cpp
 /cpp/build/
 .DS_Store
 /cpp/CythonSVR.cpython-37m-darwin.so
