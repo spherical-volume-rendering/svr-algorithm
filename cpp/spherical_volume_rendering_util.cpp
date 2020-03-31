@@ -7,7 +7,7 @@
 // Takes the absolute value of 'value' and determines if it is less than the tolerance.
 // In this case, we assume tolerance is an arbitrary small value.
 // This is used when floating point mathematics carries rounding error.
-inline bool isNearZero(double value, double tolerance) {
+inline bool isWithinTolerance(double value, double tolerance) {
     return std::abs(value) < tolerance;
 }
 
@@ -113,7 +113,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
                                             [t](int i) { return i <= t; }), intersection_times.end());
 
     RadialHitParameters radial_params;
-    if (intersection_times.size() >= 2 && isNearZero(intersection_times[0] - intersection_times[1], tol)) {
+    if (intersection_times.size() >= 2 && isWithinTolerance(intersection_times[0] - intersection_times[1], tol)) {
         // TODO(cgyurgyik): There's a lot of duplication between this case and the radial intersection case.
         //                  Once we have more tests, this can likely be reduced by switching things around.
         // Ray is tangent to the circle, i.e. two intersection times are equal.
@@ -125,7 +125,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
         const double r_new = std::sqrt(p_x_new * p_x_new + p_y_new * p_y_new + p_z_new * p_z_new);
 
         radial_params.tStepR = 0;
-        if (isNearZero(current_radius - r_new, tol)) {
+        if (isWithinTolerance(current_radius - r_new, tol)) {
             radial_params.previous_transition_flag = true;
         } else {
             radial_params.previous_transition_flag = false;
@@ -145,7 +145,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
         const double r_new = std::sqrt(p_x_new * p_x_new + p_y_new * p_y_new + p_z_new * p_z_new);
 
         const double radial_difference = r_new - current_radius;
-        const bool radial_difference_is_near_zero = isNearZero(radial_difference, tol);
+        const bool radial_difference_is_near_zero = isWithinTolerance(radial_difference, tol);
         if (radial_difference_is_near_zero) {
             radial_params.previous_transition_flag = true;
         } else {
@@ -188,8 +188,8 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid,
     const std::vector<double> b = {ray.origin().x() - grid.sphereCenter().x(),
                                    ray.origin().y() - grid.sphereCenter().y()};
     // TODO: initialize zmax, zmin
-    // if isNearZero()
-    // else if isNearZero()
+    // if isWithinTolerance()
+    // else if isWithinTolerance()
     // else
     const std::vector<double> zmin = {0.0, 0.0};
     const std::vector<double> zmax = {0.0, 0.0};
@@ -203,7 +203,7 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid,
         // Hit with maximum boundary, increment theta.
         angular_params.tStepTheta = 1;
         angular_params.tMaxTheta = zmax[2];
-    } else if (isNearZero(zmax[0] - zmin[0], tol) && zmax[1] - t > tol) {
+    } else if (isWithinTolerance(zmax[0] - zmin[0], tol) && zmax[1] - t > tol) {
         // Hit the minimum and maximum boundaries simultaneously with zmax.
         angular_params.tMaxTheta = zmax[2];
         if (ray.yDirectionIsNonZero()) {
@@ -213,7 +213,7 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid,
             const double new_interval_theta = interval_theta_one + M_PI;
             angular_params.tStepTheta = std::abs(current_voxel_ID_theta - new_interval_theta / grid.deltaTheta());
         }
-    } else if (isNearZero(zmin[0] - zmax[0], tol) && zmin[1] - t > tol) {
+    } else if (isWithinTolerance(zmin[0] - zmax[0], tol) && zmin[1] - t > tol) {
         // Hit minimum and maximum boundaries simultaneously with zmin.
         angular_params.tMaxTheta = zmin[1];
         if (ray.yDirectionIsNonZero()) {
@@ -257,8 +257,8 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
     const std::vector<double> b = {ray.origin().x() - grid.sphereCenter().x(),
                                    ray.origin().z() - grid.sphereCenter().z()};
     // TODO: initialize umax, umin
-    // if isNearZero()
-    // else if isNearZero()
+    // if isWithinTolerance()
+    // else if isWithinTolerance()
     // else
     const std::vector<double> umin = {0.0, 0.0};
     const std::vector<double> umax = {0.0, 0.0};
@@ -272,7 +272,7 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
         // Hit with maximum boundary, increment phi.
         azimuthal_params.tStepPhi = 1;
         azimuthal_params.tMaxPhi = umax[1];
-    } else if (isNearZero(umax[0] - umin[0], tol) && umax[1] - t > tol) {
+    } else if (isWithinTolerance(umax[0] - umin[0], tol) && umax[1] - t > tol) {
         // Hit the minimum and maximum boundaries simultaneously with zmax.
         azimuthal_params.tMaxPhi = umax[1];
         if (ray.yDirectionIsNonZero()) {
@@ -282,7 +282,7 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
             const double new_interval_phi = interval_phi_one + M_PI;
             azimuthal_params.tStepPhi = std::abs(current_voxel_ID_phi - new_interval_phi / grid.deltaPhi());
         }
-    } else if (isNearZero(umin[0] - umax[0], tol) && umin[1] - t > tol) {
+    } else if (isWithinTolerance(umin[0] - umax[0], tol) && umin[1] - t > tol) {
         // Hit minimum and maximum boundaries simultaneously with zmin.
         azimuthal_params.tMaxPhi = umin[1];
         if (ray.yDirectionIsNonZero()) {
@@ -332,7 +332,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     double t1 = ray.timeOfIntersectionAt(v - d);
     double t2 = ray.timeOfIntersectionAt(v + d);
 
-    if ((t1 < t_begin && t2 < t_begin) || isNearZero(t1 - t2, tol)) {
+    if ((t1 < t_begin && t2 < t_begin) || isWithinTolerance(t1 - t2, tol)) {
         // Case 1: No intersection.
         // Case 2: Tangent hit.
         return voxels;
@@ -341,9 +341,9 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     size_t current_voxel_ID_theta;
     size_t current_voxel_ID_phi;
-    if (isNearZero(ray.origin().x() - grid.sphereCenter().x(), tol) &&
-        isNearZero(ray.origin().y() - grid.sphereCenter().y(), tol) &&
-        isNearZero(ray.origin().z() - grid.sphereCenter().z(), tol)) {
+    if (isWithinTolerance(ray.origin().x() - grid.sphereCenter().x(), tol) &&
+        isWithinTolerance(ray.origin().y() - grid.sphereCenter().y(), tol) &&
+        isWithinTolerance(ray.origin().z() - grid.sphereCenter().z(), tol)) {
         // If the ray starts at the sphere's center, we need to perturb slightly along
         // the path to determine the correct angular and azimuthal voxel.
         const double perturbed_t = 0.1;
@@ -403,8 +403,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             // tMaxPhi is the minimum and within bounds (t, t_end).
             t = azimuthal_params.tMaxPhi;
             current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
-        } else if (isNearZero(azimuthal_params.tMaxPhi - angular_params.tMaxTheta, tol)
-                   && isNearZero(radial_params.tMaxR - azimuthal_params.tMaxPhi, tol) && t < radial_params.tMaxR
+        } else if (isWithinTolerance(azimuthal_params.tMaxPhi - angular_params.tMaxTheta, tol)
+                   && isWithinTolerance(radial_params.tMaxR - azimuthal_params.tMaxPhi, tol) && t < radial_params.tMaxR
                    && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds) {
             // 1. Triple boundary intersection within bounds (t, t_end).
             // 2. Radial hit is within bounds.
@@ -412,20 +412,20 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             current_voxel_ID_r += radial_params.tStepR;
             current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
             current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
-        } else if (isNearZero(azimuthal_params.tMaxPhi - angular_params.tMaxTheta, tol)
+        } else if (isWithinTolerance(azimuthal_params.tMaxPhi - angular_params.tMaxTheta, tol)
                    && t < azimuthal_params.tMaxPhi && azimuthal_params.tMaxPhi < t_end) {
             // tMaxPhi, tMaxTheta equal intersection times within bounds (t, t_end).
             t = azimuthal_params.tMaxPhi;
             current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
             current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
-        } else if (isNearZero(angular_params.tMaxTheta - radial_params.tMaxR, tol) && t < radial_params.tMaxR
+        } else if (isWithinTolerance(angular_params.tMaxTheta - radial_params.tMaxR, tol) && t < radial_params.tMaxR
                    && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds) {
             // 1. tMaxR, tMaxTheta equal intersection times within bounds (t, t_end).
             // 2. Radial hit is within bounds.
             t = angular_params.tMaxTheta;
             current_voxel_ID_r += radial_params.tStepR;
             current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
-        } else if (isNearZero(radial_params.tMaxR - azimuthal_params.tMaxPhi, tol) && t < radial_params.tMaxR
+        } else if (isWithinTolerance(radial_params.tMaxR - azimuthal_params.tMaxPhi, tol) && t < radial_params.tMaxR
                    && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds) {
             // 1. tMaxR, tMaxPhi equal intersection times within bounds (t, t_end).
             // 2. Radial hit is within bounds.
