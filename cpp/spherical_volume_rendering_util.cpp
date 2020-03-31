@@ -330,7 +330,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // Calculate the time of entrance and exit of the ray.
     // Need to use a non-zero direction to determine this.
     const double t_begin_t1 = ray.timeOfIntersectionAt(v - d);
-    double t_begin_t2 = ray.timeOfIntersectionAt(v + d);
+    const double t_begin_t2 = ray.timeOfIntersectionAt(v + d);
 
     if ((t_begin_t1 < t_begin && t_begin_t2 < t_begin) || isWithinTolerance(t_begin_t1 - t_begin_t2, tol)) {
         // Case 1: No intersection.
