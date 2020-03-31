@@ -1,11 +1,15 @@
+# C++, CMake
 /cpp/cmake-build-debug/
 /cpp/testing/cmake-build-debug/
 /cpp/testing/googletest/
-.idea/
-/cpp/CythonSVR.cgit
-/cpp/CythonSVR.so
 /cpp/.DS_Store
-/cpp/CythonSVR.cpp
-/cpp/build/
 .DS_Store
-/cpp/CythonSVR.cpython-37m-darwin.so
+.idea/
+
+# Cython
+/cpp/cython/build/
+/cpp/cython/CythonSVR.so
+/cpp/cython/CythonSVR.cpp
+/cpp/cython/CythonSVR.cpython-37m-darwin.so
+/cpp/cython/.DS_Store
+

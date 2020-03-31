@@ -5,7 +5,7 @@ cimport numpy as np
 cimport cython
 from libcpp.vector cimport vector
 
-cdef extern from "spherical_volume_rendering_util.h":
+cdef extern from "../spherical_volume_rendering_util.h":
     cdef cppclass SphericalVoxel:
         size_t radial_voxel, angular_voxel, azimuthal_voxel
 
