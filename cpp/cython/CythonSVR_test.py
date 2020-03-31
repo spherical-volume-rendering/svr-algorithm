@@ -2,7 +2,6 @@
 Testing for cythonized version of the spherical coorinate voxel traversal algorithm.
 '''
 
-# import pytest
 import numpy as np
 import CythonSVR
 
