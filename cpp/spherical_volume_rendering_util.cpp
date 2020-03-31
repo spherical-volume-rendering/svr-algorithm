@@ -102,7 +102,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
     intersection_times[1] = t2;
 
     const double discriminant_b = r_b * r_b - ray_sphere_dot_minus_v_squared;
-    if (discriminant_b >= 0) {
+    if (discriminant_b >= 0.0) {
         const double d_b = std::sqrt(discriminant_b);
         t1 = ray.timeOfIntersectionAt(v - d_b);
         t2 = ray.timeOfIntersectionAt(v + d_b);
