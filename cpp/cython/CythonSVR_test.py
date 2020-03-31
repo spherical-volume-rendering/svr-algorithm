@@ -5,7 +5,6 @@ Testing for cythonized version of the spherical coorinate voxel traversal algori
 import numpy as np
 import CythonSVR
 
-
 def test_ray_does_not_enter_sphere():
     print("Testing [Ray does not enter_sphere] ...")
     ray_origin = np.array([3.0, 3.0, 3.0])
