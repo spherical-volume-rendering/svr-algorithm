@@ -413,41 +413,23 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         } else if (isNearZero(azimuthal_params.tMaxPhi - angular_params.tMaxTheta, tol)
                    && t < azimuthal_params.tMaxPhi && azimuthal_params.tMaxPhi < t_end) {
             // tMaxPhi, tMaxTheta equal intersection times within bounds (t, t_end).
-            if (radial_params.tMaxR < azimuthal_params.tMaxPhi && t < radial_params.tMaxR && !radial_hit_out_of_bounds) {
-                // radial intersection is the minimum.
-                t = radial_params.tMaxR;
-                current_voxel_ID_r += radial_params.tStepR;
-            } else {
-                t = azimuthal_params.tMaxPhi;
-                current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
-                current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
-            }
+            t = azimuthal_params.tMaxPhi;
+            current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
+            current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
         } else if (isNearZero(angular_params.tMaxTheta - radial_params.tMaxR, tol) && t < radial_params.tMaxR
                    && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds) {
             // 1. tMaxR, tMaxTheta equal intersection times within bounds (t, t_end).
             // 2. Radial hit is within bounds.
-            if (azimuthal_params.tMaxPhi < angular_params.tMaxTheta && t < azimuthal_params.tMaxPhi) {
-                // azimuthal intersection is the minimum.
-                t = azimuthal_params.tMaxPhi;
-                current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
-            } else {
-                t = angular_params.tMaxTheta;
-                current_voxel_ID_r += radial_params.tStepR;
-                current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
-            }
+            t = angular_params.tMaxTheta;
+            current_voxel_ID_r += radial_params.tStepR;
+            current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
         } else if (isNearZero(radial_params.tMaxR - azimuthal_params.tMaxPhi, tol) && t < radial_params.tMaxR
                    && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds) {
             // 1. tMaxR, tMaxPhi equal intersection times within bounds (t, t_end).
             // 2. Radial hit is within bounds.
-            if (angular_params.tMaxTheta < radial_params.tMaxR && t < angular_params.tMaxTheta) {
-                // angular intersection is the minimum.
-                t = angular_params.tMaxTheta;
-                current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
-            } else {
-                t = radial_params.tMaxR;
-                current_voxel_ID_r += radial_params.tStepR;
-                current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
-            }
+            t = radial_params.tMaxR;
+            current_voxel_ID_r += radial_params.tStepR;
+            current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
         } else {
             // No hits are within bounds (t, t_end).
             return voxels;
