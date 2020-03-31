@@ -329,10 +329,10 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     // Calculate the time of entrance and exit of the ray.
     // Need to use a non-zero direction to determine this.
-    double t1 = ray.timeOfIntersectionAt(v - d);
-    double t2 = ray.timeOfIntersectionAt(v + d);
+    const double t_begin_t1 = ray.timeOfIntersectionAt(v - d);
+    double t_begin_t2 = ray.timeOfIntersectionAt(v + d);
 
-    if ((t1 < t_begin && t2 < t_begin) || isWithinTolerance(t1 - t2, tol)) {
+    if ((t_begin_t1 < t_begin && t_begin_t2 < t_begin) || isWithinTolerance(t_begin_t1 - t_begin_t2, tol)) {
         // Case 1: No intersection.
         // Case 2: Tangent hit.
         return voxels;
@@ -367,13 +367,13 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // Find the maximum time the ray will be in the grid.
     const double max_discriminant = grid.sphereMaxRadius() * grid.sphereMaxRadius() - (ray_sphere_vector_dot - v * v);
     const double max_d = std::sqrt(max_discriminant);
-    t1 = ray.timeOfIntersectionAt(v - max_d);
-    t2 = ray.timeOfIntersectionAt(v + max_d);
-    const double t_grid_end = std::max(t1, t2);
+    const double grid_exit_t1 = ray.timeOfIntersectionAt(v - max_d);
+    const double grid_exit_t2 = ray.timeOfIntersectionAt(v + max_d);
+    const double t_grid_exit = std::max(grid_exit_t1, grid_exit_t2);
 
     /* TRAVERSAL PHASE */
     double t = t_begin;
-    t_end = std::min(t_grid_end, t_end);
+    t_end = std::min(t_grid_exit, t_end);
     bool previous_transition_flag = false;
 
     while (t < t_end) {
