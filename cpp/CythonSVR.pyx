@@ -57,10 +57,6 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     Notes:
         Code must be compiled before use:
         > python Cython_SVR_setup.py build_ext --inplace
-
-        To disable deprecated NumPy API warning, insert:
-        > #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-        into CythonSVR.cpp file after compilation.
     '''
     assert(ray_origin.size == 3)
     assert(ray_direction.size == 3)
