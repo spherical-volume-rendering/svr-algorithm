@@ -22,28 +22,35 @@ Requires:
 ####################################
 # BEGIN EDITABLE
 # max radius of the sphere
-r = 1
+max_radius = 10
 # number of radial sections
-num_rad = 10
-dr = r/num_rad
+num_rad = 4
 # number of angular sections
-num_ang = 8
-dt = 2 * np.pi / num_ang
+num_ang = 4
 # number of azimuthal sections
-num_azi = 8
-dp = 2 * np.pi / num_azi
+num_azi = 4
 # sphere center
 origin_sphere = np.array([0, 0, 0])
 # ray Start
-origin_ray = np.array([-1, -1, -1])
+origin_ray = np.array([-13, -13, -13])
 # ray direction
-ray_dir = np.array([1, 0.5, 1])
+ray_dir = np.array([1, 1, 1])
+# t_begin
+t_begin = 0.0
+# t_end
+t_end = 30.0
+# END EDITABLE
+####################################
+
+r = max_radius # Re-label max_radius as r
+# delta radius, delta theta, delta phi respectively
+dr = r/num_rad
+dt = 2 * np.pi / num_ang
+dp = 2 * np.pi / num_azi
 # vector n_xy: n_xy is orthogonal to xy plane
 n_xy = np.array([0, 0, 1])
 # vector n_xz: n_xz is orthogonal to xz plane
 n_xz = np.array([0, 1, 0])
-# END EDITABLE
-####################################
 
 # Sphere plot axes
 fig1 = plt.figure(1)
@@ -80,7 +87,7 @@ class Arrow3D(FancyArrowPatch):
         self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
         FancyArrowPatch.draw(self, renderer)
 # estimate ray end for grid
-end_ray = origin_ray + abs(max_bound) * ray_dir
+end_ray = origin_ray + (t_end - t_begin) * ray_dir
 a = Arrow3D([origin_ray[0], end_ray[0]], [origin_ray[1], end_ray[1]], [origin_ray[2], end_ray[2]], mutation_scale=20,
             lw=1, arrowstyle="-|>", color="k")
 ax1.add_artist(a)
@@ -94,7 +101,7 @@ ax2.set_aspect("equal")
 
 # draw sphere projection and angular sections
 rad = r
-while rad > dr:
+while rad >= dr:
     x = rad * np.cos(u) + origin_sphere[0]
     y = rad * np.sin(u) + origin_sphere[1]
     ax2.plot(x, y, color="b")
@@ -112,7 +119,8 @@ rayProj_n = (np.dot(ray_dir, n_xy)/n_norm**2)*n_xy
 
 # projection of ray on xy plane
 projP = ray_dir - rayProj_n
-ax2.quiver([origin_ray[0]], [origin_ray[1]], [projP[0]], [projP[1]], color=['k'], angles='xy', scale_units='xy', scale=1)
+ax2.quiver([origin_ray[0]], [origin_ray[1]], [projP[0]], [projP[1]], color=['k'], angles='xy', scale_units='xy',
+           scale=1.0/(t_end - t_begin))
 
 # XZ plane plot axes
 fig3 = plt.figure(3)
@@ -122,7 +130,7 @@ ax3.set_aspect("equal")
 
 # draw sphere projection and angular sections
 rad = r
-while rad > dr:
+while rad >= dr:
     x = rad * np.cos(u) + origin_sphere[0]
     z = rad * np.sin(u) + origin_sphere[2]
     ax3.plot(x, z, color="g")
@@ -140,6 +148,7 @@ rayProj_n = (np.dot(ray_dir, n_xz)/n_norm**2)*n_xz
 
 # projection of ray on xy plane
 projP = ray_dir - rayProj_n
-ax3.quiver([origin_ray[0]], [origin_ray[2]], [projP[0]], [projP[2]], color=['k'], angles='xy', scale_units='xy', scale=1)
+ax3.quiver([origin_ray[0]], [origin_ray[2]], [projP[0]], [projP[2]], color=['k'], angles='xy', scale_units='xy',
+           scale=1.0/(t_end - t_begin))
 
 plt.show()
