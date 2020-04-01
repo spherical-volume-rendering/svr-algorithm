@@ -26,10 +26,10 @@ num_rad = 10
 dr = r/num_rad
 # number of angular sections
 num_ang = 8
-dt = 2*np.pi/num_ang
+dt = 2 * np.pi / num_ang
 # number of azimuthal sections
 num_azi = 8
-dp = 2*np.pi/num_azi
+dp = 2 * np.pi / num_azi
 # sphere center
 origin_sphere = np.array([0,0,0])
 # ray Start
@@ -45,6 +45,7 @@ n_xz = np.array([0, 1, 0])
 
 # Sphere plot axes
 fig1 = plt.figure(1)
+fig1.suptitle('Sphere with XY Plane Cross-Section')
 ax1 = fig1.gca(projection='3d')
 ax1.set_aspect("equal")
 
@@ -84,6 +85,8 @@ ax1.add_artist(a)
 
 # XY plane plot axes
 fig2 = plt.figure(2)
+fig2.suptitle('XY Plane')
+
 ax2 = fig2.gca()
 ax2.set_aspect("equal")
 
@@ -111,8 +114,11 @@ ax2.quiver([origin_ray[0]], [origin_ray[1]], [projP[0]], [projP[1]], color=['k']
 
 # XZ plane plot axes
 fig3 = plt.figure(3)
+fig3.suptitle('XZ Plane')
 ax3 = fig3.gca()
 ax3.set_aspect("equal")
+# ax3[0].title('X')
+# ax3[1].title('Z')
 
 # draw sphere projection and angular sections
 rad = r
