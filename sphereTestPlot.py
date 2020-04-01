@@ -22,16 +22,13 @@ Requires:
 ####################################
 # BEGIN EDITABLE
 # max radius of the sphere
-r = 10
+max_radius = 10
 # number of radial sections
 num_rad = 4
-dr = r/num_rad
 # number of angular sections
 num_ang = 4
-dt = 2 * np.pi / num_ang
 # number of azimuthal sections
 num_azi = 4
-dp = 2 * np.pi / num_azi
 # sphere center
 origin_sphere = np.array([0, 0, 0])
 # ray Start
@@ -45,6 +42,11 @@ t_end = 30.0
 # END EDITABLE
 ####################################
 
+r = max_radius # Re-label max_radius as r
+# delta radius, delta theta, delta phi respectively
+dr = r/num_rad
+dt = 2 * np.pi / num_ang
+dp = 2 * np.pi / num_azi
 # vector n_xy: n_xy is orthogonal to xy plane
 n_xy = np.array([0, 0, 1])
 # vector n_xz: n_xz is orthogonal to xz plane
