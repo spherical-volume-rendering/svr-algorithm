@@ -1,5 +1,5 @@
 # Fast Voxel Traversal Algorithm Over Spherical Coordinate Grid
-![Example ray tracing in spherical coordinates](images/spherical_coordinate_example.png)
+![Example ray tracing in spherical coordinates](images/polar_view_next_to_spherical_image.png)
 
 ## About
 This project extends the [yt](https://yt-project.org/) open-source data analysis and visualization package, providing an enhanced, integrated user interface for data exploration and enabling the visualization of physical data that comes from non-cartesian grids. Overall, the project will expand the accessibility and functionality of the yt visualization package. Yt currently implements a fast voxel traversal on cartesian grids as a Python function with C components; we are developing a fast voxel traversal over spherical grids using ideas from Amanatides and Woo’s seminal paper on fast voxel traversal for ray tracing. Part of this endeavour will include providing thorough documentation for both our function and the current function provided in yt. 
