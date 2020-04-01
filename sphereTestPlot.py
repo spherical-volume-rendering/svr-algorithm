@@ -31,11 +31,11 @@ dt = 2 * np.pi / num_ang
 num_azi = 8
 dp = 2 * np.pi / num_azi
 # sphere center
-origin_sphere = np.array([0,0,0])
+origin_sphere = np.array([0, 0, 0])
 # ray Start
-origin_ray = np.array([-1,-1,-1])
+origin_ray = np.array([-1, -1, -1])
 # ray direction
-ray_dir = np.array([1,0.5,1])
+ray_dir = np.array([1, 0.5, 1])
 # vector n_xy: n_xy is orthogonal to xy plane
 n_xy = np.array([0, 0, 1])
 # vector n_xz: n_xz is orthogonal to xz plane
@@ -63,7 +63,7 @@ ax1.scatter([origin_ray[0]], [origin_ray[1]], [origin_ray[2]], color="r", s=100)
 # plot the XY plane
 min_bound = ax1.get_ylim()[0]
 max_bound = ax1.get_ylim()[1]
-xx, yy = np.meshgrid(np.arange(min_bound, max_bound, .1), np.arange(min_bound, max_bound, .1))
+xx, yy = np.meshgrid(np.arange(min_bound, max_bound, 0.1), np.arange(min_bound, max_bound, 0.1))
 ax1.plot_surface(xx, yy, origin_sphere[2], alpha=0.5)
 
 # draw the ray
@@ -117,8 +117,6 @@ fig3 = plt.figure(3)
 fig3.suptitle('XZ Plane')
 ax3 = fig3.gca()
 ax3.set_aspect("equal")
-# ax3[0].title('X')
-# ax3[1].title('Z')
 
 # draw sphere projection and angular sections
 rad = r
