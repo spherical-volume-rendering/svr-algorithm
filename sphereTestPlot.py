@@ -12,6 +12,10 @@ resources:
 1. https://stackoverflow.com/questions/42281966/how-to-plot-vectors-in-python-using-matplotlib
 2. https://www.geeksforgeeks.org/vector-projection-using-python/
 3. https://pundit.pratt.duke.edu/wiki/Python:Plotting_Surfaces
+
+Requires:
+   python3
+   matplotlib version == 2.0.0
 """
 ####################################
 # BEGIN EDITABLE
