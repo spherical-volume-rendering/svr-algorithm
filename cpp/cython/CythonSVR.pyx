@@ -5,7 +5,7 @@ cimport numpy as np
 cimport cython
 from libcpp.vector cimport vector
 
-cdef extern from "spherical_volume_rendering_util.h":
+cdef extern from "../spherical_volume_rendering_util.h":
     cdef cppclass SphericalVoxel:
         size_t radial_voxel, angular_voxel, azimuthal_voxel
 
@@ -20,11 +20,14 @@ cdef extern from "spherical_volume_rendering_util.h":
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def walk_spherical_volume(np.ndarray[double, ndim=1, mode="c"] ray_origin, np.ndarray[double, ndim=1, mode="c"] ray_direction,
-              np.ndarray[double, ndim=1, mode="c"] min_bound, np.ndarray[double, ndim=1, mode="c"] max_bound,
-              int num_radial_voxels, int num_angular_voxels, int num_azimuthal_voxels,
-              np.ndarray[double, ndim=1, mode="c"] sphere_center, double sphere_max_radius,
-              double t_begin, double t_end, double tol):
+def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] ray_direction,
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] min_bound,
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] max_bound,
+                          int num_radial_voxels, int num_angular_voxels, int num_azimuthal_voxels,
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center,
+                          np.float64_t sphere_max_radius, np.float64_t t_begin,
+                          np.float64_t t_end, np.float64_t tol):
     '''
     Spherical Coordinate Voxel Traversal Algorithm
 
