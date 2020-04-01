@@ -15,6 +15,8 @@ resources:
 
 Requires:
    python3
+   numpy
+   itertools
    matplotlib version == 2.0.0
 """
 ####################################
