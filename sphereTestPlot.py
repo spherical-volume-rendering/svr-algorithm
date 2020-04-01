@@ -42,12 +42,13 @@ ray_dir = np.array([1, 1, 1])
 t_begin = 0.0
 # t_end
 t_end = 30.0
+# END EDITABLE
+####################################
+
 # vector n_xy: n_xy is orthogonal to xy plane
 n_xy = np.array([0, 0, 1])
 # vector n_xz: n_xz is orthogonal to xz plane
 n_xz = np.array([0, 1, 0])
-# END EDITABLE
-####################################
 
 # Sphere plot axes
 fig1 = plt.figure(1)
