@@ -2,11 +2,12 @@
 #include "../spherical_volume_rendering_util.h"
 
 // Utilizes the Google Test suite.
-// To run:
-//       1. Clone the google test suite to spherical-volume-rendering/cpp/testing
-//          - It can be found at: https://github.com/google/googletest.git
-//          - Currently uses the default folder name (googletest) in the CMake file, so there is no need to change this.
-//       2. Load (or re-load) CMakeLists.txt
+// To run, in the ../cpp/testing directory:
+//   1. Clone the googletest repository.
+//   >  git clone https://github.com/google/googletest.git
+//
+//   2. CMake
+//   >  mkdir build && cd build && cmake .. && make all && ./run_svr_tests
 //
 // For information on Google Test, see: https://github.com/google/googletest/blob/master/googletest/README.md
 // For examples of Google Test, see: https://github.com/google/googletest/tree/master/googletest/samples
