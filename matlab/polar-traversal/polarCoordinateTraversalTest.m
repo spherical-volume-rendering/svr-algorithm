@@ -705,8 +705,8 @@ end
 function testOriginNegativeXNegativeY(testCase)
     min_bound = [-30.0, -30.0];
     max_bound = [30.0, 30.0];
-    ray_origin = [-10.0, -7.0];
-    ray_direction = [1.3, 3.0];
+    ray_origin = [18.0, 9.0];
+    ray_direction = [-2.5, -0.5];
     circle_center = [0.0, 0.0];
     circle_max_radius = 10.0;
     num_radial_sections = 3;
@@ -718,8 +718,8 @@ function testOriginNegativeXNegativeY(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [1,2,3,3,3,2,1];
-        expected_thetaVoxels = [0,0,0,1,1,1,2];
+        expected_rVoxels     = [1,2,2,1];
+        expected_thetaVoxels = [0,0,1,1];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
