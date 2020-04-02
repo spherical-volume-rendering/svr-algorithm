@@ -738,7 +738,7 @@ function testSmallVoxel(testCase)
     num_angular_sections = 20;
     t_begin = 0.0;
     t_end = 30.0;
-    verbose = true
+    
     verbose = false;
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
