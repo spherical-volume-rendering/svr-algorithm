@@ -131,10 +131,10 @@ end
 % The ray may not intersect the grid at all. 
 % In particular, if the ray is outside the grid at t_begin.
 if t1 < t_begin && t2 < t_begin 
-      if verbose
-          fprintf("\nRay does not intersect polar grid for t_begin.")
-      end
-      return;
+    if verbose
+        fprintf("\nRay does not intersect polar grid for t_begin.")
+    end
+    return;
 end
 
 % It may be a tangent hit
