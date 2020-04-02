@@ -57,21 +57,21 @@ if (verbose)
     figure;
     hold on;
     title('Polar Coordinate Voxel Traversal')
-  
+    
     if (t_begin ~= 0.0)
         % Mark the ray origin if the time does not start at 0.0
         text(ray_origin_x, ray_origin_y, ' ray origin');
         plot(ray_origin_x, ray_origin_y, 'k.', 'MarkerSize', 10);
         quiver(ray_origin_x, ray_origin_y, ray_direction_x, ray_direction_y, t_begin - 0.0, 'LineWidth', 1.5);
     end
-  
+    
     % Draw the ray.
     text(ray_start_x, ray_start_y, ' ray start');
     text(ray_end_x, ray_end_y, ' ray end');
     plot(ray_end_x, ray_end_y, 'k.', 'MarkerSize', 10);
     plot(ray_start_x, ray_start_y, 'k.', 'MarkerSize', 10);
     quiver(ray_start_x, ray_start_y, ray_direction_x, ray_direction_y, t_end - t_begin, 'LineWidth', 1.5);
-  
+    
     % Draw the axis.
     axis tight;
     xlim([min_bound_x, max_bound_x]);
@@ -79,7 +79,7 @@ if (verbose)
     xlabel('x');
     ylabel('y');
     grid on;
-  
+    
     % Draw the radial sections.
     current_max_radius = circle_max_radius;
     for k = 1:num_radial_sections
@@ -131,14 +131,14 @@ end
 % The ray may not intersect the grid at all. 
 % In particular, if the ray is outside the grid at t_begin.
 if t1 < t_begin && t2 < t_begin 
-  if verbose
-      fprintf("\nRay does not intersect polar grid for t_begin.")
-  end
-  return;
+      if verbose
+          fprintf("\nRay does not intersect polar grid for t_begin.")
+      end
+      return;
 end
 
 % It may be a tangent hit
-if abs(t1 - t2) < tol
+ if abs(t1 - t2) < tol
     if verbose
         fprintf("\nTangent hit.")
     end
@@ -204,7 +204,7 @@ while t < t_end
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, ...
         current_voxel_ID_theta, num_angular_sections, circle_center, ... 
         t, verbose);
-
+    
     % 2. Compare tMaxR, tMaxTheta
     if (tMaxTheta < tMaxR || current_voxel_ID_r + tStepR == 0) && t < tMaxTheta && tMaxTheta < t_end
         % when the ray only intersects one radial shell but crosses an
