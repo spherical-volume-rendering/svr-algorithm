@@ -805,3 +805,26 @@ function testInitializationPhaseEarlyThetaTraversalThree(testCase)
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
+
+% For initialization phase of theta voxels, test ray crosses a theta boundary before entering the circle.
+function testInitializationPhaseEarlyThetaTraversalFour(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [15.0, 9.0];
+    ray_direction = [-1.3, -0.5];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 20;
+    num_angular_sections = 40;
+    t_begin = 0.0;
+    t_end = 5.7;
+    
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1];
+        expected_thetaVoxels = [4];
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
