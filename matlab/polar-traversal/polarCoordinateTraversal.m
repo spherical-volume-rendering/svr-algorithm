@@ -54,38 +54,38 @@ radial_voxels = [];
 delta_radius = circle_max_radius / num_radial_sections;
 
 if (verbose)
-  figure;
-  hold on;
-  title('Polar Coordinate Voxel Traversal')
-  
-  if (t_begin ~= 0.0)
-      % Mark the ray origin if the time does not start at 0.0
-      text(ray_origin_x, ray_origin_y, ' ray origin');
-      plot(ray_origin_x, ray_origin_y, 'k.', 'MarkerSize', 10);
-      quiver(ray_origin_x, ray_origin_y, ray_direction_x, ray_direction_y, t_begin - 0.0, 'LineWidth', 1.5);
-  end
-  
-  % Draw the ray.
-  text(ray_start_x, ray_start_y, ' ray start');
-  text(ray_end_x, ray_end_y, ' ray end');
-  plot(ray_end_x, ray_end_y, 'k.', 'MarkerSize', 10);
-  plot(ray_start_x, ray_start_y, 'k.', 'MarkerSize', 10);
-  quiver(ray_start_x, ray_start_y, ray_direction_x, ray_direction_y, t_end - t_begin, 'LineWidth', 1.5);
-  
-  % Draw the axis.
-  axis tight;
-  xlim([min_bound_x, max_bound_x]);
-  ylim([min_bound_y, max_bound_y]);
-  xlabel('x');
-  ylabel('y');
-  grid on;
-  
-  % Draw the radial sections.
-  current_max_radius = circle_max_radius;
-  for k = 1:num_radial_sections
-      viscircles(circle_center, current_max_radius, 'LineStyle', '--', 'Color', '#7E2F8E', 'LineWidth', 1);
-      current_max_radius = current_max_radius - delta_radius;
-  end
+    figure;
+    hold on;
+    title('Polar Coordinate Voxel Traversal')
+
+    if (t_begin ~= 0.0)
+        % Mark the ray origin if the time does not start at 0.0
+        text(ray_origin_x, ray_origin_y, ' ray origin');
+        plot(ray_origin_x, ray_origin_y, 'k.', 'MarkerSize', 10);
+        quiver(ray_origin_x, ray_origin_y, ray_direction_x, ray_direction_y, t_begin - 0.0, 'LineWidth', 1.5);
+    end
+
+    % Draw the ray.
+    text(ray_start_x, ray_start_y, ' ray start');
+    text(ray_end_x, ray_end_y, ' ray end');
+    plot(ray_end_x, ray_end_y, 'k.', 'MarkerSize', 10);
+    plot(ray_start_x, ray_start_y, 'k.', 'MarkerSize', 10);
+    quiver(ray_start_x, ray_start_y, ray_direction_x, ray_direction_y, t_end - t_begin, 'LineWidth', 1.5);
+
+    % Draw the axis.
+    axis tight;
+    xlim([min_bound_x, max_bound_x]);
+    ylim([min_bound_y, max_bound_y]);
+    xlabel('x');
+    ylabel('y');
+    grid on;
+
+    % Draw the radial sections.
+    current_max_radius = circle_max_radius;
+    for k = 1:num_radial_sections
+        viscircles(circle_center, current_max_radius, 'LineStyle', '--', 'Color', '#7E2F8E', 'LineWidth', 1);
+        current_max_radius = current_max_radius - delta_radius;
+    end
   
   % Draw the angular sections.
   N = num_angular_sections;
