@@ -9,7 +9,6 @@ end
 
 % Ray doesn't enter circle
 function testRayDoesNotEnterCircle(testCase)
-    fprintf("Ray doesn't enter circle\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [3.0, 3.0];
@@ -30,7 +29,6 @@ end
 
 % Ray begins outside and travels through the origin.
 function testRayEntersCircleAndGoesThroughOrigin(testCase)
-    fprintf("Ray begins outside and travels through the origin\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 5.0];
@@ -54,7 +52,6 @@ end
 
 % Ray begins outside of circle and does not go through origin.
 function testRayBeginsOutsideCircleAndDoesNotGoThroughOrigin(testCase)
-    fprintf("Ray begins outside of circle and does not go through origin\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 6.0];
@@ -78,7 +75,6 @@ end
 
 % Ray begins inside of circle and does not go through origin.
 function testRayBeginInsideCircleAndDoesNotGoThroughOrigin(testCase)
-    fprintf("Ray begins inside of circle and does not go through origin\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [12.0, 10.0];
@@ -102,7 +98,6 @@ end
 
 % Ray with zero x-direction.
 function testZeroX(testCase)
-    fprintf("Ray with zero x-direction\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [10.0, 5.0];
@@ -126,7 +121,6 @@ end
 
 % Ray with zero y-direction.
 function testZeroY(testCase)
-    fprintf("Ray with zero y-direction\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 10.0];
@@ -150,7 +144,6 @@ end
 
 % Ray with negative x-&y-direction.
 function testNegativeXandY(testCase)
-    fprintf("Ray with negative x-&y-direction\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [25.0, 25.0];
@@ -174,7 +167,6 @@ end
 
 % Ray begins at circle center.
 function testBeginAtCircleCenterNegativeXY(testCase)
-    fprintf("Ray begins at circle center\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [15.0, 15.0];
@@ -197,7 +189,6 @@ function testBeginAtCircleCenterNegativeXY(testCase)
 end
 
 function testBeginAtCircleCenterPositiveXY(testCase)
-    fprintf("BeginAtCircleCenterPositiveXY\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [15.0, 15.0];
@@ -221,7 +212,6 @@ end
 
 % Ray begins at a theta boundary (and goes in orthogonal directions).
 function testBeginAtThetaBoundaryInOrthogonal(testCase)
-    fprintf("Ray begins at a theta boundary (and goes in orthogonal directions\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [10.0, 15.0];
@@ -245,7 +235,6 @@ end
 
 % Ray begins at a radial boundary (and goes in orthogonal directions).
 function testBeginAtRadialBoundaryInOrthogonal(testCase)
-    fprintf("Ray begins at a radial boundary (and goes in orthogonal directions)\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [22.07, 22.07];
@@ -269,7 +258,6 @@ end
 
 % Ray goes along a theta boundary.
 function testRayGoesAlongThetaBoundary(testCase)
-    fprintf("Ray goes along a theta boundary\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [25.0, 15.0];
@@ -294,7 +282,6 @@ end
 % Ray intersects a “theta boundary” outside the circle, and ensure it does 
 % NOT record this as a theta hit.
 function testRayIntersectThetaBoundaryOutsideTheCircle(testCase)
-    fprintf("Ray intersects a “theta boundary” outside the circle, and ensure it does NOT record this as a theta hit\n")
     min_bound = [0.0, 0.0];
     max_bound = [30.0, 30.0];
     ray_origin = [5.0, 5.0];
