@@ -188,6 +188,13 @@ t = t_begin;
 t_end = min(t_grid, t_end);
 previous_transition_flag = false;
 
+% Initialize a variable to accumulate of time it takes for all traversals. This 
+% will be used to compare with the cord length (t2 - t1) we calculated earlier 
+if verbose
+    acc = 0.0;
+    fprintf("\n Cord length calculated in terms of time: %d\n", t2 - t1)
+  end
+  
 while t < t_end
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ... 
@@ -202,15 +209,24 @@ while t < t_end
     if (tMaxTheta < tMaxR || current_voxel_ID_r + tStepR == 0) && t < tMaxTheta && tMaxTheta < t_end
         % when the ray only intersects one radial shell but crosses an
         % angular boundary, we need the second half of conditional
+        if verbose
+            acc = acc + tMaxTheta - t;
+        end
         t = tMaxTheta;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
     elseif abs(tMaxTheta - tMaxR) < tol && t < tMaxR && tMaxR < t_end
         % For the case when the ray simultaneously hits a radial and
         % angular boundary.
+        if verbose
+            acc = acc + tMaxR - t;
+        end
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
     elseif tMaxR < t_end && current_voxel_ID_r + tStepR ~= 0
+        if verbose
+            acc = acc + tMaxR - t;
+        end
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
     else 
@@ -218,4 +234,7 @@ while t < t_end
     end 
         angular_voxels = [angular_voxels, current_voxel_ID_theta];
         radial_voxels = [radial_voxels, current_voxel_ID_r];
+    if verbose
+        fprintf("\nCurrent Total time spent from Traversal: %d\n", acc)
+    end   
 end
