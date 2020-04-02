@@ -154,18 +154,17 @@ end
 % II. Calculate Voxel ID Theta.
 delta_theta = 2 * pi/ num_angular_sections;
 % Create an array of values representing the points of intersection between 
-% the lines corresponding to angular voxels boundaries and the circle of 
-% largest radius.
+% the lines corresponding to angular voxels boundaries and the initial 
+% radius 
 P = [];
 k = 0;
 while k <= 2*pi
-    pt = [circle_max_radius * cos(k) + circle_center(1), ...
-        circle_max_radius * sin(k) + circle_center(2)];
+    pt = [r * cos(k) + circle_center(1), r * sin(k) + circle_center(2)];
     P = [P ; pt];
     k = k + delta_theta;
 end
 % Find the point of intersection between the vector created by the
-% ray origin and the circle center and the circle of max radius. 
+% ray intersection with the initial radius and the circle center. 
 if abs(ray_origin - circle_center) < tol 
     % If the ray starts at the origin, we need to perturb slightly along its 
     % path to find the correct angular voxel.
@@ -175,11 +174,12 @@ if abs(ray_origin - circle_center) < tol
     a = circle_center(1) - pert_x;
     b = circle_center(2) - pert_y;
 else 
-    a = circle_center(1) - ray_origin(1);
-    b = circle_center(2) - ray_origin(2);
+    if abs(r - circle_max_radius) < tol; a = circle_center(1) - pa(1); b = circle_center(2) - pa(2); 
+    else; a = circle_center(1) - ray_origin(1); b = circle_center(2) - ray_origin(2);
+    end
 end
 l = sqrt(a^2 + b^2);
-p1 = circle_center - (circle_max_radius/l) .* [a b];
+p1 = circle_center - (r/l) .* [a b];
 % This point will lie between two angular voxel boundaries iff the angle between
 % it and the angular boundary intersection points along the circle of 
 % max radius is obtuse. Equality encapsulates the case when the
