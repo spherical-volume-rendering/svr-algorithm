@@ -193,7 +193,6 @@ while i < length(P)
     i = i + 1;
 end
 
-
 angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
