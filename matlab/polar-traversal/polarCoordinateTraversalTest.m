@@ -236,8 +236,8 @@ function testBeginAtThetaBoundaryInOrthogonal(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [2,1];
-        expected_thetaVoxels = [1,1];
+        expected_rVoxels     = [2,2,1];
+        expected_thetaVoxels = [2,1,1];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
@@ -285,7 +285,7 @@ function testRayGoesAlongThetaBoundary(testCase)
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
         expected_rVoxels     = [1,2,3,3,2,1];
-        expected_thetaVoxels = [0,0,0,1,1,1];
+        expected_thetaVoxels = [0,0,0,2,2,2];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
@@ -509,18 +509,288 @@ function testSimulhits(testCase)
     ray_origin = [-6, 2];
     ray_direction = [1, 0];
     circle_center = [0.0, 0.0];
-    circle_max_radius = 4*sqrt(2);
+    circle_max_radius = 4 * sqrt(2);
     num_radial_sections = 2;
     num_angular_sections = 8;
     t_begin = 0.0;
     t_end = 30.0;
-    verbose = true;
+    verbose = false;
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
         expected_rVoxels     = [1,2,2,1];
         expected_thetaVoxels = [3,2,1,0];
         
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the second quadrant with positive x and y
+% direction
+function testSecondQuadrantPositiveXPositiveY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [-27.0, 12.0];
+    ray_direction = [2.0, 1.9];
+    circle_center = [-15.0, 15.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,1,2,1,1];
+        expected_thetaVoxels = [2,1,1,1,0];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the second quadrant with negative x and y
+% direction
+function testSecondQuadrantNegativeXNegativeY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [-27.0, 12.0];
+    ray_direction = [2.0, 1.9];
+    circle_center = [-15.0, 15.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,1,2,1,1];
+        expected_thetaVoxels = [2,1,1,1,0];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the third quadrant with positive x and y
+% direction
+function testThirdQuadrantPositiveXPositiveY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [-27.0, -20.0];
+    ray_direction = [2.0, 1.0];
+    circle_center = [-15.0, -15.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,3,3,3,2,1];
+        expected_thetaVoxels = [2,2,2,1,0,0,0];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the third quadrant with negative x and y
+% direction
+function testThirdQuadrantNegativeXNegativeY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [-7.0, -6.0];
+    ray_direction = [-2.3, -0.9];
+    circle_center = [-15.0, -15.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,2,1];
+        expected_thetaVoxels = [0,0,1,1];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the fourth quadrant with positive x and y
+% direction
+function testFourthQuadrantPositiveXPositiveY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [10.0, -25.0];
+    ray_direction = [1.3, 5.9];
+    circle_center = [15.0, -15.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,3,3,2,1];
+        expected_thetaVoxels = [2,2,2,1,1,1];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the fourth quadrant with negative x and y
+% direction
+function testFourthQuadrantNegativeXNegativeY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [26.0, -7.0];
+    ray_direction = [-1.3, -1.2];
+    circle_center = [15.0, -15.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,3,3,3,2,1];
+        expected_thetaVoxels = [0,0,0,3,2,2,2];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the origin of the grid with positive x and
+% y direction
+function testOriginPositiveXPositiveY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [-10.0, -7.0];
+    ray_direction = [1.3, 3.0];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,1,2,1];
+        expected_thetaVoxels = [2,1,1,1];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% The center of the circle is on the origin of the grid with negative x and
+% y direction
+function testOriginNegativeXNegativeY(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [18.0, 9.0];
+    ray_direction = [-2.5, -0.5];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+   
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,2,1];
+        expected_thetaVoxels = [0,0,1,1];
+        
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% Test with large number of voxels. We want to see if our algorithm still works when the size
+% of each voxel is very small
+function testSmallVoxel(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [15.0, 9.0];
+    ray_direction = [-1.3, -0.5];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 20;
+    num_angular_sections = 20;
+    t_begin = 0.0;
+    t_end = 30.0;
+    
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1,2,3,4,5,6,7,8,9,9,10,11,12,13,13,14,14,14,14,13,13,12,11,11,10,9,8,7,6,5,4, 4, 3, 2, 1];
+        expected_thetaVoxels = [2,2,2,2,2,2,2,2,2,3,3, 3, 3, 3, 4, 4, 5, 6, 7, 7, 8, 8, 8, 9, 9, 9,9,9,9,9,9,10,10,10,10];
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% Test ray crosses a theta boundary before radial boundary during initialization phase.
+% Ray starts in outermost radius.
+function testInitializationPhaseEarlyThetaTraversalOne(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [6.5, 6.5];
+    ray_direction = [-1.3, -0.5];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 2;
+    num_angular_sections = 20;
+    t_begin = 0.0;
+    t_end = 30.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [1, 1, 2, 2, 2, 2, 2, 2, 1, 1];
+        expected_thetaVoxels = [2, 3, 3, 4, 5, 6, 7, 8, 8, 9];
+        verifyEqual(testCase, rVoxels, expected_rVoxels);
+        verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
+end
+
+% Test ray crosses a theta boundary before radial boundary during initialization phase.
+% Ray does not start in outermost radius.
+function testInitializationPhaseEarlyThetaTraversalTwo(testCase)
+    min_bound = [-30.0, -30.0];
+    max_bound = [30.0, 30.0];
+    ray_origin = [4.5, 4.5];
+    ray_direction = [-1.0, -0.5];
+    circle_center = [0.0, 0.0];
+    circle_max_radius = 10.0;
+    num_radial_sections = 3;
+    num_angular_sections = 20;
+    t_begin = 0.0;
+    t_end = 30.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
+        expected_rVoxels     = [2,2,3,3,3,3,3,3,3,2,2,1];
+        expected_thetaVoxels = [2,3,3,4,5,6,7,8,9,9,10,10];
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
 end
