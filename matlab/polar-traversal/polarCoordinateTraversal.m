@@ -104,6 +104,10 @@ end
 % Determine ray location at t_begin.
 p = ray_origin + t_begin.*ray_direction;
 ray_circle_vector = [circle_center(1) - p(1); circle_center(2) - p(2)]';
+ray_origin_is_outside_circle = sqrt(ray_circle_vector(1)^2 + ray_circle_vector(2)^2) > circle_max_radius;
+if verbose
+    ray_origin_is_outside_circle
+end
 % Find the radial shell containing the ray at t_begin.
 r = delta_radius;
 while (ray_circle_vector(1)^2 + ray_circle_vector(2)^2 > r^2) && r < circle_max_radius
@@ -119,7 +123,7 @@ discr = r^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
 d = sqrt(discr);
 pa = ray_origin + (v-d).*ray_unit_vector;
 pb = ray_origin + (v+d).*ray_unit_vector;
-tol = 10^-15;
+tol = 10^-10;
 if (abs(ray_direction(1)) < tol)
     t1 = (pa(2) - ray_origin(2))/ray_direction(2);
     t2 = (pb(2) - ray_origin(2))/ray_direction(2);
@@ -152,20 +156,56 @@ if verbose
 end
 
 % II. Calculate Voxel ID Theta.
-if abs(ray_origin - circle_center) < tol 
-    % If the ray starts at the origin, we need to perturb slightly along its path to find the
-    % correct angular voxel
-    pert_t = 0.1;
-    pert_x = ray_start_x + ray_direction_x * pert_t;
-    pert_y = ray_start_y + ray_direction_y * pert_t;
-    current_voxel_ID_theta = floor(atan2(pert_y - circle_center_y, pert_x - circle_center_x) * num_angular_sections / (2 * pi));
-else
-    current_voxel_ID_theta = floor(atan2(ray_start_y - circle_center_y, ray_start_x - circle_center_x) * num_angular_sections / (2 * pi));
-end
-if current_voxel_ID_theta < 0
-    current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
+delta_theta = 2 * pi/ num_angular_sections;
+% Create an array of values representing the points of intersection between 
+% the lines corresponding to angular voxels boundaries and the circle of 
+% largest radius.
+P = [];
+k = 0;
+while k <= 2*pi
+    pt = [circle_max_radius * cos(k) + circle_center(1), ...
+        circle_max_radius * sin(k) + circle_center(2)];
+    P = [P ; pt];
+    k = k + delta_theta;
 end
 
+% Find the point of intersection between the vector created by the
+% ray origin and the circle center and the circle of max radius. 
+if ray_origin_is_outside_circle
+    ray_circle_intersection_x = ray_origin(1) + ray_direction_x * t1;
+    ray_circle_intersection_y = ray_origin(2) + ray_direction_y * t1;
+    a = circle_center(1) - ray_circle_intersection_x;
+    b = circle_center(2) - ray_circle_intersection_y;
+else
+    if abs(ray_origin - circle_center) < tol 
+        % If the ray starts at the origin, we need to perturb slightly along its 
+        % path to find the correct angular voxel.
+        pert_t = 0.1;
+        pert_x = ray_origin(1) + ray_direction_x * pert_t;
+        pert_y = ray_origin(2) + ray_direction_y * pert_t;
+        a = circle_center(1) - pert_x;
+        b = circle_center(2) - pert_y;
+    else
+        a = circle_center(1) - ray_origin(1);
+        b = circle_center(2) - ray_origin(2);
+    end
+end
+
+l = sqrt(a^2 + b^2);
+p1 = circle_center - (circle_max_radius/l) .* [a b];
+% This point will lie between two angular voxel boundaries iff the angle between
+% it and the angular boundary intersection points along the circle of 
+% max radius is obtuse. Equality encapsulates the case when the
+% point lies on an angular boundary. 
+i = 1;
+current_voxel_ID_theta = 0;
+while i < length(P)
+    d1 = (P(i,1)-p1(1))^2 + (P(i,2)-p1(2))^2;
+    d2 = (P(i+1,1)-p1(1))^2 + (P(i+1,2)-p1(2))^2;
+    d3 = (P(i,1)-P(i+1,1))^2 + (P(i,2)-P(i+1,2))^2;
+    if d1 + d2 <= d3; current_voxel_ID_theta = i - 1; i = length(P); end
+    i = i + 1;
+end
 angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
 
@@ -184,8 +224,8 @@ end
 t_grid = max(t1,t2);
 
 % III. TRAVERSAL PHASE
-t = t_begin;
-t_end = min(t_grid, t_end);
+t = max(t_begin, t1);
+t_end = min(t_grid, t_end) + tol;
 previous_transition_flag = false;
 
 while t < t_end
