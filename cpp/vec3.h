@@ -80,6 +80,7 @@ struct FreeVec3 : Vec3 {
     }
 
     inline FreeVec3 &operator/=(const double scalar) {
+        assert(scalar != 0.0);
         this->x() /= scalar;
         this->y() /= scalar;
         this->z() /= scalar;
@@ -172,6 +173,7 @@ inline FreeVec3 operator*(const UnitVec3 &v, const double scalar) {
 }
 
 inline FreeVec3 operator/(const UnitVec3 &v, const double scalar) {
+    assert(scalar != 0.0);
     return v.to_free() / scalar;
 }
 
