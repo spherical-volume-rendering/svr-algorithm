@@ -6,8 +6,6 @@ import unittest
 import numpy as np
 import CythonSVR
 
-tol = 10e-14
-
 class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
     # Verifies correctness of the voxel traversal coordinates.
     def verify_voxels(self, voxels, expected_radial_voxels,  expected_theta_voxels,  expected_phi_voxels):
@@ -34,7 +32,7 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
         t_end = 15.0
         voxels = CythonSVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,
                                      num_angular_sections, num_azimuthal_sections, sphere_center, sphere_max_radius,
-                                     t_begin, t_end, tol)
+                                     t_begin, t_end)
         empty = np.array([])
         assert np.array_equal(voxels, empty)
 
@@ -53,7 +51,7 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
 
         voxels = CythonSVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,
                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
-                                                 sphere_max_radius, t_begin, t_end, tol)
+                                                 sphere_max_radius, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [2,2,2,2,0,0,0,0]
         expected_phi_voxels = [2,2,2,2,0,0,0,0]
