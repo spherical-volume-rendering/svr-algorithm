@@ -429,18 +429,22 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
     std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
     double k = 0;
+    size_t index = 0;
     const double tau = 2 * M_PI;
     while (!isKnEqual(k, tau + grid.deltaTheta())) {
-        Px_angular[k] = current_r * std::cos(k) + grid.sphereCenter().x();
-        Py_angular[k] = current_r * std::sin(k) + grid.sphereCenter().y();
+        Px_angular[index] = current_r * std::cos(k) + grid.sphereCenter().x();
+        Py_angular[index] = current_r * std::sin(k) + grid.sphereCenter().y();
         k += grid.deltaTheta();
+        ++index;
     }
 
     k = 0;
+    index = 0;
     while (!isKnEqual(k, tau + grid.deltaPhi())) {
-        Px_azimuthal[k] = current_r * std::cos(k) + grid.sphereCenter().x();
-        Pz_azimuthal[k] = current_r * std::sin(k) + grid.sphereCenter().z();
+        Px_azimuthal[index] = current_r * std::cos(k) + grid.sphereCenter().x();
+        Pz_azimuthal[index] = current_r * std::sin(k) + grid.sphereCenter().z();
         k += grid.deltaPhi();
+        ++index;
     }
 
     size_t current_voxel_ID_theta = 0;
@@ -629,9 +633,9 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             for (int i = 0; i < Px_azimuthal.size(); ++i) {
                 const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[i];
                 const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[i];
-                const double inv_length = 1.0 / std::sqrt(new_azimuthal_x * new_azimuthal_x + new_azimuthal_z * new_azimuthal_z);
-                Px_azimuthal[i] = grid.sphereCenter().x() - (new_r * inv_length) * (grid.sphereCenter().x() - Px_azimuthal[i]);
-                Pz_azimuthal[i] = grid.sphereCenter().z() - (new_r * inv_length) * (grid.sphereCenter().z() - Pz_azimuthal[i]);
+                const double new_r_over_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x + new_azimuthal_z * new_azimuthal_z);
+                Px_azimuthal[i] = grid.sphereCenter().x() - (new_r_over_length) * (grid.sphereCenter().x() - Px_azimuthal[i]);
+                Pz_azimuthal[i] = grid.sphereCenter().z() - (new_r_over_length) * (grid.sphereCenter().z() - Pz_azimuthal[i]);
             }
         }
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
