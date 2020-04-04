@@ -34,7 +34,7 @@ origin_sphere = np.array([0, 0, 0])
 # ray Start
 origin_ray = np.array([-13, -13, -13])
 # ray direction
-ray_dir = np.array([1, 1.5, 1])
+ray_dir = np.array([1, 1, 1])
 # t_begin
 t_begin = 0.0
 # t_end
