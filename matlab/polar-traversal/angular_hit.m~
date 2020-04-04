@@ -23,6 +23,8 @@ if verbose
     fprintf("\nCurrent Voxel ID Theta: %d\n", current_voxel_ID_theta)
 end
 
+delta_theta = 2 * pi / num_angular_sections;
+
 % Get current ray location to use as start point
 p = ray_origin + ray_direction * t;
 % Get ray exit point to use as end point
@@ -104,7 +106,7 @@ end
 if intersect_max == 1 && intersect_min == 0 && ...
         t < t_max && t_max < t_end && ...
         ~approximatelyEqual(t,t_max,1e-12,1e-8)
-    tStepTheta = 1;
+     tStepTheta = 1;
     tMaxTheta = t_max;
 elseif intersect_min == 1 && intersect_max == 0 && ...
         t < t_min && t_min < t_end && ...
@@ -141,22 +143,44 @@ elseif intersect_min == 1 && intersect_max == 1
             ~approximatelyEqual(t,t_max,1e-12,1e-8)
         tStepTheta = 1;
         tMaxTheta = t_max;
-        if verbose
-            fprintf("hit max bound\n")
++        if verbose
++            fprintf("hit max bound\n")
          end
+-    if ray_direction(2) > tol
+-        % change in theta is dependent on the slope of the line
+-        interval_theta = interval_theta - pi;
+-        tStepTheta = - abs(current_voxel_ID_theta - interval_theta(1)/delta_theta);
+-    else
+-        interval_theta = interval_theta + pi;
+-        tStepTheta = abs(current_voxel_ID_theta - interval_theta(1)/delta_theta);
+-    end
+-elseif abs(zmax(1) - zmin(1)) < tol && zmin(2) -t > tol
+-    % hit the min & max boundary simultaneously.
+-    tMaxTheta = zmin(2);
+-    if verbose
+-        fprintf("hit origin min t\n")
+-    end
+-    if ray_direction(2) > tol
+-        % change in theta is dependent on the slope of the line
+-        interval_theta = interval_theta - pi;
+-        tStepTheta = - abs(current_voxel_ID_theta - interval_theta(1)/delta_theta);
      else
-        tStepTheta = 0;
-        tMaxTheta = inf;
-        if verbose
-            fprintf("no hit within time bound\n")
-        end
+-        interval_theta = interval_theta + pi;
+-        tStepTheta = abs(current_voxel_ID_theta - interval_theta(1)/delta_theta);
++        tStepTheta = 0;
++        tMaxTheta = inf;
++        if verbose
++            fprintf("no hit within time bound\n")
++        end
      end
  else
      tStepTheta = 0;
      tMaxTheta = inf;
      if verbose
-        fprintf("no hit within voxel bound\n")
-     end
+-        fprintf("no hit\n")
+-    end
++        fprintf("no hit within voxel bound\n")
++    end
  end
 
 
