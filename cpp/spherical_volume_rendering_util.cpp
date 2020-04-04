@@ -436,10 +436,10 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     // Create an array of values representing the points of intersection between the lines corresponding
     // to angular voxel boundaries and the initial radial voxel of the ray.
-    std::vector<double> Px_angular(grid.numAngularVoxels());
-    std::vector<double> Py_angular(grid.numAngularVoxels());
-    std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels());
-    std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels());
+    std::vector<double> Px_angular(grid.numAngularVoxels() + 1);
+    std::vector<double> Py_angular(grid.numAngularVoxels() + 1);
+    std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
+    std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
     double k = 0;
     const double tau = 2 * M_PI;
     while (k <= tau) {
@@ -535,7 +535,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     /* TRAVERSAL PHASE */
     double t = t_begin;
     bool previous_transition_flag = false;
-    bool change_r = false; // TODO(cgyurgyik): Implement, update traversal phase.
+    bool change_r = false;
     t_end = std::min(t_grid_exit, t_end);
 
     while (t < t_end) {
@@ -552,18 +552,22 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
         // Comparison between tMaxR, tMaxTheta, tMaxPhi.
         if (((angular_params.tMaxTheta < radial_params.tMaxR && radial_params.tMaxR < azimuthal_params.tMaxPhi)
-             || radial_hit_out_of_bounds) && t < angular_params.tMaxTheta && angular_params.tMaxTheta < t_end) {
+             || radial_hit_out_of_bounds) && t < angular_params.tMaxTheta && angular_params.tMaxTheta < t_end &&
+             !isKnEqual(angular_params.tMaxTheta, t) && !isKnEqual(angular_params.tMaxTheta, t)) {
             // 1. tMaxTheta is the minimum and within bounds (t, t_end).
             // 2. When the ray only intersects one radial shell but crosses an angular boundary,
             // we need the second half of the disjunction.
             t = angular_params.tMaxTheta;
             current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
+            change_r = false;
         } else if (radial_params.tMaxR < angular_params.tMaxTheta && radial_params.tMaxR < azimuthal_params.tMaxPhi
-                   && t < radial_params.tMaxR && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds) {
+                   && t < radial_params.tMaxR && radial_params.tMaxR < t_end && !radial_hit_out_of_bounds &&
+                   !isKnEqual(radial_params.tMaxR, t) && !isKnEqual(radial_params.tMaxR, t_end)) {
             // 1. tMaxR is the minimum and within bounds (t, t_end).
             // 2. The next radial step is within bounds.
             t = radial_params.tMaxR;
             current_voxel_ID_r += radial_params.tStepR;
+            change_r = radial_params.tStepR != 0;
         } else if (azimuthal_params.tMaxPhi < angular_params.tMaxTheta && azimuthal_params.tMaxPhi < radial_params.tMaxR
                    && t < azimuthal_params.tMaxPhi && azimuthal_params.tMaxPhi < t_end) {
             // tMaxPhi is the minimum and within bounds (t, t_end).
@@ -578,6 +582,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             current_voxel_ID_r += radial_params.tStepR;
             current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
             current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
+            change_r = radial_params.tStepR != 0;
         } else if (isKnEqual(azimuthal_params.tMaxPhi, angular_params.tMaxTheta)
                    && t < azimuthal_params.tMaxPhi && azimuthal_params.tMaxPhi < t_end) {
             // tMaxPhi, tMaxTheta equal intersection times within bounds (t, t_end).
@@ -585,6 +590,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
                 // radial intersection is the minimum.
                 t = radial_params.tMaxR;
                 current_voxel_ID_r += radial_params.tStepR;
+                change_r = radial_params.tStepR != 0;
             } else {
                 t = azimuthal_params.tMaxPhi;
                 current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
@@ -601,6 +607,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             } else {
                 t = angular_params.tMaxTheta;
                 current_voxel_ID_r += radial_params.tStepR;
+                change_r = radial_params.tStepR != 0;
                 current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
             }
         } else if (isKnEqual(radial_params.tMaxR, azimuthal_params.tMaxPhi) && t < radial_params.tMaxR
@@ -614,15 +621,23 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             } else {
                 t = radial_params.tMaxR;
                 current_voxel_ID_r += radial_params.tStepR;
+                change_r = radial_params.tStepR != 0;
                 current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
             }
         } else {
             // No hits are within bounds (t, t_end).
             return voxels;
         }
+
+        if (change_r) {
+            // Need to update the angular voxel boundary segments and the azimuthal voxel boundary segments.
+            const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r);
+            assert(false);
+            // TODO: Implement.
+        }
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
-                                 .angular_voxel=current_voxel_ID_theta,
-                                 .azimuthal_voxel=current_voxel_ID_phi});
+                          .angular_voxel=current_voxel_ID_theta,
+                          .azimuthal_voxel=current_voxel_ID_phi});
     }
     return voxels;
 }
