@@ -188,7 +188,6 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
 //    px_angular_two: TODO:(cgyurgyik): Documentation.
 //    py_angular_one:
 //    py_angular_two:
-//    point_array_y:
 //    t: The current time.
 //    t_end: The time of the ray exit from the grid.
 //
@@ -293,8 +292,10 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
 //    ray: The given ray to check for intersection.
 //    grid: The grid that the ray is intersecting with.
 //    current_voxel_ID_phi: The current azimuthal voxel ID.
-//    point_array_x: TODO:(cgyurgyik): Documentation.
-//    point_array_z:
+//    px_angular_one: // TODO(cgyurgyik): Documentation.
+//    px_anglar_two:
+//    pz_angular_one:
+//    pz_angular_two:
 //    t: The current time.
 //    t_end: The time of ray exit from the grid.
 //    v: The dot product between the ray's direction and the ray_sphere_vector.
