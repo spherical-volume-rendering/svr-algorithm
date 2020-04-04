@@ -29,19 +29,6 @@ inline bool isKnEqual(const Vec3& a, const Vec3& b, double absEpsilon=1e-12, dou
            diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * relEpsilon;
 }
 
-// Produces the corresponding angular or azimuthal voxel ID given two directions.
-// This is done using the four-quadrant inverse tangent of a two-dimensional plane. From this,
-// it will return signed values in the counterclockwise direction of the angles in the Euclidean plane between
-// the ray origin on the closed interval [-pi, pi].
-//
-// Note: With the current variable naming (x,y), we assume the point is on the XY plane.
-//       This function will work with any 2-dimensional plane.
-//       If you want a point on the XZ plane, then y is the z-coordinate, x is the x-coordinate.
-inline size_t getInitialVoxelID(double y, double x, size_t num_sections) {
-    const size_t current_voxel_ID = std::floor(std::atan2(y, x) * num_sections / ( 2 * M_PI));
-    return (current_voxel_ID + num_sections) % num_sections;
-}
-
 // The parameters returned by radialHit().
 struct RadialHitParameters {
     // The time at which a hit occurs for the ray at the next point of intersection with a radial section.
