@@ -424,27 +424,27 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     // Create an array of values representing the points of intersection between the lines corresponding
     // to angular voxel boundaries and the initial radial voxel of the ray.
-    std::vector<double> Px_angular(grid.numAngularVoxels());
-    std::vector<double> Py_angular(grid.numAngularVoxels());
-    std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels());
-    std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels());
+    std::vector<double> Px_angular(grid.numAngularVoxels() + 1);
+    std::vector<double> Py_angular(grid.numAngularVoxels() + 1);
+    std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
+    std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
     double k = 0;
     const double tau = 2 * M_PI;
-    while (!isKnEqual(k, tau)) {
+    while (!isKnEqual(k, tau + grid.deltaTheta())) {
         Px_angular[k] = current_r * std::cos(k) + grid.sphereCenter().x();
         Py_angular[k] = current_r * std::sin(k) + grid.sphereCenter().y();
         k += grid.deltaTheta();
     }
 
     k = 0;
-    while (!isKnEqual(k, tau)) {
+    while (!isKnEqual(k, tau + grid.deltaPhi())) {
         Px_azimuthal[k] = current_r * std::cos(k) + grid.sphereCenter().x();
         Pz_azimuthal[k] = current_r * std::sin(k) + grid.sphereCenter().z();
         k += grid.deltaPhi();
     }
 
-    size_t current_voxel_ID_theta;
-    size_t current_voxel_ID_phi;
+    size_t current_voxel_ID_theta = 0;
+    size_t current_voxel_ID_phi = 0;
     double a,b,c;
     if (isKnEqual(ray.origin(), grid.sphereCenter())) {
         // If the ray starts at the sphere's center, we need to perturb slightly along
@@ -474,7 +474,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
     // boundary.
     size_t i = 0;
-    while (i < Px_angular.size()) {
+    while (i < Px_angular.size() - 1) {
         const double px_diff = Px_angular[i] - Px_angular[i+1];
         const double py_diff = Py_angular[i] - Py_angular[i+1];
         const double px_p1_diff = Px_angular[i] - p1.x();
@@ -492,7 +492,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     }
 
     i = 0;
-    while (i < Px_azimuthal.size()) {
+    while (i < Px_azimuthal.size() - 1) {
         const double px_diff = Px_azimuthal[i] - Px_azimuthal[i+1];
         const double pz_diff = Pz_azimuthal[i] - Pz_azimuthal[i+1];
         const double px_p1_diff = Px_azimuthal[i] - p1.x();
@@ -508,7 +508,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         }
         ++i;
     }
-
     voxels.push_back({.radial_voxel=current_voxel_ID_r,
                       .angular_voxel=current_voxel_ID_theta,
                       .azimuthal_voxel=current_voxel_ID_phi});

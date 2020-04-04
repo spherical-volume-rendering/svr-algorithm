@@ -20,7 +20,7 @@ public:
             max_bound_(max_bound),
             num_radial_voxels_(num_radial_voxels),
             num_angular_voxels_(num_angular_voxels),
-            num_azimuthal_voxels_(num_angular_voxels),
+            num_azimuthal_voxels_(num_azimuthal_voxels),
             inv_num_radial_voxels_(1.0 / num_radial_voxels),
             inv_num_angular_voxels_(1.0 / num_angular_voxels),
             inv_num_azimuthal_voxels_(1.0 / num_azimuthal_voxels),
