@@ -60,6 +60,12 @@ struct AzimuthalHitParameters {
     size_t tStepPhi;
 };
 
+// A generalized set of hit parameters
+struct GenHitParameters {
+    double tMax;
+    size_t tStep;
+};
+
 // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
 // the ray and a radial section. This follows closely the mathematics presented in:
 // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
@@ -165,6 +171,83 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, si
     return radial_params;
 }
 
+// A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
+// is the 2-d plane that they exist in, this portion can be generalized to a single function.
+GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double perp_uv_max, double perp_uw_min,
+                                     double perp_uw_max, double perp_vw_min, double perp_vw_max, const BoundVec3& p,
+                                     const FreeVec3& v, double t, double t_end, double ray_plane_dir,
+                                     double num_voxels) noexcept {
+
+    const bool is_parallel_min = isKnEqual(perp_uv_min, 0.0);
+    const bool is_parallel_max = isKnEqual(perp_uv_max, 0.0);
+    double a, b;
+    bool is_intersect_min, is_intersect_max;
+    double t_min = 0.0;
+    if (!is_parallel_min) {
+        a = perp_vw_min / perp_uv_min;
+        b = perp_uw_min / perp_uv_min;
+        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
+            is_intersect_min = false;
+        } else {
+            is_intersect_min = true;
+            const BoundVec3 p_min(p.x() + v.x() * b, p.y() + v.y() * b, p.z() + v.z() * b);
+            t_min = ray.timeOfIntersectionAt(p_min);
+        }
+    } else {
+        is_intersect_min = false;
+    }
+    double t_max = 0.0;
+    if (!is_parallel_max) {
+        a = perp_vw_max / perp_uv_max;
+        b = perp_uw_max / perp_uv_max;
+        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
+            is_intersect_max = false;
+        } else {
+            is_intersect_max = true;
+            const BoundVec3 p_max(p.x() + v.x() * b, p.y() + v.y() * b, p.z() + v.z() * b);
+            t_max = ray.timeOfIntersectionAt(p_max);
+        }
+    } else {
+        is_intersect_max = false;
+    }
+    GenHitParameters params;
+    if (is_intersect_max && !is_intersect_min && t < t_max && t_max < t_end && !isKnEqual(t, t_max)) {
+        params.tStep = 1;
+        params.tMax= t_max;
+        return params;
+    }
+    if (is_intersect_min && !is_intersect_max && t < t_min && t_min < t_end && !isKnEqual(t, t_min)) {
+        params.tStep = -1;
+        params.tMax = t_min;
+        return params;
+    }
+    if (is_intersect_max && is_intersect_min) {
+        if (t < t_min && t_min < t_end && isKnEqual(t_min, t_max) && !isKnEqual(t, t_min)) {
+
+            params.tMax = t_max;
+            if (!isKnEqual(ray_plane_dir, 0.0)) {
+                params.tStep = -num_voxels / 2;
+            } else {
+                params.tStep = num_voxels / 2;
+            }
+            return params;
+        }
+        if (t < t_min && t_min < t_end && (t_min < t_max || isKnEqual(t, t_max)) && !isKnEqual(t, t_min)) {
+            params.tStep = -1;
+            params.tMax = t_min;
+            return params;
+        }
+        if (t < t_max && t_max < t_end && (t_max < t_min || isKnEqual(t, t_min)) && !isKnEqual(t, t_max)) {
+            params.tStep = 1;
+            params.tMax= t_max;
+            return params;
+        }
+    }
+    params.tStep= 0;
+    params.tMax = std::numeric_limits<double>::infinity();
+    return params;
+}
+
 // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
 // the ray and an angular section. The angular sections live in the XY plane.
 // Input:
@@ -199,75 +282,10 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
     const double perp_vw_min = v.x() * w_min.y() - v.y() * w_min.x();
     const double perp_vw_max = v.x() * w_max.y() - v.y() * w_max.x();
 
-    const bool is_parallel_min = isKnEqual(perp_uv_min, 0.0);
-    const bool is_parallel_max = isKnEqual(perp_uv_max, 0.0);
-
-    double a, b;
-    bool is_intersect_min, is_intersect_max;
-    double t_min = 0.0;
-    if (!is_parallel_min) {
-        a = perp_vw_min / perp_uv_min;
-        b = perp_uw_min / perp_uv_min;
-        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
-            is_intersect_min = false;
-        } else {
-            is_intersect_min = true;
-            const BoundVec3 p_min(p.x() + v.x() * b, p.y() + v.y() * b, p.z() + v.z() * b);
-            t_min = ray.timeOfIntersectionAt(p_min);
-        }
-    } else {
-        is_intersect_min = false;
-    }
-    double t_max = 0.0;
-    if (!is_parallel_max) {
-        a = perp_vw_max / perp_uv_max;
-        b = perp_uw_max / perp_uv_max;
-        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
-            is_intersect_max = false;
-        } else {
-            is_intersect_max = true;
-            const BoundVec3 p_max(p.x() + v.x() * b, p.y() + v.y() * b, p.z() + v.z() * b);
-            t_max = ray.timeOfIntersectionAt(p_max);
-        }
-    } else {
-        is_intersect_max = false;
-    }
-    printf("--\nt: %f \nt_end: %f \nTHETA t_max: %f \nTHETA t_min: %f\n--", t, t_end, t_max, t_min);
-    AngularHitParameters angular_params;
-    if (is_intersect_max && !is_intersect_min && t < t_max && t_max < t_end && !isKnEqual(t, t_max)) {
-        angular_params.tStepTheta = 1;
-        angular_params.tMaxTheta = t_max;
-        return angular_params;
-    }
-    if (is_intersect_min && !is_intersect_max && t < t_min && t_min < t_end && !isKnEqual(t, t_min)) {
-        angular_params.tStepTheta = -1;
-        angular_params.tMaxTheta = t_min;
-        return angular_params;
-    }
-    if (is_intersect_max && is_intersect_min) {
-        if (t < t_min && t_min < t_end && isKnEqual(t_min, t_max) && !isKnEqual(t, t_min)) {
-            angular_params.tMaxTheta = t_max;
-            if (!isKnEqual(ray.direction().y(), 0.0)) {
-                angular_params.tStepTheta = -grid.numAngularVoxels() / 2;
-            } else {
-                angular_params.tStepTheta = grid.numAngularVoxels() / 2;
-            }
-            return angular_params;
-        }
-        if (t < t_min && t_min < t_end && (t_min < t_max || isKnEqual(t, t_max)) && !isKnEqual(t, t_min)) {
-            angular_params.tStepTheta = -1;
-            angular_params.tMaxTheta = t_min;
-            return angular_params;
-        }
-        if (t < t_max && t_max < t_end && (t_max < t_min || isKnEqual(t, t_min)) && !isKnEqual(t, t_max)) {
-            angular_params.tStepTheta = 1;
-            angular_params.tMaxTheta = t_max;
-            return angular_params;
-        }
-    }
-    angular_params.tStepTheta = 0;
-    angular_params.tMaxTheta = std::numeric_limits<double>::infinity();
-    return angular_params;
+    const GenHitParameters params = generalizedPlaneHit(ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
+                                                        perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().y(),
+                                                        grid.numRadialVoxels());
+    return {.tMaxTheta=params.tMax, .tStepTheta=params.tStep};
 }
 
 // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is considered an intersection with
@@ -306,75 +324,10 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
     const double perp_vw_min = v.x() * w_min.z() - v.z() * w_min.x();
     const double perp_vw_max = v.x() * w_max.z() - v.z() * w_max.x();
 
-    const bool is_parallel_min = isKnEqual(perp_uv_min, 0.0);
-    const bool is_parallel_max = isKnEqual(perp_uv_max, 0.0);
-
-    double a, b;
-    bool is_intersect_min, is_intersect_max;
-    double t_min = 0.0;
-    if (!is_parallel_min) {
-        a = perp_vw_min / perp_uv_min;
-        b = perp_uw_min / perp_uv_min;
-        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
-            is_intersect_min = false;
-        } else {
-            is_intersect_min = true;
-            const BoundVec3 p_min(p.x() + v.x() * b, p.y() + v.y() * b, p.z() + v.z() * b);
-            t_min = ray.timeOfIntersectionAt(p_min);
-        }
-    } else {
-        is_intersect_min = false;
-    }
-    double t_max = 0.0;
-    if (!is_parallel_max) {
-        a = perp_vw_max / perp_uv_max;
-        b = perp_uw_max / perp_uv_max;
-        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
-            is_intersect_max = false;
-        } else {
-            is_intersect_max = true;
-            const BoundVec3 p_max(p.x() + v.x() * b, p.y() + v.y() * b, p.z() + v.z() * b);
-            t_max = ray.timeOfIntersectionAt(p_max);
-        }
-    } else {
-        is_intersect_max = false;
-    }
-    printf("--\nt: %f \nt_end: %f \nPHI t_max: %f \nPHI t_min: %f\n--", t, t_end, t_max, t_min);
-    AzimuthalHitParameters azimuthal_params;
-    if (is_intersect_max && !is_intersect_min && t < t_max && t_max < t_end && !isKnEqual(t, t_max)) {
-        azimuthal_params.tStepPhi = 1;
-        azimuthal_params.tMaxPhi = t_max;
-        return azimuthal_params;
-    }
-    if (is_intersect_min && !is_intersect_max && t < t_min && t_min < t_end && !isKnEqual(t, t_min)) {
-        azimuthal_params.tStepPhi = -1;
-        azimuthal_params.tMaxPhi = t_min;
-        return azimuthal_params;
-    }
-    if (is_intersect_max && is_intersect_min) {
-        if (t < t_min && t_min < t_end && isKnEqual(t_min, t_max) && !isKnEqual(t, t_min)) {
-            azimuthal_params.tMaxPhi = t_max;
-            if (!isKnEqual(ray.direction().z(), 0.0)) {
-                azimuthal_params.tStepPhi = -grid.numAzimuthalVoxels() / 2;
-            } else {
-                azimuthal_params.tStepPhi = grid.numAzimuthalVoxels() / 2;
-            }
-            return azimuthal_params;
-        }
-        if (t < t_min && t_min < t_end && (t_min < t_max || isKnEqual(t, t_max)) && !isKnEqual(t, t_min)) {
-            azimuthal_params.tStepPhi = -1;
-            azimuthal_params.tMaxPhi = t_min;
-            return azimuthal_params;
-        }
-        if (t < t_max && t_max < t_end && (t_max < t_min || isKnEqual(t, t_min)) && !isKnEqual(t, t_max)) {
-            azimuthal_params.tStepPhi = 1;
-            azimuthal_params.tMaxPhi = t_max;
-            return azimuthal_params;
-        }
-    }
-    azimuthal_params.tStepPhi = 0;
-    azimuthal_params.tMaxPhi = std::numeric_limits<double>::infinity();
-    return azimuthal_params;
+    const GenHitParameters params = generalizedPlaneHit(ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
+                                                        perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().z(),
+                                                        grid.numAzimuthalVoxels());
+    return {.tMaxPhi=params.tMax, .tStepPhi=params.tStep};
 }
 
 std::vector<SphericalVoxel>
@@ -423,22 +376,17 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
     std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
     double k = 0;
-    size_t index = 0;
     const double tau = 2 * M_PI;
-    while (!isKnEqual(k, tau + grid.deltaTheta())) {
+    for (size_t index = 0; index < Px_angular.size(); ++index) {
         Px_angular[index] = current_r * std::cos(k) + grid.sphereCenter().x();
         Py_angular[index] = current_r * std::sin(k) + grid.sphereCenter().y();
         k += grid.deltaTheta();
-        ++index;
     }
-
     k = 0;
-    index = 0;
-    while (!isKnEqual(k, tau + grid.deltaPhi())) {
+    for (size_t index = 0; index < Px_azimuthal.size(); ++index) {
         Px_azimuthal[index] = current_r * std::cos(k) + grid.sphereCenter().x();
         Pz_azimuthal[index] = current_r * std::sin(k) + grid.sphereCenter().z();
         k += grid.deltaPhi();
-        ++index;
     }
 
     size_t current_voxel_ID_theta = 0;
@@ -534,7 +482,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
                 Px_azimuthal[current_voxel_ID_phi], Px_azimuthal[current_voxel_ID_phi+1],
                 Pz_azimuthal[current_voxel_ID_phi], Pz_azimuthal[current_voxel_ID_phi+1], t, t_end);
         const bool radial_hit_out_of_bounds = current_voxel_ID_r + radial_params.tStepR == 0;
-        printf("\ntMaxR: %f\ntMaxTheta: %f\ntMaxPhi: %f", radial_params.tMaxR, angular_params.tMaxTheta, azimuthal_params.tMaxPhi);
+
         // Comparison between tMaxR, tMaxTheta, tMaxPhi.
         if (((angular_params.tMaxTheta < radial_params.tMaxR && radial_params.tMaxR < azimuthal_params.tMaxPhi)
              || radial_hit_out_of_bounds) && t < angular_params.tMaxTheta && angular_params.tMaxTheta < t_end &&
@@ -620,16 +568,16 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             for (int i = 0; i < Px_angular.size(); ++i) {
                 const double new_angular_x = grid.sphereCenter().x() - Px_angular[i];
                 const double new_angular_y = grid.sphereCenter().y() - Py_angular[i];
-                const double length = std::sqrt(new_angular_x * new_angular_x + new_angular_y * new_angular_y);
-                Px_angular[i] = grid.sphereCenter().x() - (new_r * length) * (grid.sphereCenter().x() - Px_angular[i]);
-                Py_angular[i] = grid.sphereCenter().y() - (new_r * length) * (grid.sphereCenter().y() - Py_angular[i]);
+                const double new_r_over_length = new_r / std::sqrt(new_angular_x * new_angular_x + new_angular_y * new_angular_y);
+                Px_angular[i] = grid.sphereCenter().x() - new_r_over_length * (grid.sphereCenter().x() - Px_angular[i]);
+                Py_angular[i] = grid.sphereCenter().y() - new_r_over_length * (grid.sphereCenter().y() - Py_angular[i]);
             }
             for (int i = 0; i < Px_azimuthal.size(); ++i) {
                 const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[i];
                 const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[i];
                 const double new_r_over_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x + new_azimuthal_z * new_azimuthal_z);
-                Px_azimuthal[i] = grid.sphereCenter().x() - (new_r_over_length) * (grid.sphereCenter().x() - Px_azimuthal[i]);
-                Pz_azimuthal[i] = grid.sphereCenter().z() - (new_r_over_length) * (grid.sphereCenter().z() - Pz_azimuthal[i]);
+                Px_azimuthal[i] = grid.sphereCenter().x() - new_r_over_length * (grid.sphereCenter().x() - Px_azimuthal[i]);
+                Pz_azimuthal[i] = grid.sphereCenter().z() - new_r_over_length * (grid.sphereCenter().z() - Pz_azimuthal[i]);
             }
             radius_has_changed = false;
         }
