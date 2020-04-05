@@ -376,7 +376,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
     std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
     double k = 0;
-    const double tau = 2 * M_PI;
     for (size_t index = 0; index < Px_angular.size(); ++index) {
         Px_angular[index] = current_r * std::cos(k) + grid.sphereCenter().x();
         Py_angular[index] = current_r * std::sin(k) + grid.sphereCenter().y();
