@@ -20,17 +20,29 @@ namespace {
                            const std::vector<size_t>& expected_theta_voxels,
                            const std::vector<size_t>& expected_phi_voxels) {
 
-        EXPECT_EQ(actual_voxels.size(), expected_radial_voxels.size());
-        EXPECT_EQ(actual_voxels.size(), expected_theta_voxels.size());
-        EXPECT_EQ(actual_voxels.size(), expected_phi_voxels.size());
-
-        int i = 0;
+        size_t i = 0;
+        bool has_different_voxel_values = false;
         for (const auto voxel : actual_voxels) {
+            if (!has_different_voxel_values &&
+                ( voxel.radial_voxel != expected_radial_voxels[i] ||
+                  voxel.angular_voxel != expected_theta_voxels[i] ||
+                  voxel.azimuthal_voxel != expected_phi_voxels[i])) {
+                has_different_voxel_values = true;
+            }
             EXPECT_EQ(voxel.radial_voxel, expected_radial_voxels[i]);
             EXPECT_EQ(voxel.angular_voxel, expected_theta_voxels[i]);
             EXPECT_EQ(voxel.azimuthal_voxel, expected_phi_voxels[i]);
-            ++i;
         }
+            if (has_different_voxel_values) {
+                size_t k = 0;
+                for (const auto voxel : actual_voxels) {
+                    printf("\nVoxel %lu", k);
+                    printf("\nActual:   {%lu, %lu, %lu}\nExpected: {%lu, %lu, %lu}\n",
+                           voxel.radial_voxel, voxel.angular_voxel, voxel.azimuthal_voxel,
+                           expected_radial_voxels[k], expected_theta_voxels[k], expected_phi_voxels[k]);
+                    ++k;
+                }
+            }
     }
 
     TEST(SphericalCoordinateTraversal, RayDoesNotEnterSphere) {
