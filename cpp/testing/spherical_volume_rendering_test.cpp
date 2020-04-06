@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "../spherical_volume_rendering_util.h"
 
 // Utilizes the Google Test suite.
@@ -19,30 +20,19 @@ namespace {
                            const std::vector<size_t>& expected_radial_voxels,
                            const std::vector<size_t>& expected_theta_voxels,
                            const std::vector<size_t>& expected_phi_voxels) {
-
-        size_t i = 0;
-        bool has_different_voxel_values = false;
-        for (const auto voxel : actual_voxels) {
-            if (!has_different_voxel_values &&
-                ( voxel.radial_voxel != expected_radial_voxels[i] ||
-                  voxel.angular_voxel != expected_theta_voxels[i] ||
-                  voxel.azimuthal_voxel != expected_phi_voxels[i])) {
-                has_different_voxel_values = true;
-            }
-            EXPECT_EQ(voxel.radial_voxel, expected_radial_voxels[i]);
-            EXPECT_EQ(voxel.angular_voxel, expected_theta_voxels[i]);
-            EXPECT_EQ(voxel.azimuthal_voxel, expected_phi_voxels[i]);
-        }
-            if (has_different_voxel_values) {
-                size_t k = 0;
-                for (const auto voxel : actual_voxels) {
-                    printf("\nVoxel %lu", k);
-                    printf("\nActual:   {%lu, %lu, %lu}\nExpected: {%lu, %lu, %lu}\n",
-                           voxel.radial_voxel, voxel.angular_voxel, voxel.azimuthal_voxel,
-                           expected_radial_voxels[k], expected_theta_voxels[k], expected_phi_voxels[k]);
-                    ++k;
-                }
-            }
+        const size_t num_voxels = actual_voxels.size();
+        std::vector<size_t> radial_voxels(num_voxels);
+        std::vector<size_t> theta_voxels(num_voxels);
+        std::vector<size_t> phi_voxels(num_voxels);
+        std::transform(actual_voxels.cbegin(), actual_voxels.cend(), radial_voxels.begin(),
+                [](const SphericalVoxel& sv) -> size_t {return sv.radial_voxel;});
+        std::transform(actual_voxels.cbegin(), actual_voxels.cend(), theta_voxels.begin(),
+                       [](const SphericalVoxel& sv) -> size_t {return sv.angular_voxel;});
+        std::transform(actual_voxels.cbegin(), actual_voxels.cend(), phi_voxels.begin(),
+                       [](const SphericalVoxel& sv) -> size_t {return sv.azimuthal_voxel;});
+        EXPECT_THAT(radial_voxels, testing::ContainerEq(expected_radial_voxels));
+        EXPECT_THAT(theta_voxels, testing::ContainerEq(expected_theta_voxels));
+        EXPECT_THAT(phi_voxels, testing::ContainerEq(expected_phi_voxels));
     }
 
     TEST(SphericalCoordinateTraversal, RayDoesNotEnterSphere) {
