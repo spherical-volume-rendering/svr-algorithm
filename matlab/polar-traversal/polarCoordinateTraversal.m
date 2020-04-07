@@ -192,8 +192,12 @@ previous_transition_flag = false;
 % will be used to compare with the cord length (t2 - t1) we calculated earlier 
 if verbose
     acc = 0.0;
-    fprintf("\n Cord length calculated in terms of time: %d\n", t2 - t1)
-  end
+    if t_begin < t1
+        fprintf("\n Cord length calculated in terms of time: %d\n", t2 - t1)
+    else
+        fprintf("\n Cord length calculated in terms of time: %d\n", t2 - t_begin)
+    end
+end
   
 while t < t_end
     % 1. Calculate tMaxR, tMaxTheta
