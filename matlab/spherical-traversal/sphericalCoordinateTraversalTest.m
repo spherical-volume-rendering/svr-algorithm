@@ -56,7 +56,7 @@ function testSphereCenteredAtOrigin(testCase)
 end
 
 % Change direction of ray slightly in the XY plane.
-function testRayChangesinXYPlane(testCase)
+function testRayOffsetinXYPlane(testCase)
     min_bound = [-20, -20.0, -20.0];
     max_bound = [20.0, 20.0, 20.0];
     ray_origin = [-13.0, -13.0, -13.0];
