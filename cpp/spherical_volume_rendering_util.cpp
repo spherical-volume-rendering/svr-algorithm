@@ -4,13 +4,15 @@
 #include <cmath>
 #include <limits>
 
-// Determines equality between two floating point numbers in two steps.
-// First, it uses the absolute epsilon, then it uses Knuth's
-// algorithm which uses relative epsilon.
-// Defaults the absolute epsilon to 1e-12, and relative epsilon to 1e-8.
+// Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
+// uses a modified version of an algorithm developed by Donald Knuth (which in turn relies upon relative epsilon).
+// Provides default values for the absolute and relative epsilon. The "Kn" in the function name is short for Knuth.
 // Related Boost document:
 //        https://www.boost.org/doc/libs/1_61_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/
 //        floating_point/floating_points_comparison_theory.html#equ1
+// Related reading:
+//        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
+//        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
 inline bool isKnEqual(double a, double b, double absEpsilon=1e-12, double relEpsilon=1e-8) {
     const double diff = std::abs(a - b);
     if (diff <= absEpsilon) { return true; }

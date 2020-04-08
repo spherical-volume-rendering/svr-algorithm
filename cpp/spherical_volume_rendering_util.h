@@ -22,8 +22,8 @@
 //    t_end > t_begin >= 0.0
 //
 // Returns:
-//    A vector of the spherical coordinate voxels traversed. Recall that if a radial hit occurs,
-//    The azimuthal and angular voxels will remain the same as before.
+//    A vector of the spherical coordinate voxels traversed. Recall that if, for example, a radial hit occurs,
+//    The azimuthal and angular voxels will remain the same as before. This applies for each traversal.
 //
 // Notes: For further documentation and visualization, see the Progress Report for the algorithm:
 // https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?usp=sharing
