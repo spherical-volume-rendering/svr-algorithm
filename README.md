@@ -22,6 +22,5 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 - John Amanatides and Andrew Woo. A fast voxel traversal algorithm for ray tracing. In Eurographics ’87, pages 3–10, 1987.
 - James Foley, Andries van Dam, Steven Feiner & John Hughes, "Clipping Lines" in Computer Graphics (3rd Edition) (2013)
 - Paul S. Heckbert, editor. Graphics Gems IV.  Academic Press Professional, Inc., USA, 1994.
-- Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley
-Professional; 3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
+- Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional; 3rd edition.
 - Joseph O'Rourke, "Search and  Intersection" in Computational Geometry in C (2nd Edition) (1998)
