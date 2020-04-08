@@ -254,7 +254,7 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
 // Input:
 //    ray: The given ray to check for intersection.
 //    grid: The grid that the ray is intersecting with.
-//    p*_angular_*: Points of intersection between the lines corresponding to angular voxels
+//    p*_angular_*: Points of intersection between the lines corresponding to angular voxels.
 //    boundaries and the initial radial voxel of the ray.
 //    t: The current time.
 //    t_end: The time of the ray exit from the grid.
@@ -292,7 +292,7 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
 // Input:
 //    ray: The given ray to check for intersection.
 //    grid: The grid that the ray is intersecting with.
-//    p*_azimuthal_*: Points of intersection between the lines corresponding to azimuthal voxels
+//    p*_azimuthal_*: Points of intersection between the lines corresponding to azimuthal voxels.
 //    boundaries and the initial radial voxel of the ray.
 //    t: The current time.
 //    t_end: The time of ray exit from the grid.
