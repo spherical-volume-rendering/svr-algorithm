@@ -57,7 +57,7 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
         expected_phi_voxels = [2,2,2,2,0,0,0,0]
         self.verifyVoxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
-    def test_ray_direction_slightyl_offset_in_XY_plane(self):
+    def test_ray_direction_slightly_offset_in_XY_plane(self):
         ray_origin = np.array([-13.0, -13.0, -13.0])
         ray_direction = np.array([1.0, 1.5, 1.0])
         min_bound = np.array([-20.0, -20.0, -20.0])
