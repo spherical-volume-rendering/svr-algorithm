@@ -172,13 +172,12 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, st
 
 // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
 // is the 2-d plane that they exist in, this portion can be generalized to a single function. The calculations
-// presented below follow closely the works of ([Foley et al, 1996], [O'Rourke, 1998]).
-// Reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
+// presented below follow closely the works of [Foley et al, 1996], [O'Rourke, 1998].
+// Quick reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
 GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double perp_uv_max, double perp_uw_min,
                                      double perp_uw_max, double perp_vw_min, double perp_vw_max, const BoundVec3& p,
                                      const FreeVec3& v, double t, double t_end, double ray_plane_dir,
                                      double num_voxels) noexcept {
-
     const bool is_parallel_min = isKnEqual(perp_uv_min, 0.0);
     const bool is_parallel_max = isKnEqual(perp_uv_max, 0.0);
     double a, b;
@@ -280,7 +279,6 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
     const double perp_uw_max = u_max.x() * w_max.y() - u_max.y() * w_max.x();
     const double perp_vw_min = v.x() * w_min.y() - v.y() * w_min.x();
     const double perp_vw_max = v.x() * w_max.y() - v.y() * w_max.x();
-
     const GenHitParameters params = generalizedPlaneHit(ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
                                                         perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().y(),
                                                         grid.numRadialVoxels());
@@ -320,7 +318,6 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
     const double perp_uw_max = u_max.x() * w_max.z() - u_max.z() * w_max.x();
     const double perp_vw_min = v.x() * w_min.z() - v.z() * w_min.x();
     const double perp_vw_max = v.x() * w_max.z() - v.z() * w_max.x();
-
     const GenHitParameters params = generalizedPlaneHit(ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
                                                         perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().z(),
                                                         grid.numAzimuthalVoxels());
@@ -366,8 +363,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     std::size_t current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - current_r) / grid.deltaRadius();
 
     // Create an array of values representing the points of intersection between the lines corresponding
-    // to angular voxel boundaries and the initial radial voxel of the ray. This is similar for azimuthal voxel
-    // boundaries, but across the XZ plane instead.
+    // to angular voxel boundaries and the initial radial voxel of the ray in the XY plane. This is similar for
+    // azimuthal voxel boundaries, but in the XZ plane instead.
     std::vector<double> Px_angular(grid.numAngularVoxels() + 1);
     std::vector<double> Py_angular(grid.numAngularVoxels() + 1);
     std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
@@ -471,11 +468,11 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
                                                             v, previous_transition_flag);
         previous_transition_flag = radial_params.previous_transition_flag;
         const AngularHitParameters angular_params = angularHit(ray, grid,
-                Px_angular[current_voxel_ID_theta+1], Px_angular[current_voxel_ID_theta+2],
-                Py_angular[current_voxel_ID_theta+1], Py_angular[current_voxel_ID_theta+2], t, t_end);
+                Px_angular[current_voxel_ID_theta+0], Px_angular[current_voxel_ID_theta+1],
+                Py_angular[current_voxel_ID_theta+0], Py_angular[current_voxel_ID_theta+1], t, t_end);
         const AzimuthalHitParameters azimuthal_params = azimuthalHit(ray, grid,
-                Px_azimuthal[current_voxel_ID_phi+1], Px_azimuthal[current_voxel_ID_phi+2],
-                Pz_azimuthal[current_voxel_ID_phi+1], Pz_azimuthal[current_voxel_ID_phi+2], t, t_end);
+                Px_azimuthal[current_voxel_ID_phi+0], Px_azimuthal[current_voxel_ID_phi+1],
+                Pz_azimuthal[current_voxel_ID_phi+0], Pz_azimuthal[current_voxel_ID_phi+1], t, t_end);
         const bool radial_hit_out_of_bounds = current_voxel_ID_r + radial_params.tStepR == 0;
 
         // Comparison between tMaxR, tMaxTheta, tMaxPhi.
