@@ -414,8 +414,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         b = grid.sphereCenter().y() - ray.origin().y();
         c = grid.sphereCenter().z() - ray.origin().z();
     }
-    const double inv_length = 1.0 / std::sqrt(a * a + b * b + c * c);
-    const BoundVec3 p1 = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r * inv_length);
+    const BoundVec3 p1 = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r / std::sqrt(a * a + b * b + c * c));
 
     // p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
     // points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
