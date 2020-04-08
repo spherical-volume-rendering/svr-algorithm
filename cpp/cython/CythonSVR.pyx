@@ -11,7 +11,8 @@ cdef extern from "../spherical_volume_rendering_util.h":
 
     vector[SphericalVoxel] sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
                                                                double* min_bound, double* max_bound,
-                                                               size_t num_radial_voxels, size_t num_angular_voxels,
+                                                               size_t num_radial_voxels,
+                                                               size_t num_angular_voxels,
                                                                size_t num_azimuthal_voxels, double* sphere_center,
                                                                double sphere_max_radius, double t_begin, double t_end)
 

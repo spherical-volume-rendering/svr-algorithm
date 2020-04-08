@@ -8,9 +8,9 @@
 
 // Represents a spherical voxel coordinate.
     struct SphericalVoxel {
-        size_t radial_voxel;
-        size_t angular_voxel;
-        size_t azimuthal_voxel;
+        std::size_t radial_voxel;
+        std::size_t angular_voxel;
+        std::size_t azimuthal_voxel;
     };
 
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the 'ray' over the spherical voxel grid
@@ -33,8 +33,9 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
 // Simplified parameters to Cythonize the function; implementation remains the same as above.
 std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
                                                               double* min_bound, double* max_bound,
-                                                              size_t num_radial_voxels, size_t num_angular_voxels,
-                                                              size_t num_azimuthal_voxels, double* sphere_center,
+                                                                std::size_t num_radial_voxels,
+                                                                std::size_t num_angular_voxels,
+                                                                std::size_t num_azimuthal_voxels, double* sphere_center,
                                                               double sphere_max_radius, double t_begin,
                                                               double t_end) noexcept;
 

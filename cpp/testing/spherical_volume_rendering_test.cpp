@@ -16,19 +16,19 @@
 namespace {
     // Determines equality amongst actual spherical voxels, and the expected spherical voxels.
     void expectEqualVoxels(const std::vector<SphericalVoxel>& actual_voxels,
-                           const std::vector<size_t>& expected_radial_voxels,
-                           const std::vector<size_t>& expected_theta_voxels,
-                           const std::vector<size_t>& expected_phi_voxels) {
-        const size_t num_voxels = actual_voxels.size();
-        std::vector<size_t> radial_voxels(num_voxels);
-        std::vector<size_t> theta_voxels(num_voxels);
-        std::vector<size_t> phi_voxels(num_voxels);
+                           const std::vector<std::size_t>& expected_radial_voxels,
+                           const std::vector<std::size_t>& expected_theta_voxels,
+                           const std::vector<std::size_t>& expected_phi_voxels) {
+        const std::size_t num_voxels = actual_voxels.size();
+        std::vector<std::size_t> radial_voxels(num_voxels);
+        std::vector<std::size_t> theta_voxels(num_voxels);
+        std::vector<std::size_t> phi_voxels(num_voxels);
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), radial_voxels.begin(),
-                [](const SphericalVoxel& sv) -> size_t { return sv.radial_voxel; });
+                [](const SphericalVoxel& sv) -> std::size_t { return sv.radial_voxel; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), theta_voxels.begin(),
-                       [](const SphericalVoxel& sv) -> size_t { return sv.angular_voxel; });
+                       [](const SphericalVoxel& sv) -> std::size_t { return sv.angular_voxel; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), phi_voxels.begin(),
-                       [](const SphericalVoxel& sv) -> size_t { return sv.azimuthal_voxel; });
+                       [](const SphericalVoxel& sv) -> std::size_t { return sv.azimuthal_voxel; });
         EXPECT_THAT(radial_voxels, testing::ContainerEq(expected_radial_voxels));
         EXPECT_THAT(theta_voxels, testing::ContainerEq(expected_theta_voxels));
         EXPECT_THAT(phi_voxels, testing::ContainerEq(expected_phi_voxels));
@@ -39,9 +39,9 @@ namespace {
         const BoundVec3 max_bound(30.0, 30.0, 30.0);
         const BoundVec3 sphere_center(15.0, 15.0, 15.0);
         const double sphere_max_radius = 10.0;
-        const size_t num_radial_sections = 4;
-        const size_t num_angular_sections = 8;
-        const size_t num_azimuthal_sections = 4;
+        const std::size_t num_radial_sections = 4;
+        const std::size_t num_angular_sections = 8;
+        const std::size_t num_azimuthal_sections = 4;
         const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                       num_angular_sections,
                                       num_azimuthal_sections, sphere_center, sphere_max_radius);
@@ -60,9 +60,9 @@ namespace {
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
-        const size_t num_radial_sections = 4;
-        const size_t num_angular_sections = 4;
-        const size_t num_azimuthal_sections = 4;
+        const std::size_t num_radial_sections = 4;
+        const std::size_t num_angular_sections = 4;
+        const std::size_t num_azimuthal_sections = 4;
         const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                       num_angular_sections,
                                       num_azimuthal_sections, sphere_center, sphere_max_radius);
@@ -73,9 +73,9 @@ namespace {
         const double t_end = 30.0;
 
         const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-        const std::vector<size_t> expected_radial_voxels = {1,2,3,4,4,3,2,1};
-        const std::vector<size_t> expected_theta_voxels = {2,2,2,2,0,0,0,0};
-        const std::vector<size_t> expected_phi_voxels = {2,2,2,2,0,0,0,0};
+        const std::vector<std::size_t> expected_radial_voxels = {1,2,3,4,4,3,2,1};
+        const std::vector<std::size_t> expected_theta_voxels = {2,2,2,2,0,0,0,0};
+        const std::vector<std::size_t> expected_phi_voxels = {2,2,2,2,0,0,0,0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
@@ -84,9 +84,9 @@ namespace {
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
-        const size_t num_radial_sections = 4;
-        const size_t num_angular_sections = 4;
-        const size_t num_azimuthal_sections = 4;
+        const std::size_t num_radial_sections = 4;
+        const std::size_t num_angular_sections = 4;
+        const std::size_t num_azimuthal_sections = 4;
         const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                       num_angular_sections,
                                       num_azimuthal_sections, sphere_center, sphere_max_radius);
@@ -97,9 +97,9 @@ namespace {
         const double t_end = 30.0;
 
         const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-        const std::vector<size_t> expected_radial_voxels = {1,2,2,3,2,2,2,1};
-        const std::vector<size_t> expected_theta_voxels = {2,2,1,1,1,1,0,0};
-        const std::vector<size_t> expected_phi_voxels = {2,2,2,2,2,0,0,0};
+        const std::vector<std::size_t> expected_radial_voxels = {1,2,2,3,2,2,2,1};
+        const std::vector<std::size_t> expected_theta_voxels = {2,2,1,1,1,1,0,0};
+        const std::vector<std::size_t> expected_phi_voxels = {2,2,2,2,2,0,0,0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
@@ -108,9 +108,9 @@ namespace {
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
-        const size_t num_radial_sections = 4;
-        const size_t num_angular_sections = 4;
-        const size_t num_azimuthal_sections = 4;
+        const std::size_t num_radial_sections = 4;
+        const std::size_t num_angular_sections = 4;
+        const std::size_t num_azimuthal_sections = 4;
         const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                       num_angular_sections,
                                       num_azimuthal_sections, sphere_center, sphere_max_radius);
@@ -121,9 +121,9 @@ namespace {
         const double t_end = 30.0;
 
         const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-        const std::vector<size_t> expected_radial_voxels = {1,2,3,4,4,3,2,1};
-        const std::vector<size_t> expected_theta_voxels = {2,2,2,2,0,0,0,0};
-        const std::vector<size_t> expected_phi_voxels = {2,2,2,2,0,0,0,0};
+        const std::vector<std::size_t> expected_radial_voxels = {1,2,3,4,4,3,2,1};
+        const std::vector<std::size_t> expected_theta_voxels = {2,2,2,2,0,0,0,0};
+        const std::vector<std::size_t> expected_phi_voxels = {2,2,2,2,0,0,0,0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 }
