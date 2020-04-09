@@ -28,7 +28,7 @@ enum VoxelIntersectionType {
                                 "RadialAzimuthal", "AngularAzimuthal", "RadialAngularAzimuthal"};
     static std::vector<std::string> VoxelIntersectionTypeToString(ENUM_NAMES, std::end(ENUM_NAMES));
     const char* T_OR_F[] = {"False", "True"};
-    static std::vector<std::string> BooleanValue(T_OR_F, std::end(T_OR_F));
+    static std::vector<std::string> BooleanToString(T_OR_F, std::end(T_OR_F));
 #endif
 
 // The parameters returned by radialHit().
@@ -226,15 +226,15 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
     printf("\nAngular Hit DEBUG:"
            "\nis_parallel_min: %s"
            "\nis_parallel_max: %s",
-           BooleanValue[is_parallel_min].data(),
-           BooleanValue[is_parallel_max].data());
+           BooleanToString[is_parallel_min].data(),
+           BooleanToString[is_parallel_max].data());
 #endif
 #ifdef AZIMUTHAL_HIT_DEBUG
     printf("\nAzimuthal Hit DEBUG:"
            "\nis_parallel_min: %s"
            "\nis_parallel_max: %s",
-           BooleanValue[is_parallel_min].data(),
-           BooleanValue[is_parallel_max].data());
+           BooleanToString[is_parallel_min].data(),
+           BooleanToString[is_parallel_max].data());
 #endif
     double a, b;
     bool is_intersect_min, is_intersect_max;
@@ -272,15 +272,15 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
     printf("\nAngular Hit DEBUG:"
            "\nis_intersect_min: %s"
            "\nis_intersect_max: %s",
-           BooleanValue[is_intersect_min].data(),
-           BooleanValue[is_intersect_max].data());
+           BooleanToString[is_intersect_min].data(),
+           BooleanToString[is_intersect_max].data());
 #endif
 #ifdef AZIMUTHAL_HIT_DEBUG
     printf("\nAzimuthal Hit DEBUG:"
            "\nis_intersect_min: %s"
            "\nis_intersect_max: %s",
-           BooleanValue[is_intersect_min].data(),
-           BooleanValue[is_intersect_max].data());
+           BooleanToString[is_intersect_min].data(),
+           BooleanToString[is_intersect_max].data());
 #endif
     GenHitParameters params;
     if (is_intersect_max && !is_intersect_min && t < t_max && t_max < t_end && !isKnEqual(t, t_max)) {
@@ -702,21 +702,21 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
            "\n     previous_transition_flag: %s",
            radial_params.tMaxR,
            radial_params.tStepR,
-           BooleanValue[radial_params.within_bounds].data(),
-           BooleanValue[radial_params.exits_voxel_bounds].data(),
-           BooleanValue[radial_params.previous_transition_flag].data());
+           BooleanToString[radial_params.within_bounds].data(),
+           BooleanToString[radial_params.exits_voxel_bounds].data(),
+           BooleanToString[radial_params.previous_transition_flag].data());
     printf("\nAngular parameters:"
            "\n     tMaxTheta: %f"
            "\n     tStepTheta: %zu"
            "\n     within_bounds: %s",
            angular_params.tMaxTheta, angular_params.tStepTheta,
-           BooleanValue[angular_params.within_bounds].data());
+           BooleanToString[angular_params.within_bounds].data());
     printf("\nAzimuthal parameters:"
            "\n     tMaxPhi: %f"
            "\n     tStepPhi: %zu"
            "\n     within_bounds: %s",
            azimuthal_params.tMaxPhi, azimuthal_params.tStepPhi,
-           BooleanValue[azimuthal_params.within_bounds].data());
+           BooleanToString[azimuthal_params.within_bounds].data());
 #endif
         const auto voxel_intersection = calculateMinimumIntersection(radial_params, angular_params, azimuthal_params);
 #ifdef TRAVERSAL_DEBUG
@@ -780,7 +780,8 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
                           .angular_voxel=current_voxel_ID_theta,
                           .azimuthal_voxel=current_voxel_ID_phi});
 #ifdef TRAVERSAL_DEBUG
-        printf("\nVoxel Pushed: {radial=%zu, theta=%zu, phi=%zu}", current_voxel_ID_r, current_voxel_ID_theta, current_voxel_ID_phi);
+        printf("\nVoxel Pushed: {radial=%zu, theta=%zu, phi=%zu}", current_voxel_ID_r,
+                current_voxel_ID_theta, current_voxel_ID_phi);
 #endif
 #ifdef ANGULAR_HIT_DEBUG
         printf("\n--Voxel Pushed: {theta=%zu}", current_voxel_ID_theta);
