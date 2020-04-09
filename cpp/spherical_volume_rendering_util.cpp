@@ -16,32 +16,6 @@ enum VoxelIntersectionType {
     RadialAngularAzimuthal = 6
 };
 
-// Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
-// uses a modified version of an algorithm developed by Donald Knuth (which in turn relies upon relative epsilon).
-// Provides default values for the absolute and relative epsilon. The "Kn" in the function name is short for Knuth.
-// Related Boost document:
-//        https://www.boost.org/doc/libs/1_61_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/
-//        floating_point/floating_points_comparison_theory.html#equ1
-// Related reading:
-//        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
-//        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
-inline bool isKnEqual(double a, double b, double absEpsilon=1e-12, double relEpsilon=1e-8) noexcept {
-    const double diff = std::abs(a - b);
-    if (diff <= absEpsilon) { return true; }
-    return diff <= std::max(std::abs(a), std::abs(b)) * relEpsilon;
-}
-
-// Overloaded version that checks for Knuth equality with vector cartesian coordinates.
-inline bool isKnEqual(const Vec3& a, const Vec3& b, double absEpsilon=1e-12, double relEpsilon=1e-8) noexcept {
-    const double diff_x = std::abs(a.x() - b.x());
-    const double diff_y = std::abs(a.y() - b.y());
-    const double diff_z = std::abs(a.z() - b.z());
-    if (diff_x <= absEpsilon && diff_y <= absEpsilon && diff_z <= absEpsilon) { return true; }
-    return diff_x <= std::max(std::abs(a.x()), std::abs(b.x())) * relEpsilon &&
-           diff_y <= std::max(std::abs(a.y()), std::abs(b.y())) * relEpsilon &&
-           diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * relEpsilon;
-}
-
 // The parameters returned by radialHit().
 struct RadialHitParameters {
     // The time at which a hit occurs for the ray at the next point of intersection with a radial section.
@@ -87,6 +61,32 @@ struct GenHitParameters {
     std::size_t tStep;
     bool within_bounds;
 };
+
+// Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
+// uses a modified version of an algorithm developed by Donald Knuth (which in turn relies upon relative epsilon).
+// Provides default values for the absolute and relative epsilon. The "Kn" in the function name is short for Knuth.
+// Related Boost document:
+//        https://www.boost.org/doc/libs/1_61_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/
+//        floating_point/floating_points_comparison_theory.html#equ1
+// Related reading:
+//        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
+//        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
+inline bool isKnEqual(double a, double b, double absEpsilon=1e-12, double relEpsilon=1e-8) noexcept {
+    const double diff = std::abs(a - b);
+    if (diff <= absEpsilon) { return true; }
+    return diff <= std::max(std::abs(a), std::abs(b)) * relEpsilon;
+}
+
+// Overloaded version that checks for Knuth equality with vector cartesian coordinates.
+inline bool isKnEqual(const Vec3& a, const Vec3& b, double absEpsilon=1e-12, double relEpsilon=1e-8) noexcept {
+    const double diff_x = std::abs(a.x() - b.x());
+    const double diff_y = std::abs(a.y() - b.y());
+    const double diff_z = std::abs(a.z() - b.z());
+    if (diff_x <= absEpsilon && diff_y <= absEpsilon && diff_z <= absEpsilon) { return true; }
+    return diff_x <= std::max(std::abs(a.x()), std::abs(b.x())) * relEpsilon &&
+           diff_y <= std::max(std::abs(a.y()), std::abs(b.y())) * relEpsilon &&
+           diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * relEpsilon;
+}
 
 // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
 // the ray and a radial section. This follows closely the mathematics presented in:
@@ -356,6 +356,55 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
     return {.tMaxPhi=params.tMax, .tStepPhi=params.tStep,  .within_bounds=params.within_bounds};
 }
 
+// Calculates the voxel(s) with the minimal tMax for the next intersection. Since t is being updated
+// with each interval of the algorithm, this must check the following cases:
+// 1. tMaxTheta is the minimum.
+// 2. tMaxR is the minimum.
+// 3. tMaxPhi is the minimum.
+// 4. tMaxTheta, tMaxR, tMaxPhi equal intersection.
+// 5. tMaxR, tMaxPhi equal intersection.
+// 6. tMaxR, tMaxTheta equal intersection.
+// 7. tMaxPhi, tMaxTheta equal intersection.
+//
+// For each case, the following must hold:
+// (1) t < tMax < t_end
+// (2) If its a radial hit, the next step must be within bounds.
+//
+// In cases 1, 3 we also need to change the requirements slightly for when
+// the ray intersects a single shell, but still crosses an angular or azimuthal boundary:
+// (1) tMax must be within bounds
+// (2) Either tMax is a strict minimum OR the next step is a radial exit.
+inline VoxelIntersectionType calculateMinimumIntersection(const RadialHitParameters& rad_params,
+                                                          const AngularHitParameters& ang_params,
+                                                          const AzimuthalHitParameters& azi_params) noexcept {
+    if (ang_params.within_bounds && ((ang_params.tMaxTheta < rad_params.tMaxR
+                                      && rad_params.tMaxR < azi_params.tMaxPhi) || rad_params.exits_voxel_bounds)) {
+        return VoxelIntersectionType::Angular;
+    }
+    if (rad_params.within_bounds && rad_params.tMaxR < ang_params.tMaxTheta
+               && rad_params.tMaxR < azi_params.tMaxPhi) {
+        return VoxelIntersectionType::Radial;
+    }
+    if (azi_params.within_bounds && ((azi_params.tMaxPhi < ang_params.tMaxTheta
+                                      && azi_params.tMaxPhi < rad_params.tMaxR) || rad_params.exits_voxel_bounds)) {
+        return VoxelIntersectionType::Azimuthal;
+    }
+    if (rad_params.within_bounds && isKnEqual(rad_params.tMaxR, ang_params.tMaxTheta)
+               && isKnEqual(rad_params.tMaxR, azi_params.tMaxPhi)) {
+        return VoxelIntersectionType::RadialAngularAzimuthal;
+    }
+    if (azi_params.within_bounds && isKnEqual(azi_params.tMaxPhi, ang_params.tMaxTheta)) {
+        return VoxelIntersectionType::AngularAzimuthal;
+    }
+    if (rad_params.within_bounds && isKnEqual(ang_params.tMaxTheta, rad_params.tMaxR)) {
+        return VoxelIntersectionType::RadialAngular;
+    }
+    if (rad_params.within_bounds && isKnEqual(rad_params.tMaxR, azi_params.tMaxPhi)) {
+        return VoxelIntersectionType::RadialAzimuthal;
+    }
+    return VoxelIntersectionType::None;
+}
+
 std::vector<SphericalVoxel>
 sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid, double t_begin,
                                        double t_end) noexcept {
@@ -485,9 +534,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     // Find the maximum time the ray will be in the grid.
     const double max_discriminant = grid.sphereMaxRadius() * grid.sphereMaxRadius() - (ray_sphere_vector_dot - v * v);
     const double max_d = std::sqrt(max_discriminant);
-    const double grid_exit_t1 = ray.timeOfIntersectionAt(v - max_d);
-    const double grid_exit_t2 = ray.timeOfIntersectionAt(v + max_d);
-    const double t_grid_exit = std::max(grid_exit_t1, grid_exit_t2);
+    const double t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
 
     /* TRAVERSAL PHASE */
     double t = t_begin;
@@ -496,106 +543,65 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     t_end = std::min(t_grid_exit, t_end);
 
     while (t < t_end) {
-        const auto rad_params = radialHit(ray, grid, current_voxel_ID_r, ray_sphere_vector_dot, t,
-                                          t_end, v, previous_transition_flag);
-        previous_transition_flag = rad_params.previous_transition_flag;
-        const auto ang_params = angularHit(ray, grid,
-                                           Px_angular[current_voxel_ID_theta+0], Px_angular[current_voxel_ID_theta+1],
-                                           Py_angular[current_voxel_ID_theta+0], Py_angular[current_voxel_ID_theta+1],
-                                           t, t_end);
-        const auto azi_params = azimuthalHit(ray, grid,
-                                             Px_azimuthal[current_voxel_ID_phi+0], Px_azimuthal[current_voxel_ID_phi+1],
-                                             Pz_azimuthal[current_voxel_ID_phi+0], Pz_azimuthal[current_voxel_ID_phi+1],
-                                             t, t_end);
-
-        // Comparison between tMaxR, tMaxTheta, tMaxPhi.
-        VoxelIntersectionType voxel_intersection;
-        if (((ang_params.tMaxTheta < rad_params.tMaxR && rad_params.tMaxR < azi_params.tMaxPhi)
-             || rad_params.exits_voxel_bounds) && ang_params.within_bounds) {
-            // 1. tMaxTheta is the minimum and within bounds (t, t_end).
-            // 2. When the ray only intersects one radial shell but crosses an angular boundary,
-            // we need the second half of the disjunction.
-            voxel_intersection = VoxelIntersectionType::Angular;
-        } else if (rad_params.tMaxR < ang_params.tMaxTheta && rad_params.tMaxR < azi_params.tMaxPhi
-                   && rad_params.within_bounds) {
-            // 1. tMaxR is the minimum and within bounds (t, t_end).
-            // 2. The next radial step is within bounds.
-            voxel_intersection = VoxelIntersectionType::Radial;
-        } else if (azi_params.tMaxPhi < ang_params.tMaxTheta && azi_params.tMaxPhi < rad_params.tMaxR
-                   && azi_params.within_bounds) {
-            voxel_intersection = VoxelIntersectionType::Azimuthal;
-        } else if (isKnEqual(azi_params.tMaxPhi, ang_params.tMaxTheta)
-                   && isKnEqual(rad_params.tMaxR, azi_params.tMaxPhi) && rad_params.within_bounds) {
-            // 1. Triple boundary intersection within bounds (t, t_end).
-            // 2. Radial hit is within bounds.
-            voxel_intersection = VoxelIntersectionType::RadialAngularAzimuthal;
-        } else if (isKnEqual(azi_params.tMaxPhi, ang_params.tMaxTheta) && azi_params.within_bounds) {
-            // tMaxPhi, tMaxTheta equal intersection times within bounds (t, t_end).
-            voxel_intersection = (rad_params.tMaxR < azi_params.tMaxPhi && rad_params.within_bounds) ?
-                                 VoxelIntersectionType::Radial : VoxelIntersectionType::AngularAzimuthal;
-        } else if (isKnEqual(ang_params.tMaxTheta, rad_params.tMaxR) && rad_params.within_bounds) {
-            // 1. tMaxR, tMaxTheta equal intersection times within bounds (t, t_end).
-            // 2. Radial hit is within bounds.
-                voxel_intersection = (azi_params.tMaxPhi < ang_params.tMaxTheta && azi_params.within_bounds) ?
-                                     VoxelIntersectionType::Azimuthal : VoxelIntersectionType::RadialAngular;
-        } else if (isKnEqual(rad_params.tMaxR, azi_params.tMaxPhi) && rad_params.within_bounds) {
-            // 1. tMaxR, tMaxPhi equal intersection times within bounds (t, t_end).
-            // 2. Radial hit is within bounds.
-                voxel_intersection = (ang_params.tMaxTheta < rad_params.tMaxR && ang_params.within_bounds) ?
-                                     VoxelIntersectionType::Angular : VoxelIntersectionType::RadialAzimuthal;
-        } else {
-            // No hits are within bounds (t, t_end).
-            voxel_intersection = VoxelIntersectionType::None;
-        }
-
+        const auto radial_params = radialHit(ray, grid, current_voxel_ID_r, ray_sphere_vector_dot, t,
+                                             t_end, v, previous_transition_flag);
+        previous_transition_flag = radial_params.previous_transition_flag;
+        const auto angular_params = angularHit(ray, grid, Px_angular[current_voxel_ID_theta],
+                                               Px_angular[current_voxel_ID_theta+1],
+                                               Py_angular[current_voxel_ID_theta],
+                                               Py_angular[current_voxel_ID_theta+1], t, t_end);
+        const auto azimuthal_params = azimuthalHit(ray, grid, Px_azimuthal[current_voxel_ID_phi],
+                                                   Px_azimuthal[current_voxel_ID_phi+1],
+                                                   Pz_azimuthal[current_voxel_ID_phi],
+                                                   Pz_azimuthal[current_voxel_ID_phi+1], t, t_end);
+        const auto voxel_intersection = calculateMinimumIntersection(radial_params, angular_params, azimuthal_params);
         switch(voxel_intersection) {
             case Radial: {
-                t = rad_params.tMaxR;
-                current_voxel_ID_r += rad_params.tStepR;
-                radius_has_stepped = rad_params.tStepR != 0;
+                t = radial_params.tMaxR;
+                current_voxel_ID_r += radial_params.tStepR;
+                radius_has_stepped = radial_params.tStepR != 0;
                 break;
             }
             case Angular: {
-                t = ang_params.tMaxTheta;
-                current_voxel_ID_theta = (current_voxel_ID_theta + ang_params.tStepTheta) % grid.numAngularVoxels();
+                t = angular_params.tMaxTheta;
+                current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
                 break;
             }
             case Azimuthal: {
-                t = azi_params.tMaxPhi;
-                current_voxel_ID_phi = (current_voxel_ID_phi + azi_params.tStepPhi) % grid.numAzimuthalVoxels();
+                t = azimuthal_params.tMaxPhi;
+                current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
                 break;
             }
             case RadialAngular: {
-                t = rad_params.tMaxR;
-                current_voxel_ID_r += rad_params.tStepR;
-                current_voxel_ID_theta = (current_voxel_ID_theta + ang_params.tStepTheta) % grid.numAngularVoxels();
-                radius_has_stepped = rad_params.tStepR != 0;
+                t = radial_params.tMaxR;
+                current_voxel_ID_r += radial_params.tStepR;
+                current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
+                radius_has_stepped = radial_params.tStepR != 0;
                 break;
             }
             case RadialAzimuthal: {
-                t = rad_params.tMaxR;
-                current_voxel_ID_r += rad_params.tStepR;
-                current_voxel_ID_phi = (current_voxel_ID_phi + azi_params.tStepPhi) % grid.numAzimuthalVoxels();
-                radius_has_stepped = rad_params.tStepR != 0;
+                t = radial_params.tMaxR;
+                current_voxel_ID_r += radial_params.tStepR;
+                current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
+                radius_has_stepped = radial_params.tStepR != 0;
                 break;
             }
             case AngularAzimuthal: {
-                t = ang_params.tMaxTheta;
-                current_voxel_ID_theta = (current_voxel_ID_theta + ang_params.tStepTheta) % grid.numAngularVoxels();
-                current_voxel_ID_phi = (current_voxel_ID_phi + azi_params.tStepPhi) % grid.numAzimuthalVoxels();
+                t = angular_params.tMaxTheta;
+                current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
+                current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
                 break;
             }
             case RadialAngularAzimuthal: {
-                t = rad_params.tMaxR;
-                current_voxel_ID_r += rad_params.tStepR;
-                current_voxel_ID_theta = (current_voxel_ID_theta + ang_params.tStepTheta) % grid.numAngularVoxels();
-                current_voxel_ID_phi = (current_voxel_ID_phi + azi_params.tStepPhi) % grid.numAzimuthalVoxels();
-                radius_has_stepped = rad_params.tStepR != 0;
+                t = radial_params.tMaxR;
+                current_voxel_ID_r += radial_params.tStepR;
+                current_voxel_ID_theta = (current_voxel_ID_theta + angular_params.tStepTheta) % grid.numAngularVoxels();
+                current_voxel_ID_phi = (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
+                radius_has_stepped = radial_params.tStepR != 0;
                 break;
             }
             case None: { return voxels; }
         }
-
         if (radius_has_stepped) {
             // Need to update the angular and azimuthal voxel boundary segments.
             const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
@@ -621,6 +627,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             }
             radius_has_stepped = false;
         }
+
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
                           .angular_voxel=current_voxel_ID_theta,
                           .azimuthal_voxel=current_voxel_ID_phi});
