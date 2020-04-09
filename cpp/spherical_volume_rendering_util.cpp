@@ -408,6 +408,35 @@ inline VoxelIntersectionType calculateMinimumIntersection(const RadialHitParamet
     return VoxelIntersectionType::None;
 }
 
+// Each time the radius changes, we need to update the angular and azimuthal voxel boundary segments.
+// This function updates Px_angular, Py_angular, Px_azimuthal, and Pz_azimuthal.
+inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
+                                std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
+                                const SphericalVoxelGrid& grid, std::size_t current_voxel_ID_r) noexcept {
+    // Need to update the angular and azimuthal voxel boundary segments.
+    const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
+    for (std::size_t l = 0; l < Px_angular.size(); ++l) {
+        const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
+        const double new_angular_y = grid.sphereCenter().y() - Py_angular[l];
+        const double new_r_over_length = new_r / std::sqrt(new_angular_x * new_angular_x +
+                                                           new_angular_y * new_angular_y +
+                                                           grid.sphereCenter().z() * grid.sphereCenter().z());
+        Px_angular[l] = grid.sphereCenter().x() - new_r_over_length * (grid.sphereCenter().x() - Px_angular[l]);
+        Py_angular[l] = grid.sphereCenter().y() - new_r_over_length * (grid.sphereCenter().y() - Py_angular[l]);
+    }
+    for (std::size_t m = 0; m < Px_azimuthal.size(); ++m) {
+        const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
+        const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[m];
+        const double new_r_over_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x +
+                                                           grid.sphereCenter().y() * grid.sphereCenter().y() +
+                                                           new_azimuthal_z * new_azimuthal_z);
+        Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_length *
+                                                    (grid.sphereCenter().x() - Px_azimuthal[m]);
+        Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_length *
+                                                    (grid.sphereCenter().z() - Pz_azimuthal[m]);
+    }
+}
+
 std::vector<SphericalVoxel>
 sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid, double t_begin,
                                        double t_end) noexcept {
@@ -606,31 +635,9 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             case None: { return voxels; }
         }
         if (radius_has_stepped) {
-            // Need to update the angular and azimuthal voxel boundary segments.
-            const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
-            for (std::size_t l = 0; l < Px_angular.size(); ++l) {
-                const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
-                const double new_angular_y = grid.sphereCenter().y() - Py_angular[l];
-                const double new_r_over_length = new_r / std::sqrt(new_angular_x * new_angular_x +
-                                                                   new_angular_y * new_angular_y +
-                                                                   grid.sphereCenter().z() * grid.sphereCenter().z());
-                Px_angular[l] = grid.sphereCenter().x() - new_r_over_length * (grid.sphereCenter().x() - Px_angular[l]);
-                Py_angular[l] = grid.sphereCenter().y() - new_r_over_length * (grid.sphereCenter().y() - Py_angular[l]);
-            }
-            for (std::size_t m = 0; m < Px_azimuthal.size(); ++m) {
-                const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
-                const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[m];
-                const double new_r_over_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x +
-                                                                   grid.sphereCenter().y() * grid.sphereCenter().y() +
-                                                                   new_azimuthal_z * new_azimuthal_z);
-                Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_length *
-                                  (grid.sphereCenter().x() - Px_azimuthal[m]);
-                Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_length *
-                                  (grid.sphereCenter().z() - Pz_azimuthal[m]);
-            }
+            updateVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, current_voxel_ID_r);
             radius_has_stepped = false;
         }
-
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
                           .angular_voxel=current_voxel_ID_theta,
                           .azimuthal_voxel=current_voxel_ID_phi});
