@@ -4,16 +4,16 @@
 #include <cmath>
 #include <limits>
 
-// TODO: Document.
-enum MinimumValueIntersectionType {
-                       None = -1,
-                       Radial = 0,
-                       Angular = 1,
-                       Azimuthal = 2,
-                       RadialAngular = 3,
-                       RadialAzimuthal = 4,
-                       AngularAzimuthal = 5,
-                       RadialAngularAzimuthal = 6
+// The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
+enum VoxelIntersectionType {
+    None = -1,
+    Radial = 0,
+    Angular = 1,
+    Azimuthal = 2,
+    RadialAngular = 3,
+    RadialAzimuthal = 4,
+    AngularAzimuthal = 5,
+    RadialAngularAzimuthal = 6
 };
 
 // Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
@@ -490,48 +490,48 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         const bool angular_within_bounds = t < angular_params.tMaxTheta && angular_params.tMaxTheta < t_end;
         const bool azimuthal_within_bounds = t < azimuthal_params.tMaxPhi && azimuthal_params.tMaxPhi < t_end;
 
-        MinimumValueIntersectionType minimum_type;
+        VoxelIntersectionType voxel_intersection;
         // Comparison between tMaxR, tMaxTheta, tMaxPhi.
         if (((angular_params.tMaxTheta < radial_params.tMaxR && radial_params.tMaxR < azimuthal_params.tMaxPhi)
              || radial_hit_exits_voxel_bounds) && angular_within_bounds) {
             // 1. tMaxTheta is the minimum and within bounds (t, t_end).
             // 2. When the ray only intersects one radial shell but crosses an angular boundary,
             // we need the second half of the disjunction.
-            minimum_type = MinimumValueIntersectionType::Angular;
+            voxel_intersection = VoxelIntersectionType::Angular;
         } else if (radial_params.tMaxR < angular_params.tMaxTheta && radial_params.tMaxR < azimuthal_params.tMaxPhi
                    && radial_within_bounds) {
             // 1. tMaxR is the minimum and within bounds (t, t_end).
             // 2. The next radial step is within bounds.
-            minimum_type = MinimumValueIntersectionType::Radial;
+            voxel_intersection = VoxelIntersectionType::Radial;
         } else if (azimuthal_params.tMaxPhi < angular_params.tMaxTheta && azimuthal_params.tMaxPhi < radial_params.tMaxR
                    && azimuthal_within_bounds) {
-            minimum_type = MinimumValueIntersectionType::Azimuthal;
+            voxel_intersection = VoxelIntersectionType::Azimuthal;
         } else if (isKnEqual(azimuthal_params.tMaxPhi, angular_params.tMaxTheta)
                    && isKnEqual(radial_params.tMaxR, azimuthal_params.tMaxPhi) && radial_within_bounds) {
             // 1. Triple boundary intersection within bounds (t, t_end).
             // 2. Radial hit is within bounds.
-            minimum_type = MinimumValueIntersectionType::RadialAngularAzimuthal;
+            voxel_intersection = VoxelIntersectionType::RadialAngularAzimuthal;
             radius_has_changed = radial_params.tStepR != 0;
         } else if (isKnEqual(azimuthal_params.tMaxPhi, angular_params.tMaxTheta) && azimuthal_within_bounds) {
             // tMaxPhi, tMaxTheta equal intersection times within bounds (t, t_end).
-            minimum_type = (radial_params.tMaxR < azimuthal_params.tMaxPhi && radial_within_bounds) ?
-                           MinimumValueIntersectionType::Radial : MinimumValueIntersectionType::AngularAzimuthal;
+            voxel_intersection = (radial_params.tMaxR < azimuthal_params.tMaxPhi && radial_within_bounds) ?
+                                 VoxelIntersectionType::Radial : VoxelIntersectionType::AngularAzimuthal;
         } else if (isKnEqual(angular_params.tMaxTheta, radial_params.tMaxR) && radial_within_bounds) {
             // 1. tMaxR, tMaxTheta equal intersection times within bounds (t, t_end).
             // 2. Radial hit is within bounds.
-                minimum_type = (azimuthal_params.tMaxPhi < angular_params.tMaxTheta && azimuthal_within_bounds) ?
-                               MinimumValueIntersectionType::Azimuthal : MinimumValueIntersectionType::RadialAngular;
+                voxel_intersection = (azimuthal_params.tMaxPhi < angular_params.tMaxTheta && azimuthal_within_bounds) ?
+                                     VoxelIntersectionType::Azimuthal : VoxelIntersectionType::RadialAngular;
         } else if (isKnEqual(radial_params.tMaxR, azimuthal_params.tMaxPhi) && radial_within_bounds) {
             // 1. tMaxR, tMaxPhi equal intersection times within bounds (t, t_end).
             // 2. Radial hit is within bounds.
-                minimum_type = (angular_params.tMaxTheta < radial_params.tMaxR && angular_within_bounds) ?
-                               MinimumValueIntersectionType::Angular : MinimumValueIntersectionType::RadialAzimuthal;
+                voxel_intersection = (angular_params.tMaxTheta < radial_params.tMaxR && angular_within_bounds) ?
+                                     VoxelIntersectionType::Angular : VoxelIntersectionType::RadialAzimuthal;
         } else {
             // No hits are within bounds (t, t_end).
-            minimum_type = MinimumValueIntersectionType::None;
+            voxel_intersection = VoxelIntersectionType::None;
         }
 
-        switch(minimum_type) {
+        switch(voxel_intersection) {
             case Radial: {
                 t = radial_params.tMaxR;
                 current_voxel_ID_r += radial_params.tStepR;
