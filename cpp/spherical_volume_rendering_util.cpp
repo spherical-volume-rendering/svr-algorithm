@@ -413,7 +413,6 @@ inline VoxelIntersectionType calculateMinimumIntersection(const RadialHitParamet
 inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
                                 std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
                                 const SphericalVoxelGrid& grid, std::size_t current_voxel_ID_r) noexcept {
-    // Need to update the angular and azimuthal voxel boundary segments.
     const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
     for (std::size_t l = 0; l < Px_angular.size(); ++l) {
         const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
