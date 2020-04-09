@@ -99,7 +99,6 @@ struct GenHitParameters {
 //    t: The current time.
 //    t_end: The maximum allowable time before the minimum of (sphere, grid) exit.
 //    v: The dot product between the ray's unit direction and the ray_sphere_vector.
-//    tol: The allowed tolerance for float point error.
 //    prev_transition_flag: Determines whether the previous radial traversal was a 'transition'. A transition
 //                          is defined as the change in sign of tStepR. Another way this can be determined is
 //                          sequential hits with equal radii.
@@ -290,7 +289,7 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
 //    p*_angular_*: Points of intersection between the lines corresponding to angular voxels.
 //    boundaries and the initial radial voxel of the ray.
 //    t: The current time.
-//    t_end: The maximum allowable time before the minimum of (sphere, grid) exit.
+//    t_end: The maximum allowable time before the minimum of (sphere exit, grid exit, t_end).
 //
 // Returns: the corresponding angular hit parameters.
 AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, double px_angular_one,
@@ -327,9 +326,8 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
 //    p*_azimuthal_*: Points of intersection between the lines corresponding to azimuthal voxels.
 //    boundaries and the initial radial voxel of the ray.
 //    t: The current time.
-//    t_end: The maximum allowable time before the minimum of (sphere, grid) exit.
+//    t_end: The maximum allowable time before the minimum of (sphere exit, grid exit, t_end).
 //    v: The dot product between the ray's direction and the ray_sphere_vector.
-//    tol: The allowed tolerance for float point error.
 //
 // Returns: the corresponding azimuthal hit parameters.
 AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& grid,  double px_angular_one,
