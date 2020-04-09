@@ -379,7 +379,7 @@ inline VoxelIntersectionType calculateMinimumIntersection(const RadialHitParamet
                                                           const AzimuthalHitParameters& azi_params) noexcept {
     // TODO(cgyurgyik: There's quite a bit of duplication in the boolean expressions here.
     //                 While this attempts to place the most common cases first, it may be quicker just to reduce
-    //                 the boolean algebra. Wait until benchmarking on large scale to test.
+    //                 the boolean algebra. Wait until benchmarking on large scale to determine change.
     if (ang_params.within_bounds && ((ang_params.tMaxTheta < rad_params.tMaxR
                                       && rad_params.tMaxR < azi_params.tMaxPhi) || rad_params.exits_voxel_bounds)) {
         return VoxelIntersectionType::Angular;
