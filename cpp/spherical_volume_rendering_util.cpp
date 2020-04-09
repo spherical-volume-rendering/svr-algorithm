@@ -211,8 +211,9 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
     bool is_intersect_min, is_intersect_max;
     double t_min = 0.0;
     if (!is_parallel_min) {
-        a = perp_vw_min / perp_uv_min;
-        b = perp_uw_min / perp_uv_min;
+        const double inv_perp_uv_min = 1.0 / perp_uv_min;
+        a = perp_vw_min * inv_perp_uv_min;
+        b = perp_uw_min * inv_perp_uv_min;
         if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
             is_intersect_min = false;
         } else {
@@ -225,8 +226,9 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
     }
     double t_max = 0.0;
     if (!is_parallel_max) {
-        a = perp_vw_max / perp_uv_max;
-        b = perp_uw_max / perp_uv_max;
+        const double inv_perp_uv_max = 1.0 / perp_uv_max;
+        a = perp_vw_max * inv_perp_uv_max;
+        b = perp_uw_max * inv_perp_uv_max;
         if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
             is_intersect_max = false;
         } else {
