@@ -11,10 +11,10 @@ cdef extern from "../spherical_volume_rendering_util.h":
 
     vector[SphericalVoxel] sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
                                                                double* min_bound, double* max_bound,
-                                                               size_t num_radial_voxels, size_t num_angular_voxels,
+                                                               size_t num_radial_voxels,
+                                                               size_t num_angular_voxels,
                                                                size_t num_azimuthal_voxels, double* sphere_center,
-                                                               double sphere_max_radius, double t_begin, double t_end,
-                                                               double tol)
+                                                               double sphere_max_radius, double t_begin, double t_end)
 
 
 @cython.boundscheck(False)
@@ -27,7 +27,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
                           int num_radial_voxels, int num_angular_voxels, int num_azimuthal_voxels,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center,
                           np.float64_t sphere_max_radius, np.float64_t t_begin,
-                          np.float64_t t_end, np.float64_t tol):
+                          np.float64_t t_end):
     '''
     Spherical Coordinate Voxel Traversal Algorithm
 
@@ -44,7 +44,6 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
            sphere_max_radius: The maximum radius of the sphere.
            t_begin: The beginning time of the ray.
            t_end: The end time of the ray.
-           tol: The tolerance for floating point error.
 
     Returns:
            A numpy array of the spherical voxel coordinates.
@@ -67,7 +66,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     cdef vector[SphericalVoxel] v
     v = sphericalCoordinateVoxelTraversalCy(&ray_origin[0], &ray_direction[0], &min_bound[0], &max_bound[0],
                                             num_radial_voxels, num_angular_voxels, num_azimuthal_voxels,
-                                            &sphere_center[0], sphere_max_radius, t_begin, t_end, tol)
+                                            &sphere_center[0], sphere_max_radius, t_begin, t_end)
 
     cdef np.ndarray voxels = np.empty(v.size() * 3, dtype=int)
     for i in range(v.size()):
