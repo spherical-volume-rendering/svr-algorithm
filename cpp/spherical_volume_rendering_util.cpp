@@ -5,10 +5,10 @@
 #include <limits>
 
 #define DEBUG_STRINGS
-#define INITIALIZATION_DEBUG
+// #define INITIALIZATION_DEBUG
 #define TRAVERSAL_DEBUG
-#define ANGULAR_HIT_DEBUG
-#define AZIMUTHAL_HIT_DEBUG
+// #define ANGULAR_HIT_DEBUG
+// #define AZIMUTHAL_HIT_DEBUG
 
 // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
 enum VoxelIntersectionType {
@@ -24,7 +24,8 @@ enum VoxelIntersectionType {
 
 #ifdef DEBUG_STRINGS
     #include <string>
-    const char* ENUM_NAMES[] = {"None","Radial",  "Angular",  "Azimuthal", "RadialAngular", "RadialAzimuthal", "AngularAzimuthal", "RadialAngularAzimuthal"};
+    const char* ENUM_NAMES[] = {"None", "Radial", "Angular", "Azimuthal", "RadialAngular",
+                                "RadialAzimuthal", "AngularAzimuthal", "RadialAngularAzimuthal"};
     static std::vector<std::string> VoxelIntersectionTypeToString(ENUM_NAMES, std::end(ENUM_NAMES));
     const char* T_OR_F[] = {"False", "True"};
     static std::vector<std::string> BooleanValue(T_OR_F, std::end(T_OR_F));
