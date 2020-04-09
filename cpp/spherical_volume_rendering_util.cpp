@@ -522,7 +522,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     // p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
     // points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
-    // boundary.
+    // boundary. This is similar for azimuthal boundaries.
     std::size_t i = 0;
     while (i < Px_angular.size() - 1) {
         const double px_diff = Px_angular[i] - Px_angular[i+1];
