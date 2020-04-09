@@ -242,7 +242,7 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
     GenHitParameters params;
     if (is_intersect_max && !is_intersect_min && t < t_max && t_max < t_end && !isKnEqual(t, t_max)) {
         params.tStep = 1;
-        params.tMax= t_max;
+        params.tMax = t_max;
         params.within_bounds = true;
         return params;
     }
