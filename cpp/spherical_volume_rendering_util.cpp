@@ -316,7 +316,7 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
     const double perp_vw_max = v.x() * w_max.y() - v.y() * w_max.x();
     const GenHitParameters params = generalizedPlaneHit(ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
                                                         perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().y(),
-                                                        grid.numRadialVoxels());
+                                                        grid.numAngularVoxels());
     return {.tMaxTheta=params.tMax, .tStepTheta=params.tStep, .within_bounds=params.within_bounds};
 }
 
