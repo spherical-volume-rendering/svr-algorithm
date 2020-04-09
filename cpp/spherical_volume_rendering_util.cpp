@@ -413,7 +413,6 @@ inline VoxelIntersectionType calculateMinimumIntersection(const RadialHitParamet
 inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
                                 std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
                                 const SphericalVoxelGrid& grid, std::size_t current_voxel_ID_r) noexcept {
-    // Need to update the angular and azimuthal voxel boundary segments.
     const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
     for (std::size_t l = 0; l < Px_angular.size(); ++l) {
         const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
@@ -523,7 +522,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 
     // p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
     // points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
-    // boundary.
+    // boundary. This is similar for azimuthal boundaries.
     std::size_t i = 0;
     while (i < Px_angular.size() - 1) {
         const double px_diff = Px_angular[i] - Px_angular[i+1];
