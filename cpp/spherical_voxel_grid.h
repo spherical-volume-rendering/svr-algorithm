@@ -13,14 +13,14 @@
 //   sphere_max_radius > 0.0
 struct SphericalVoxelGrid {
 public:
-    SphericalVoxelGrid(const BoundVec3& min_bound, const BoundVec3& max_bound,
-            size_t num_radial_voxels, size_t num_angular_voxels, size_t num_azimuthal_voxels,
-            const BoundVec3& sphere_center, double sphere_max_radius) :
+    SphericalVoxelGrid(const BoundVec3& min_bound, const BoundVec3& max_bound, std::size_t num_radial_voxels,
+                       std::size_t num_angular_voxels, std::size_t num_azimuthal_voxels, const BoundVec3& sphere_center,
+                       double sphere_max_radius) :
             min_bound_(min_bound),
             max_bound_(max_bound),
             num_radial_voxels_(num_radial_voxels),
             num_angular_voxels_(num_angular_voxels),
-            num_azimuthal_voxels_(num_angular_voxels),
+            num_azimuthal_voxels_(num_azimuthal_voxels),
             inv_num_radial_voxels_(1.0 / num_radial_voxels),
             inv_num_angular_voxels_(1.0 / num_angular_voxels),
             inv_num_azimuthal_voxels_(1.0 / num_azimuthal_voxels),
@@ -28,13 +28,16 @@ public:
             sphere_max_radius_(sphere_max_radius),
             delta_radius_(sphere_max_radius * inv_num_radial_voxels_),
             delta_theta_(2 * M_PI * inv_num_angular_voxels_),
-            delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_) {}
+            delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_),
+            inv_delta_radius_(1.0 / delta_radius_),
+            inv_delta_theta_(1.0 / delta_theta_),
+            inv_delta_phi_(1.0 / delta_phi_) {}
 
-    inline size_t numRadialVoxels() const { return num_radial_voxels_; }
+    inline std::size_t numRadialVoxels() const { return num_radial_voxels_; }
 
-    inline size_t numAngularVoxels() const { return num_angular_voxels_; }
+    inline std::size_t numAngularVoxels() const { return num_angular_voxels_; }
 
-    inline size_t numAzimuthalVoxels() const { return num_azimuthal_voxels_; }
+    inline std::size_t numAzimuthalVoxels() const { return num_azimuthal_voxels_; }
 
     inline double invNumRadialVoxels() const { return inv_num_radial_voxels_; }
 
@@ -56,6 +59,12 @@ public:
 
     inline double deltaPhi() const { return delta_phi_; }
 
+    inline double invDeltaRadius() const { return inv_delta_radius_; }
+
+    inline double invDeltaTheta() const { return inv_delta_theta_; }
+
+    inline double invDeltaPhi() const { return inv_delta_phi_; }
+
 private:
     // The minimum bound vector of the voxel grid.
     const BoundVec3 min_bound_;
@@ -64,7 +73,7 @@ private:
     const BoundVec3 max_bound_;
 
     // The number of radial, angular, and azimuthal voxels.
-    const size_t num_radial_voxels_, num_angular_voxels_, num_azimuthal_voxels_;
+    const std::size_t num_radial_voxels_, num_angular_voxels_, num_azimuthal_voxels_;
 
     // Similar to num_x_voxels, but 1 / x, where x is the number of voxels.
     const double inv_num_radial_voxels_, inv_num_angular_voxels_, inv_num_azimuthal_voxels_;
@@ -76,10 +85,10 @@ private:
     const double sphere_max_radius_;
 
     // The maximum sphere radius divided by the number of radial sections.
-    const double delta_radius_;
+    const double delta_radius_, inv_delta_radius_;
 
     // Sphere's area divided by the number of angular sections and number of azimuthal sections respectively.
-    const double delta_theta_, delta_phi_;
+    const double delta_theta_, delta_phi_, inv_delta_theta_, inv_delta_phi_;
 };
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H

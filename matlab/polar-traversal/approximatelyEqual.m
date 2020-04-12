@@ -3,6 +3,7 @@ function [check] = approximatelyEqual(a, b, absEpsilon, relEpsilon)
     diff = abs(a-b);
     if diff <= absEpsilon
         check = true;
+        return;
     end
     check = (diff <= max(abs(a),abs(b))*relEpsilon);
 end

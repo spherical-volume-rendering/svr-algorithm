@@ -7,7 +7,10 @@ function [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, curren
 %    current_voxel_ID_theta: the (angular) ID of current voxel.
 %    num_angular_sections: number of total angular sections on the grid.
 %    circle_center: The center of the circle.
-%    pointArray:
+%    pointArray:  An array of values representing the points of intersection between 
+%                 the lines corresponding to angular voxels boundaries and the initial 
+%                 radial voxel of the ray. These correspond to current_voxel_ID_theta+1
+%                 and current_voxel_ID_theta+2.
 %    t: The current time parameter of the ray.
 %    t_end:
 %    verbose: Determines whether debug print statements are enabled.
