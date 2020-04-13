@@ -91,26 +91,26 @@ struct GenHitParameters {
 // Related reading:
 //        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
 //        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
-inline bool isKnEqual(double a, double b, double absEpsilon=ABS_EPSILON, double relEpsilon=REL_EPSILON) noexcept {
+inline bool isKnEqual(double a, double b) noexcept {
     const double diff = std::abs(a - b);
-    if (diff <= absEpsilon) { return true; }
-    return diff <= std::max(std::abs(a), std::abs(b)) * relEpsilon;
+    if (diff <= ABS_EPSILON) { return true; }
+    return diff <= std::max(std::abs(a), std::abs(b)) * REL_EPSILON;
 }
 
 // Overloaded version that checks for Knuth equality with vector cartesian coordinates.
-inline bool isKnEqual(const Vec3& a, const Vec3& b, double absEpsilon=ABS_EPSILON, double relEpsilon=REL_EPSILON) noexcept {
+inline bool isKnEqual(const Vec3& a, const Vec3& b) noexcept {
     const double diff_x = std::abs(a.x() - b.x());
     const double diff_y = std::abs(a.y() - b.y());
     const double diff_z = std::abs(a.z() - b.z());
-    if (diff_x <= absEpsilon && diff_y <= absEpsilon && diff_z <= absEpsilon) { return true; }
-    return diff_x <= std::max(std::abs(a.x()), std::abs(b.x())) * relEpsilon &&
-           diff_y <= std::max(std::abs(a.y()), std::abs(b.y())) * relEpsilon &&
-           diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * relEpsilon;
+    if (diff_x <= ABS_EPSILON && diff_y <= ABS_EPSILON && diff_z <= ABS_EPSILON) { return true; }
+    return diff_x <= std::max(std::abs(a.x()), std::abs(b.x())) * REL_EPSILON &&
+           diff_y <= std::max(std::abs(a.y()), std::abs(b.y())) * REL_EPSILON &&
+           diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * REL_EPSILON;
 }
 
 // Uses the Knuth algorithm in KnEqual() to ensure that a is strictly less than b.
-inline bool strictlyLessThan(double a, double b, double absEpsilon=ABS_EPSILON, double relEpsilon=REL_EPSILON) noexcept {
-    return a < b && !isKnEqual(a, b, absEpsilon, relEpsilon);
+inline bool strictlyLessThan(double a, double b) noexcept {
+    return a < b && !isKnEqual(a, b);
 }
 
 // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
