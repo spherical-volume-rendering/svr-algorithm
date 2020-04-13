@@ -25,14 +25,18 @@ struct RadialHitParameters {
     // The time at which a hit occurs for the ray at the next point of intersection with a radial section.
     // This is always calculated from the ray origin.
     double tMaxR;
+
     // The voxel traversal value of a radial step: 0, +1, -1. This is added to the current radial voxel.
     int tStepR;
+
     // Determine whether the current voxel traversal was a 'transition'. This is necessary to determine when
     // The radial steps should go from negative to positive or vice-versa,
     // since the radial voxels go from 1..N, where N is the number of radial sections.
     bool previous_transition_flag;
+
     // Determines whether the current hit is within time bounds (t, t_end).
     bool within_bounds;
+
     // Determines whether the current voxel hit has caused a step outside of the spherical voxel grid.
     bool exits_voxel_bounds;
 };
@@ -42,8 +46,10 @@ struct AngularHitParameters {
     // The time at which a hit occurs for the ray at the next point of intersection with an angular section.
     // This is always calculated from the ray origin.
     double tMaxTheta;
+
     // The voxel traversal value of an angular step: 0, +1, -1. This is added to the current angular voxel.
     int tStepTheta;
+
     // Determines whether the current hit is within time bounds (t, t_end).
     bool within_bounds;
 };
@@ -53,8 +59,10 @@ struct AzimuthalHitParameters {
     // The time at which a hit occurs for the ray at the next point of intersection with an azimuthal section.
     // This is always calculated from the ray origin.
     double tMaxPhi;
+
     // The voxel traversal value of an azimuthal step: 0, +1, -1. This is added to the current azimuthal voxel.
     int tStepPhi;
+
     // Determines whether the current hit is within time bounds (t, t_end).
     bool within_bounds;
 };
@@ -300,7 +308,8 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
 //
 // Returns: the corresponding angular hit parameters.
 AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, double px_angular_one,
-        double px_angular_two, double py_angular_one, double py_angular_two, double t, double t_end) noexcept {
+                                double px_angular_two, double py_angular_one, double py_angular_two,
+                                double t, double t_end) noexcept {
     // Ray segment vector.
     const BoundVec3 p = ray.pointAtParameter(t);
     const BoundVec3 p_end = ray.pointAtParameter(t_end);
@@ -338,7 +347,8 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
 //
 // Returns: the corresponding azimuthal hit parameters.
 AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& grid,  double px_azimuthal_one,
-        double px_azimuthal_two, double pz_azimuthal_one, double pz_azimuthal_two, double t, double t_end) noexcept {
+                                    double px_azimuthal_two, double pz_azimuthal_one, double pz_azimuthal_two,
+                                    double t, double t_end) noexcept {
     // Ray segment vector.
     const BoundVec3 p = ray.pointAtParameter(t);
     const BoundVec3 p_end = ray.pointAtParameter(t_end);
@@ -382,8 +392,8 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
 // (1) tMax must be within bounds
 // (2) Either tMax is a strict minimum OR the next step is a radial exit.
 inline VoxelIntersectionType minimumIntersection(const RadialHitParameters& rad_params,
-                                                          const AngularHitParameters& ang_params,
-                                                          const AzimuthalHitParameters& azi_params) noexcept {
+                                                 const AngularHitParameters& ang_params,
+                                                 const AzimuthalHitParameters& azi_params) noexcept {
     if (ang_params.within_bounds && ((ang_params.tMaxTheta < rad_params.tMaxR
                                       && rad_params.tMaxR < azi_params.tMaxPhi) || rad_params.exits_voxel_bounds)) {
         return VoxelIntersectionType::Angular;
@@ -602,8 +612,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     t_end = std::min(t_grid_exit, t_end);
 
     while (t < t_end) {
-        const auto radial_params = radialHit(ray, grid, current_voxel_ID_r, ray_sphere_vector_dot, t,
-                                             t_end, v, previous_transition_flag);
+        const auto radial_params = radialHit(ray, grid, current_voxel_ID_r, ray_sphere_vector_dot,
+                                             t, t_end, v, previous_transition_flag);
         previous_transition_flag = radial_params.previous_transition_flag;
         const auto angular_params = angularHit(ray, grid, Px_angular[current_voxel_ID_theta],
                                                Px_angular[current_voxel_ID_theta+1],
