@@ -4,12 +4,12 @@
 #include <cmath>
 #include <limits>
 
-#define DEBUG_STRINGS
-#define INITIALIZATION_DEBUG
+//#define DEBUG_STRINGS
+//#define INITIALIZATION_DEBUG
 //#define TRAVERSAL_DEBUG
 //#define RADIAL_HIT_DEBUG
 //#define ANGULAR_HIT_DEBUG
-#define AZIMUTHAL_HIT_DEBUG
+//#define AZIMUTHAL_HIT_DEBUG
 
 // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
 enum VoxelIntersectionType {
@@ -282,7 +282,7 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
         const double inv_perp_uv_min = 1.0 / perp_uv_min;
         a = perp_vw_min * inv_perp_uv_min;
         b = perp_uw_min * inv_perp_uv_min;
-        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
+        if ((strictlyLessThan(a, 0.0) || strictlyLessThan(1.0, a)) || strictlyLessThan(b, 0.0) || strictlyLessThan(1.0, b)) {
             is_intersect_min = false;
         } else {
             is_intersect_min = true;
@@ -297,7 +297,7 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
         const double inv_perp_uv_max = 1.0 / perp_uv_max;
         a = perp_vw_max * inv_perp_uv_max;
         b = perp_uw_max * inv_perp_uv_max;
-        if ((a < 0.0 || a > 1.0) || (b < 0.0 || b > 1.0)) {
+        if ((strictlyLessThan(a, 0.0) || strictlyLessThan(1.0, a)) || strictlyLessThan(b, 0.0) || strictlyLessThan(1.0, b)) {
             is_intersect_max = false;
         } else {
             is_intersect_max = true;
@@ -453,6 +453,7 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
 #ifdef AZIMUTHAL_HIT_DEBUG
     printf("\nAzimuthal Hit DEBUG:"
            "\nv: {%f, %f, %f}"
+           "\nu_max: {.x(): %f, .z(): %f}"
            "\npx_azimuthal: {%f, %f}"
            "\npz_azimuthal: {%f, %f}"
            "\nperp_uv_min: %f"
@@ -461,7 +462,7 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
            "\nperp_uw_max: %f"
            "\nperp_vw_min: %f"
            "\nperp_vw_max: %f",
-           v.x(), v.y(), v.z(), px_azimuthal_one, px_azimuthal_two,
+           v.x(), v.y(), v.z(), u_max.x(), u_max.z(), px_azimuthal_one, px_azimuthal_two,
            pz_azimuthal_one, pz_azimuthal_two, perp_uv_min,
            perp_uv_max, perp_uw_min, perp_uw_max,
            perp_vw_min, perp_vw_max);
@@ -537,8 +538,7 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
         const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
         const double new_angular_y = grid.sphereCenter().y() - Py_angular[l];
         const double new_r_over_length = new_r / std::sqrt(new_angular_x * new_angular_x +
-                                                           new_angular_y * new_angular_y +
-                                                           grid.sphereCenter().z() * grid.sphereCenter().z());
+                                                           new_angular_y * new_angular_y);
         Px_angular[l] = grid.sphereCenter().x() - new_r_over_length * (grid.sphereCenter().x() - Px_angular[l]);
         Py_angular[l] = grid.sphereCenter().y() - new_r_over_length * (grid.sphereCenter().y() - Py_angular[l]);
 #ifdef TRAVERSAL_DEBUG
@@ -550,7 +550,6 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
         const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
         const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[m];
         const double new_r_over_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x +
-                                                           grid.sphereCenter().y() * grid.sphereCenter().y() +
                                                            new_azimuthal_z * new_azimuthal_z);
         Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_length *
                                                     (grid.sphereCenter().x() - Px_azimuthal[m]);
@@ -847,7 +846,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             case None: { return voxels; }
         }
         if (radius_has_stepped) {
-            // updateVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, current_voxel_ID_r);
+            updateVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, current_voxel_ID_r);
             radius_has_stepped = false;
         }
 #ifdef TRAVERSAL_DEBUG
