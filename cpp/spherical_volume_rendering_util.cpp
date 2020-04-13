@@ -421,19 +421,19 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
     for (std::size_t l = 0; l < Px_angular.size(); ++l) {
         const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
         const double new_angular_y = grid.sphereCenter().y() - Py_angular[l];
-        const double new_r_over_length = new_r / std::sqrt(new_angular_x * new_angular_x +
+        const double new_r_over_plane_length = new_r / std::sqrt(new_angular_x * new_angular_x +
                                                            new_angular_y * new_angular_y);
-        Px_angular[l] = grid.sphereCenter().x() - new_r_over_length * (grid.sphereCenter().x() - Px_angular[l]);
-        Py_angular[l] = grid.sphereCenter().y() - new_r_over_length * (grid.sphereCenter().y() - Py_angular[l]);
+        Px_angular[l] = grid.sphereCenter().x() - new_r_over_plane_length * (grid.sphereCenter().x() - Px_angular[l]);
+        Py_angular[l] = grid.sphereCenter().y() - new_r_over_plane_length * (grid.sphereCenter().y() - Py_angular[l]);
     }
     for (std::size_t m = 0; m < Px_azimuthal.size(); ++m) {
         const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
         const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[m];
-        const double new_r_over_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x +
+        const double new_r_over_plane_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x +
                                                            new_azimuthal_z * new_azimuthal_z);
-        Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_length *
+        Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_plane_length *
                                                     (grid.sphereCenter().x() - Px_azimuthal[m]);
-        Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_length *
+        Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_plane_length *
                                                     (grid.sphereCenter().z() - Pz_azimuthal[m]);
     }
 }
@@ -520,13 +520,13 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         c = grid.sphereCenter().z() - ray.origin().z();
     }
 
-    const double ang_length = std::sqrt(a * a + b * b);
+    const double ang_plane_length = std::sqrt(a * a + b * b);
     BoundVec3 p_ang(0.0, 0.0, 0.0);
-    if (isKnEqual(ang_length, 0.0)) {
+    if (isKnEqual(ang_plane_length, 0.0)) {
         p_ang.x() = grid.sphereCenter().x() + current_r;
         p_ang.y() = grid.sphereCenter().y();
     } else {
-        p_ang = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r / ang_length);
+        p_ang = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r / ang_plane_length);
     }
 
     // p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
@@ -549,13 +549,13 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         }
         ++i;
     }
-    const double azi_length = std::sqrt(a * a + c * c);
+    const double azi_plane_length = std::sqrt(a * a + c * c);
     BoundVec3 p_azi(0.0, 0.0, 0.0);
-    if (isKnEqual(azi_length, 0.0)) {
+    if (isKnEqual(azi_plane_length, 0.0)) {
         p_azi.x() = grid.sphereCenter().x() + current_r;
         p_azi.z() = grid.sphereCenter().z();
     } else {
-        p_azi = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r / azi_length);
+        p_azi = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r / azi_plane_length);
     }
 
     i = 0;
