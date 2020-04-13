@@ -8,9 +8,9 @@
 
 // Represents a spherical voxel coordinate.
     struct SphericalVoxel {
-        std::size_t radial_voxel;
-        std::size_t angular_voxel;
-        std::size_t azimuthal_voxel;
+        int radial_voxel;
+        int angular_voxel;
+        int azimuthal_voxel;
     };
 
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the 'ray' over the spherical voxel grid
