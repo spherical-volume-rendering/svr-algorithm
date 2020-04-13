@@ -5,8 +5,8 @@
 #include <limits>
 
 // Epsilons used for floating point comparisons in Knuth's algorithm.
-#define ABS_EPSILON 1e-12
-#define REL_EPSILON 1e-8
+const double ABS_EPSILON = 1e-12;
+const double REL_EPSILON = 1e-8;
 
 //#define DEBUG_STRINGS
 //#define INITIALIZATION_DEBUG
