@@ -28,8 +28,8 @@ struct RadialHitParameters {
     // The voxel traversal value of a radial step: 0, +1, -1. This is added to the current radial voxel.
     int tStepR;
     // Determine whether the current voxel traversal was a 'transition'. This is necessary to determine when
-    // The radial steps should go from negative to positive or vice-versa, since the radial voxels go from 1..N, where N
-    // is the number of radial sections.
+    // The radial steps should go from negative to positive or vice-versa,
+    // since the radial voxels go from 1..N, where N is the number of radial sections.
     bool previous_transition_flag;
     // Determines whether the current hit is within time bounds (t, t_end).
     bool within_bounds;
