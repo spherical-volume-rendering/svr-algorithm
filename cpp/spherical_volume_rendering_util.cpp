@@ -762,7 +762,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         const auto radial_params = radialHit(ray, grid, current_voxel_ID_r, ray_sphere_vector_dot, t,
                                              t_end, v, previous_transition_flag);
         previous_transition_flag = radial_params.previous_transition_flag;
-        const auto angular_params = angularHit(ray, grid, Px_angular[current_voxel_ID_thetagit ],
+        const auto angular_params = angularHit(ray, grid, Px_angular[current_voxel_ID_theta],
                                                Px_angular[current_voxel_ID_theta+1],
                                                Py_angular[current_voxel_ID_theta],
                                                Py_angular[current_voxel_ID_theta+1], t, t_end);
