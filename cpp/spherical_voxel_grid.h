@@ -16,22 +16,22 @@ public:
     SphericalVoxelGrid(const BoundVec3& min_bound, const BoundVec3& max_bound, std::size_t num_radial_voxels,
                        std::size_t num_angular_voxels, std::size_t num_azimuthal_voxels, const BoundVec3& sphere_center,
                        double sphere_max_radius) :
-            min_bound_(min_bound),
-            max_bound_(max_bound),
-            num_radial_voxels_(num_radial_voxels),
-            num_angular_voxels_(num_angular_voxels),
-            num_azimuthal_voxels_(num_azimuthal_voxels),
-            inv_num_radial_voxels_(1.0 / num_radial_voxels),
-            inv_num_angular_voxels_(1.0 / num_angular_voxels),
-            inv_num_azimuthal_voxels_(1.0 / num_azimuthal_voxels),
-            sphere_center_(sphere_center),
-            sphere_max_radius_(sphere_max_radius),
-            delta_radius_(sphere_max_radius * inv_num_radial_voxels_),
-            delta_theta_(2 * M_PI * inv_num_angular_voxels_),
-            delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_),
-            inv_delta_radius_(1.0 / delta_radius_),
-            inv_delta_theta_(1.0 / delta_theta_),
-            inv_delta_phi_(1.0 / delta_phi_) {}
+                       min_bound_(min_bound),
+                       max_bound_(max_bound),
+                       num_radial_voxels_(num_radial_voxels),
+                       num_angular_voxels_(num_angular_voxels),
+                       num_azimuthal_voxels_(num_azimuthal_voxels),
+                       inv_num_radial_voxels_(1.0 / num_radial_voxels),
+                       inv_num_angular_voxels_(1.0 / num_angular_voxels),
+                       inv_num_azimuthal_voxels_(1.0 / num_azimuthal_voxels),
+                       sphere_center_(sphere_center),
+                       sphere_max_radius_(sphere_max_radius),
+                       delta_radius_(sphere_max_radius * inv_num_radial_voxels_),
+                       delta_theta_(2 * M_PI * inv_num_angular_voxels_),
+                       delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_),
+                       inv_delta_radius_(1.0 / delta_radius_),
+                       inv_delta_theta_(1.0 / delta_theta_),
+                       inv_delta_phi_(1.0 / delta_phi_) {}
 
     inline std::size_t numRadialVoxels() const { return num_radial_voxels_; }
 

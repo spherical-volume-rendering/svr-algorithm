@@ -7,11 +7,11 @@
 #include <vector>
 
 // Represents a spherical voxel coordinate.
-    struct SphericalVoxel {
-        int radial_voxel;
-        int angular_voxel;
-        int azimuthal_voxel;
-    };
+struct SphericalVoxel {
+    int radial_voxel;
+    int angular_voxel;
+    int azimuthal_voxel;
+};
 
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the 'ray' over the spherical voxel grid
 // provided. 't_begin' is the time the ray begins, and 't_end' is the time the ray ends.
@@ -32,11 +32,11 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
 
 // Simplified parameters to Cythonize the function; implementation remains the same as above.
 std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
-                                                              double* min_bound, double* max_bound,
+                                                                double* min_bound, double* max_bound,
                                                                 std::size_t num_radial_voxels,
                                                                 std::size_t num_angular_voxels,
                                                                 std::size_t num_azimuthal_voxels, double* sphere_center,
-                                                              double sphere_max_radius, double t_begin,
-                                                              double t_end) noexcept;
+                                                                double sphere_max_radius, double t_begin,
+                                                                double t_end) noexcept;
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOLUMERENDERINGUTIL_H
