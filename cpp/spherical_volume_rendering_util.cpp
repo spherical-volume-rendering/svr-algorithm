@@ -142,12 +142,6 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, in
         // the innermost radial disc, this ensures that the proper radii are being checked.
         r_b = std::min(current_radius + grid.deltaRadius(), grid.sphereMaxRadius());
     } else { r_b = std::min(current_radius, grid.sphereMaxRadius());  }
-
-#ifdef RADIAL_HIT_DEBUG
-    printf("\nCurrent Radius: %f"
-           "\n r_a: %f"
-           "\n r_b: %f", current_radius, r_a, r_b);
-#endif
     // Find the intersection times for the ray and the previous and next radial discs.
     const double ray_sphere_dot_minus_v_squared = ray_sphere_vector_dot - v * v;
     double discriminant_a = r_a * r_a - ray_sphere_dot_minus_v_squared;
@@ -159,48 +153,21 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, in
     std::vector<double> intersection_times(4);
     intersection_times[0] = ray.timeOfIntersectionAt(v - d_a);
     intersection_times[1] = ray.timeOfIntersectionAt(v + d_a);
-#ifdef RADIAL_HIT_DEBUG
-    printf("\nBEFORE:\nt[0]: %f\nt[1]: %f", intersection_times[0], intersection_times[1]);
-#endif
 
     const double discriminant_b = r_b * r_b - ray_sphere_dot_minus_v_squared;
     if (discriminant_b >= 0.0) {
         const double d_b = std::sqrt(discriminant_b);
         intersection_times[2] = ray.timeOfIntersectionAt(v - d_b);
         intersection_times[3] = ray.timeOfIntersectionAt(v + d_b);
-#ifdef RADIAL_HIT_DEBUG
-        printf("\nt[2]: %f\nt[3]: %f", intersection_times[2], intersection_times[3]);
-        printf("\nt: %f", t);
-#endif
     }
     std::vector<double> times_gt_t = intersection_times;
     times_gt_t.erase(std::remove_if(times_gt_t.begin(), times_gt_t.end(), [t](double i) {
                                     return i < t || isKnEqual(i, t); }), times_gt_t.end());
 
     RadialHitParameters radial_params;
-#ifdef RADIAL_HIT_DEBUG
-    //printf("\n discr_a: %f", discriminant_a);
-    //printf("\n discr_b: %f", discriminant_b);
-    const auto isize = intersection_times.size();
-    printf("\nintersection_times.size(): %zu", isize);
-    if (isize >= 4) {
-        printf("\nAFTER:\nintersection_times[0]: %f"
-               "\nintersection_times[1]: %f"
-               "\nintersection_times[2]: %f"
-               "\nintersection_times[3]: %f",
-               intersection_times[0], intersection_times[1],
-               intersection_times[2], intersection_times[3]);
-    } else if (isize >= 2) {
-        printf("\nAFTER:\nintersection_times[0]: %f"
-               "\nintersection_times[1]: %f",
-               intersection_times[0], intersection_times[1]);
-    }
-#endif
+
     if (times_gt_t.size() >= 2 && isKnEqual(intersection_times[0], intersection_times[1])) {
         // Ray is tangent to the circle, i.e. two intersection times are equal.
-#ifdef RADIAL_HIT_DEBUG
-printf("\nRay is tangent to the circle.");
-#endif
         radial_params.tMaxR = times_gt_t[0];
         const BoundVec3 p = ray.pointAtParameter(radial_params.tMaxR);
         const double p_x_new = p.x() - grid.sphereCenter().x();
@@ -217,18 +184,12 @@ printf("\nRay is tangent to the circle.");
         }
     } else if (times_gt_t.empty()) {
         // No intersection.
-#ifdef RADIAL_HIT_DEBUG
-        printf("\nNo intersection.");
-#endif
         radial_params.tMaxR = std::numeric_limits<double>::infinity();
         radial_params.within_bounds = false;
         radial_params.tStepR = 0;
         radial_params.previous_transition_flag = false;
     } else {
         // Radial intersection.
-#ifdef RADIAL_HIT_DEBUG
-        printf("\nRadial intersection.");
-#endif
         radial_params.tMaxR = times_gt_t[0];
         const BoundVec3 p = ray.pointAtParameter(radial_params.tMaxR);
         const double p_x_new = p.x() - grid.sphereCenter().x();
@@ -265,20 +226,6 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
                                      std::size_t num_voxels) noexcept {
     const bool is_parallel_min = isKnEqual(perp_uv_min, 0.0);
     const bool is_parallel_max = isKnEqual(perp_uv_max, 0.0);
-#ifdef ANGULAR_HIT_DEBUG
-    printf("\nAngular Hit DEBUG:"
-           "\nis_parallel_min: %s"
-           "\nis_parallel_max: %s",
-           BooleanToString[is_parallel_min].data(),
-           BooleanToString[is_parallel_max].data());
-#endif
-#ifdef AZIMUTHAL_HIT_DEBUG
-    printf("\nAzimuthal Hit DEBUG:"
-           "\nis_parallel_min: %s"
-           "\nis_parallel_max: %s",
-           BooleanToString[is_parallel_min].data(),
-           BooleanToString[is_parallel_max].data());
-#endif
     double a, b;
     bool is_intersect_min, is_intersect_max;
     double t_min = 0.0;
@@ -313,20 +260,6 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
     } else {
         is_intersect_max = false;
     }
-#ifdef ANGULAR_HIT_DEBUG
-    printf("\nAngular Hit DEBUG:"
-           "\nis_intersect_min: %s"
-           "\nis_intersect_max: %s",
-           BooleanToString[is_intersect_min].data(),
-           BooleanToString[is_intersect_max].data());
-#endif
-#ifdef AZIMUTHAL_HIT_DEBUG
-    printf("\nAzimuthal Hit DEBUG:"
-           "\nis_intersect_min: %s"
-           "\nis_intersect_max: %s",
-           BooleanToString[is_intersect_min].data(),
-           BooleanToString[is_intersect_max].data());
-#endif
     GenHitParameters params;
     if (is_intersect_max && !is_intersect_min && t < t_max && t_max < t_end && !isKnEqual(t, t_max)) {
         params.tStep = 1;
@@ -402,22 +335,6 @@ AngularHitParameters angularHit(const Ray& ray, const SphericalVoxelGrid& grid, 
     const double perp_uw_max = u_max.x() * w_max.y() - u_max.y() * w_max.x();
     const double perp_vw_min = v.x() * w_min.y() - v.y() * w_min.x();
     const double perp_vw_max = v.x() * w_max.y() - v.y() * w_max.x();
-#ifdef ANGULAR_HIT_DEBUG
-    printf("\nAngular Hit DEBUG:"
-           "\nv: {%f, %f, %f}"
-           "\npx_angular: {%f, %f}"
-           "\npy_angular: {%f, %f}"
-           "\nperp_uv_min: %f"
-           "\nperp_uv_max: %f"
-           "\nperp_uw_min: %f"
-           "\nperp_uw_max: %f"
-           "\nperp_vw_min: %f"
-           "\nperp_vw_max: %f",
-           v.x(), v.y(), v.z(), px_angular_one, px_angular_two,
-           py_angular_one, py_angular_two, perp_uv_min,
-           perp_uv_max, perp_uw_min, perp_uw_max,
-           perp_vw_min, perp_vw_max);
-#endif
     const GenHitParameters params = generalizedPlaneHit(ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
                                                         perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().y(),
                                                         grid.numAngularVoxels());
@@ -456,23 +373,6 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
     const double perp_uw_max = u_max.x() * w_max.z() - u_max.z() * w_max.x();
     const double perp_vw_min = v.x() * w_min.z() - v.z() * w_min.x();
     const double perp_vw_max = v.x() * w_max.z() - v.z() * w_max.x();
-#ifdef AZIMUTHAL_HIT_DEBUG
-    printf("\nAzimuthal Hit DEBUG:"
-           "\nv: {%f, %f, %f}"
-           "\nu_max: {.x(): %f, .z(): %f}"
-           "\npx_azimuthal: {%f, %f}"
-           "\npz_azimuthal: {%f, %f}"
-           "\nperp_uv_min: %f"
-           "\nperp_uv_max: %f"
-           "\nperp_uw_min: %f"
-           "\nperp_uw_max: %f"
-           "\nperp_vw_min: %f"
-           "\nperp_vw_max: %f",
-           v.x(), v.y(), v.z(), u_max.x(), u_max.z(), px_azimuthal_one, px_azimuthal_two,
-           pz_azimuthal_one, pz_azimuthal_two, perp_uv_min,
-           perp_uv_max, perp_uw_min, perp_uw_max,
-           perp_vw_min, perp_vw_max);
-#endif
     const GenHitParameters params = generalizedPlaneHit(ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
                                                         perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().z(),
                                                         grid.numAzimuthalVoxels());
@@ -500,9 +400,6 @@ AzimuthalHitParameters azimuthalHit(const Ray& ray, const SphericalVoxelGrid& gr
 inline VoxelIntersectionType calculateMinimumIntersection(const RadialHitParameters& rad_params,
                                                           const AngularHitParameters& ang_params,
                                                           const AzimuthalHitParameters& azi_params) noexcept {
-    // TODO(cgyurgyik: There's quite a bit of duplication in the boolean expressions here.
-    //                 While this attempts to place the most common cases first, it may be quicker just to reduce
-    //                 the boolean algebra. Wait until benchmarking on large scale to determine change.
     if (ang_params.within_bounds && ((ang_params.tMaxTheta < rad_params.tMaxR
                                       && rad_params.tMaxR < azi_params.tMaxPhi) || rad_params.exits_voxel_bounds)) {
         return VoxelIntersectionType::Angular;
@@ -536,9 +433,6 @@ inline VoxelIntersectionType calculateMinimumIntersection(const RadialHitParamet
 inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
                                 std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
                                 const SphericalVoxelGrid& grid, std::size_t current_voxel_ID_r) noexcept {
-#ifdef TRAVERSAL_DEBUG
-    printf("\nRadial Voxel Has Stepped. Update Voxel Boundary Segments...");
-#endif
     const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
     for (std::size_t l = 0; l < Px_angular.size(); ++l) {
         const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
@@ -547,10 +441,6 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
                                                            new_angular_y * new_angular_y);
         Px_angular[l] = grid.sphereCenter().x() - new_r_over_length * (grid.sphereCenter().x() - Px_angular[l]);
         Py_angular[l] = grid.sphereCenter().y() - new_r_over_length * (grid.sphereCenter().y() - Py_angular[l]);
-#ifdef TRAVERSAL_DEBUG
-        printf("\nPx_angular[%zu]: %f\nPy_angular[%zu]: %f",
-               l, Px_angular[l], l, Py_angular[l]);
-#endif
     }
     for (std::size_t m = 0; m < Px_azimuthal.size(); ++m) {
         const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
@@ -561,10 +451,6 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
                                                     (grid.sphereCenter().x() - Px_azimuthal[m]);
         Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_length *
                                                     (grid.sphereCenter().z() - Pz_azimuthal[m]);
-#ifdef TRAVERSAL_DEBUG
-        printf("\nPx_azimuthal[%zu]: %f\nPz_azimuthal[%zu]: %f",
-               m, Px_azimuthal[m], m, Pz_azimuthal[m]);
-#endif
     }
 }
 
@@ -606,12 +492,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     }
     int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - current_r) * grid.invDeltaRadius();
 
-#ifdef INITIALIZATION_DEBUG
-    printf("\n----------------------------------"
-           "\nInitialization Phase:"
-           "\nInitial Radial Voxel: %d", current_voxel_ID_r);
-#endif
-
     // Create an array of values representing the points of intersection between the lines corresponding
     // to angular voxel boundaries and the initial radial voxel of the ray in the XY plane. This is similar for
     // azimuthal voxel boundaries, but in the XZ plane instead.
@@ -619,17 +499,10 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     std::vector<double> Py_angular(grid.numAngularVoxels() + 1);
     std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
     std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
-#ifdef INITIALIZATION_DEBUG
-    printf("\nArrayPoints:");
-#endif
     double k = 0;
     for (std::size_t j = 0; j < Px_angular.size(); ++j) {
         Px_angular[j] = current_r * std::cos(k) + grid.sphereCenter().x();
         Py_angular[j] = current_r * std::sin(k) + grid.sphereCenter().y();
-#ifdef INITIALIZATION_DEBUG
-        printf("\nPx_angular[%zu]: %f\nPy_angular[%zu]: %f",
-                j, Px_angular[j], j, Py_angular[j]);
-#endif
         k += grid.deltaTheta();
     }
     k = 0;
@@ -637,10 +510,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         Px_azimuthal[n] = current_r * std::cos(k) + grid.sphereCenter().x();
         Pz_azimuthal[n] = current_r * std::sin(k) + grid.sphereCenter().z();
         k += grid.deltaPhi();
-#ifdef INITIALIZATION_DEBUG
-        printf("\nPx_azimuthal[%zu]: %f\nPz_azimuthal[%zu]: %f",
-               n, Px_azimuthal[n], n, Pz_azimuthal[n]);
-#endif
     }
 
     int current_voxel_ID_theta, current_voxel_ID_phi;
@@ -696,11 +565,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         }
         ++i;
     }
-
-#ifdef INITIALIZATION_DEBUG
-    printf("\nInitial Angular Voxel: %d", current_voxel_ID_theta);
-#endif
-
     const double azi_length = std::sqrt(a * a + c * c);
     BoundVec3 p_azi(0.0, 0.0, 0.0);
     if (isKnEqual(azi_length, 0.0)) {
@@ -727,9 +591,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         }
         ++i;
     }
-#ifdef INITIALIZATION_DEBUG
-    printf("\nInitial Azimuthal Voxel: %d", current_voxel_ID_theta);
-#endif
     voxels.push_back({.radial_voxel=current_voxel_ID_r,
                       .angular_voxel=current_voxel_ID_theta,
                       .azimuthal_voxel=current_voxel_ID_phi});
@@ -755,13 +616,6 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
     bool previous_transition_flag = false;
     bool radius_has_stepped = false;
     t_end = std::min(t_grid_exit, t_end);
-#ifdef TRAVERSAL_DEBUG
-    printf("\n----------------------------------"
-           "\nTraversal Phase:"
-           "\n Initial Voxel: {%d, %d, %d}"
-           "\nt: %f"
-           "\nt_end: %f", current_voxel_ID_r, current_voxel_ID_theta, current_voxel_ID_phi,t, t_end);
-#endif
 
     while (t < t_end) {
         const auto radial_params = radialHit(ray, grid, current_voxel_ID_r, ray_sphere_vector_dot, t,
@@ -775,35 +629,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
                                                    Px_azimuthal[current_voxel_ID_phi+1],
                                                    Pz_azimuthal[current_voxel_ID_phi],
                                                    Pz_azimuthal[current_voxel_ID_phi+1], t, t_end);
-#ifdef TRAVERSAL_DEBUG
-    printf("\nRadial parameters:"
-           "\n     tMaxR: %f"
-           "\n     tStepR: %d"
-           "\n     within_bounds: %s"
-           "\n     exits_voxel_bounds: %s"
-           "\n     previous_transition_flag: %s",
-           radial_params.tMaxR,
-           radial_params.tStepR,
-           BooleanToString[radial_params.within_bounds].data(),
-           BooleanToString[radial_params.exits_voxel_bounds].data(),
-           BooleanToString[radial_params.previous_transition_flag].data());
-    printf("\nAngular parameters:"
-           "\n     tMaxTheta: %f"
-           "\n     tStepTheta: %d"
-           "\n     within_bounds: %s",
-           angular_params.tMaxTheta, angular_params.tStepTheta,
-           BooleanToString[angular_params.within_bounds].data());
-    printf("\nAzimuthal parameters:"
-           "\n     tMaxPhi: %f"
-           "\n     tStepPhi: %d"
-           "\n     within_bounds: %s",
-           azimuthal_params.tMaxPhi, azimuthal_params.tStepPhi,
-           BooleanToString[azimuthal_params.within_bounds].data());
-#endif
         const auto voxel_intersection = calculateMinimumIntersection(radial_params, angular_params, azimuthal_params);
-#ifdef TRAVERSAL_DEBUG
-        printf("\nVoxel Intersection: %s", VoxelIntersectionTypeToString[voxel_intersection].data());
-#endif
         switch(voxel_intersection) {
             case Radial: {
                 t = radial_params.tMaxR;
@@ -855,32 +681,9 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
             updateVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, current_voxel_ID_r);
             radius_has_stepped = false;
         }
-#ifdef TRAVERSAL_DEBUG
-        printf("\nUpdated Time: %f", t);
-#endif
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
                           .angular_voxel=current_voxel_ID_theta,
                           .azimuthal_voxel=current_voxel_ID_phi});
-#ifdef TRAVERSAL_DEBUG
-        printf("\nVoxel Pushed: {radial=%d, theta=%d, phi=%d}", current_voxel_ID_r,
-                current_voxel_ID_theta, current_voxel_ID_phi);
-#endif
-#ifdef ANGULAR_HIT_DEBUG
-        printf("\n--Voxel Pushed: {theta=%d}", current_voxel_ID_theta);
-        printf("\n--Theta Voxel List: {");
-        for (const auto voxel: voxels) {
-            printf(" %d", voxel.angular_voxel);
-        }
-        printf(" }\n");
-#endif
-#ifdef AZIMUTHAL_HIT_DEBUG
-        printf("\n--Voxel Pushed: {phi=%d}", current_voxel_ID_phi);
-        printf("\n--Phi Voxel List: {");
-        for (const auto voxel: voxels) {
-            printf(" %d", voxel.azimuthal_voxel);
-        }
-        printf(" }\n");
-#endif
     }
     return voxels;
 }
