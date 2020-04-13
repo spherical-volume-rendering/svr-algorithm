@@ -600,7 +600,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     bool radius_has_stepped = false;
     t_end = std::min(t_grid_exit, t_end);
 
-    while (true) {
+    while (t < t_end) {
         const auto radial_params = radialHit(ray, grid, current_voxel_ID_r, ray_sphere_vector_dot, t,
                                              t_end, v, previous_transition_flag);
         previous_transition_flag = radial_params.previous_transition_flag;
