@@ -52,7 +52,8 @@ if approximatelyEqual(perpuv_max,0.0,1e-12,1e-8) ; parallel_max = 1; else; paral
 if parallel_min == 0
     a = perpvw_min / perpuv_min;
     b = perpuw_min / perpuv_min;
-    if (a < 0 || a > 1) || (b < 0 || b > 1)
+    if (strictlyLess(a,0.0,1e-12,1e-8) || strictlyLess(1.0,a,1e-12,1e-8)) || ...
+            (strictlyLess(b,0.0,1e-12,1e-8) || strictlyLess(1.0,b,1e-12,1e-8))
         intersect_min = 0;
     else
         intersect_min = 1;
@@ -65,7 +66,8 @@ end
 if parallel_max == 0
     a = perpvw_max / perpuv_max;
     b = perpuw_max / perpuv_max;
-    if (a < 0 || a > 1) || (b < 0 || b > 1)
+    if (strictlyLess(a,0.0,1e-12,1e-8) || strictlyLess(1.0,a,1e-12,1e-8)) || ...
+            (strictlyLess(b,0.0,1e-12,1e-8) || strictlyLess(1.0,b,1e-12,1e-8))
         intersect_max = 0;
     else
         intersect_max = 1;
