@@ -4,6 +4,10 @@
 #include <cmath>
 #include <limits>
 
+// Epsilons used for floating point comparisons in Knuth's algorithm.
+#define ABS_EPSILON 1e-12
+#define REL_EPSILON 1e-8
+
 //#define DEBUG_STRINGS
 //#define INITIALIZATION_DEBUG
 //#define TRAVERSAL_DEBUG
@@ -87,14 +91,14 @@ struct GenHitParameters {
 // Related reading:
 //        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
 //        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
-inline bool isKnEqual(double a, double b, double absEpsilon=1e-12, double relEpsilon=1e-8) noexcept {
+inline bool isKnEqual(double a, double b, double absEpsilon=ABS_EPSILON, double relEpsilon=REL_EPSILON) noexcept {
     const double diff = std::abs(a - b);
     if (diff <= absEpsilon) { return true; }
     return diff <= std::max(std::abs(a), std::abs(b)) * relEpsilon;
 }
 
 // Overloaded version that checks for Knuth equality with vector cartesian coordinates.
-inline bool isKnEqual(const Vec3& a, const Vec3& b, double absEpsilon=1e-12, double relEpsilon=1e-8) noexcept {
+inline bool isKnEqual(const Vec3& a, const Vec3& b, double absEpsilon=ABS_EPSILON, double relEpsilon=REL_EPSILON) noexcept {
     const double diff_x = std::abs(a.x() - b.x());
     const double diff_y = std::abs(a.y() - b.y());
     const double diff_z = std::abs(a.z() - b.z());
@@ -105,7 +109,7 @@ inline bool isKnEqual(const Vec3& a, const Vec3& b, double absEpsilon=1e-12, dou
 }
 
 // Uses the Knuth algorithm in KnEqual() to ensure that a is strictly less than b.
-inline bool strictlyLessThan(double a, double b, double absEpsilon=1e-12, double relEpsilon=1e-8) noexcept {
+inline bool strictlyLessThan(double a, double b, double absEpsilon=ABS_EPSILON, double relEpsilon=REL_EPSILON) noexcept {
     return a < b && !isKnEqual(a, b, absEpsilon, relEpsilon);
 }
 
@@ -282,7 +286,8 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
         const double inv_perp_uv_min = 1.0 / perp_uv_min;
         a = perp_vw_min * inv_perp_uv_min;
         b = perp_uw_min * inv_perp_uv_min;
-        if ((strictlyLessThan(a, 0.0) || strictlyLessThan(1.0, a)) || strictlyLessThan(b, 0.0) || strictlyLessThan(1.0, b)) {
+        if ((strictlyLessThan(a, 0.0) || strictlyLessThan(1.0, a)) ||
+             strictlyLessThan(b, 0.0) || strictlyLessThan(1.0, b)) {
             is_intersect_min = false;
         } else {
             is_intersect_min = true;
@@ -297,7 +302,8 @@ GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double 
         const double inv_perp_uv_max = 1.0 / perp_uv_max;
         a = perp_vw_max * inv_perp_uv_max;
         b = perp_uw_max * inv_perp_uv_max;
-        if ((strictlyLessThan(a, 0.0) || strictlyLessThan(1.0, a)) || strictlyLessThan(b, 0.0) || strictlyLessThan(1.0, b)) {
+        if ((strictlyLessThan(a, 0.0) || strictlyLessThan(1.0, a)) ||
+             strictlyLessThan(b, 0.0) || strictlyLessThan(1.0, b)) {
             is_intersect_max = false;
         } else {
             is_intersect_max = true;
