@@ -85,9 +85,12 @@ private:
     const double sphere_max_radius_;
 
     // The maximum sphere radius divided by the number of radial sections.
-    const double delta_radius_, delta_theta_, delta_phi_;
+    const double delta_radius_;
 
-    // Sphere's area divided by the number of angular sections and number of azimuthal sections respectively.
+    // 2 * PI divided by X, where X is the number of angular and number of azimuthal sections respectively.
+    const double delta_theta_, delta_phi_;
+
+    // Inverse of the above delta values.
     const double inv_delta_radius_, inv_delta_theta_, inv_delta_phi_;
 };
 
