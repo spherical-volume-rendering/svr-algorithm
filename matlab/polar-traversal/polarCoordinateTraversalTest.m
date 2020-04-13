@@ -226,8 +226,8 @@ function testBeginAtThetaBoundaryInOrthogonal(testCase)
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
-        expected_rVoxels     = [2,2,1];
-        expected_thetaVoxels = [2,1,1];
+        expected_rVoxels     = [2,1];
+        expected_thetaVoxels = [1,1];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
@@ -273,7 +273,7 @@ function testRayGoesAlongThetaBoundary(testCase)
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
         expected_rVoxels     = [1,2,3,3,2,1];
-        expected_thetaVoxels = [0,0,0,2,2,2];
+        expected_thetaVoxels = [0,0,0,1,1,1];
         
         verifyEqual(testCase, rVoxels, expected_rVoxels);
         verifyEqual(testCase, thetaVoxels, expected_thetaVoxels);
@@ -504,7 +504,7 @@ function testSimulhits(testCase)
     verbose = false;
     
     [rVoxels, thetaVoxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
-        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
+        circle_center, circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose);
         expected_rVoxels     = [1,2,2,1];
         expected_thetaVoxels = [3,2,1,0];
         
