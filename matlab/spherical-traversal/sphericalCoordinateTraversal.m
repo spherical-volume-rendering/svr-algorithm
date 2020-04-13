@@ -34,18 +34,6 @@ function [radial_voxels, angular_voxels, azimuthal_voxels] = sphericalCoordinate
 %    [radial_voxels(1), angular_voxels(1), azimuthal_voxels(1)]
 %    is the first voxel the ray travels through. If the next traversal is a radial hit,
 %    angular_voxels(2) and azimuthal_voxels(2) will remain the same.
-close all;
-sphere_center_x = sphere_center(1);
-sphere_center_y = sphere_center(2);
-sphere_center_z = sphere_center(3);
-ray_direction_x = ray_direction(1);
-ray_direction_y = ray_direction(2);
-ray_direction_z = ray_direction(3);
-
-ray_start = ray_origin + t_begin * ray_direction;
-ray_start_x = ray_start(1);
-ray_start_y = ray_start(2);
-ray_start_z = ray_start(3);
 
 angular_voxels = [];
 radial_voxels = [];
@@ -74,11 +62,11 @@ pa = ray_origin + (v-d) .* ray_unit_vector;
 pb = ray_origin + (v+d) .* ray_unit_vector;
 tol = 10^-16;
 % Calculate the time of entrance and exit of the ray.
-if (abs(ray_direction(2)) > tol)
+if ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
     % Use the y-direction if it is non-zero.
     t1 = (pa(2) - ray_origin(2)) / ray_direction(2);
     t2 = (pb(2) - ray_origin(2)) / ray_direction(2);
-elseif (abs(ray_direction(1)) > tol)
+elseif ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
     % Use the x-direction if it is non-zero.
     t1 = (pa(1) - ray_origin(1)) / ray_direction(1);
     t2 = (pb(1) - ray_origin(1)) / ray_direction(1);
@@ -98,7 +86,7 @@ if t1 < t_begin && t2 < t_begin
 end
 
 % It may be a tangent hit.
- if abs(t1 - t2) < tol
+ if approximatelyEqual(t1,t2,1e-12,1e-8)
     if verbose
         fprintf("\nTangent hit.")
     end
@@ -112,39 +100,120 @@ if verbose
 end
 
 % Calculate Voxel ID Theta.
-tol = 10^-16; % Tolerance, to account for floating point rounding error.
-if abs(ray_origin - sphere_center) < tol 
-    % If the ray starts at the origin, we need to perturb slightly along 
-    % its path to find the correct angular voxel.
-    pert_t = 0.1;
-    pert_x = ray_start_x + ray_direction_x * pert_t;
-    pert_y = ray_start_y + ray_direction_y * pert_t;
-    current_voxel_ID_theta = floor(atan2(pert_y - sphere_center_y, pert_x - sphere_center_x) * num_angular_sections / (2 * pi));
-else
-    current_voxel_ID_theta = floor(atan2(ray_start_y - sphere_center_y, ray_start_x - sphere_center_x) * num_angular_sections / (2 * pi));
-end
-if current_voxel_ID_theta < 0
-    current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
+delta_theta = 2 * pi/ num_angular_sections;
+delta_phi = 2 * pi/ num_azimuthal_sections;
+% Create an array of values representing the points of intersection between 
+% the lines corresponding to angular voxels boundaries and the initial 
+% radial voxel of the ray. Note that spherical coordinates are unnecessary,
+% this is just marking the voxel boundaries in the plane. 
+P_ang = [];
+k_ang = 0;
+while k_ang <= 2*pi
+    pt = [r * cos(k_ang) + sphere_center(1), r * sin(k_ang) + sphere_center(2)];
+    P_ang = [P_ang ; pt];
+    k_ang = k_ang + delta_theta;
 end
 
-% Calculate Voxel ID phi.
-if abs(ray_origin - sphere_center) < tol 
-    % If the ray starts at the origin, we need to perturb slightly along
-    % its path to find the correct azimuthal voxel.
-    pert_t = 0.1;
-    pert_x = ray_start_x + ray_direction_x * pert_t;
-    pert_z = ray_start_z + ray_direction_z * pert_t;
-    current_voxel_ID_phi = floor(atan2(pert_z - sphere_center_z, pert_x - sphere_center_x) * num_azimuthal_sections / (2 * pi));
-else
-    current_voxel_ID_phi = floor(atan2(ray_start_z - sphere_center_z, ray_start_x - sphere_center_x) * num_azimuthal_sections / (2 * pi));
+P_azi = [];
+k_azi = 0;
+while k_azi <= 2*pi
+    pt = [r * cos(k_azi) + sphere_center(1), r * sin(k_azi) + sphere_center(3)];
+    P_azi = [P_azi ; pt];
+    k_azi = k_azi + delta_phi;
 end
-if current_voxel_ID_phi < 0
-    current_voxel_ID_phi = num_azimuthal_sections + current_voxel_ID_phi;
+
+% Find the point of intersection between the vector created by the
+% ray intersection with the initial sphere radius and the sphere center.
+ray_origin_xy = [ray_origin(1), ray_origin(2)];
+sphere_center_xy = [sphere_center(1), sphere_center(2)];
+if approximatelyEqual(ray_origin_xy,sphere_center_xy,1e-12,1e-8)    
+    % If the ray starts at the origin, we need to perturb slightly along its path to find the
+    % correct angular voxel
+    pert_t = 0.1;
+    pert_x = ray_origin(1) + ray_direction(1) * pert_t;
+    pert_y = ray_origin(2) + ray_direction(2) * pert_t;
+    a = sphere_center(1) - pert_x;
+    b = sphere_center(2) - pert_y;
+elseif approximatelyEqual(r,sphere_max_radius,1e-12,1e-8)
+% If the ray origin is outside the grid, this will snap to the grid and use the
+% resulting intersection point as the ray origin for this calculation.
+    a = sphere_center(1) - pa(1);
+    b = sphere_center(2) - pa(2);
+else
+    a = sphere_center(1) - ray_origin(1);
+    b = sphere_center(2) - ray_origin(2);
+end
+l = sqrt(a^2 + b^2);
+if approximatelyEqual(l,0.0,1e-12,1e-8)
+    % if l is 0.0 then only the z-dir of the ray is non-zero; set the
+    % initial point s.t. voxel_ID_theta init is 0.
+    p1_xy = [sphere_center(1) + r, sphere_center(2)];
+else
+    p1_xy = sphere_center_xy - (r/l) .* [a b];
+end
+% This point will lie between two angular voxel boundaries iff the angle between
+% it and the angular boundary intersection points along the circle of 
+% max radius is obtuse. Equality represents the case when the
+% point lies on an angular boundary. 
+i = 1;    
+while i < length(P_ang)
+    d1 = (P_ang(i,1)-p1_xy(1))^2 + (P_ang(i,2)-p1_xy(2))^2;
+    d2 = (P_ang(i+1,1)-p1_xy(1))^2 + (P_ang(i+1,2)-p1_xy(2))^2;
+    d3 = (P_ang(i,1)-P_ang(i+1,1))^2 + (P_ang(i,2)-P_ang(i+1,2))^2;
+    if d1 + d2 <= d3
+        current_voxel_ID_theta = i - 1;
+        i = length(P_ang);
+    end
+    i = i + 1;
+end
+
+ray_origin_xz = [ray_origin(1), ray_origin(3)];
+sphere_center_xz = [sphere_center(1), sphere_center(3)];
+if approximatelyEqual(ray_origin_xz,sphere_center_xz,1e-12,1e-8)    
+    % If the ray starts at the origin, we need to perturb slightly along its path to find the
+    % correct angular voxel
+    pert_t = 0.1;
+    pert_x = ray_origin(1) + ray_direction(1) * pert_t;
+    pert_z = ray_origin(3) + ray_direction(3) * pert_t;
+    a = sphere_center(1) - pert_x;
+    c = sphere_center(3) - pert_z;
+elseif approximatelyEqual(r,sphere_max_radius,1e-12,1e-8)
+% If the ray origin is outside the grid, this will snap to the grid and use the
+% resulting intersection point as the ray origin for this calculation.
+    a = sphere_center(1) - pa(1);
+    c = sphere_center(3) - pa(3);
+else
+    a = sphere_center(1) - ray_origin(1);
+    c = sphere_center(3) - ray_origin(3);
+end
+l = sqrt(a^2 + c^2);
+if approximatelyEqual(l,0.0,1e-12,1e-8)
+    % if l is 0.0 then only the z-dir of the ray is non-zero; set the
+    % initial point s.t. voxel_ID_theta init is 0.
+    p1_xz = [sphere_center(1) + r, sphere_center(3)];
+else
+    p1_xz = sphere_center_xz - (r/l) .* [a c];
+end
+% This point will lie between two angular voxel boundaries iff the angle between
+% it and the angular boundary intersection points along the circle of 
+% max radius is obtuse. Equality represents the case when the
+% point lies on an angular boundary. 
+i = 1;    
+while i < length(P_azi)
+    d1 = (P_azi(i,1)-p1_xz(1))^2 + (P_azi(i,2)-p1_xz(2))^2;
+    d2 = (P_azi(i+1,1)-p1_xz(1))^2 + (P_azi(i+1,2)-p1_xz(2))^2;
+    d3 = (P_azi(i,1)-P_ang(i+1,1))^2 + (P_azi(i,2)-P_ang(i+1,2))^2;
+    if d1 + d2 <= d3
+        current_voxel_ID_phi = i - 1;
+        i = length(P_azi);
+    end
+    i = i + 1;
 end
 
 azimuthal_voxels = [current_voxel_ID_phi];
 angular_voxels = [current_voxel_ID_theta];
 radial_voxels = [current_voxel_ID_r];
+
 if verbose
     fprintf('\nInitial phi voxel: %d', current_voxel_ID_phi)
     fprintf('\nInitial theta voxel: %d', current_voxel_ID_theta)
@@ -156,62 +225,94 @@ discr = sphere_max_radius^2 - (dot(ray_sphere_vector,ray_sphere_vector) - v^2);
 d = sqrt(discr);
 pa_max = ray_origin + (v-d) .* ray_unit_vector;
 pb_max = ray_origin + (v+d) .* ray_unit_vector;
-if ray_direction(2) > tol
+if ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
     t1 = (pa_max(2) - ray_origin(2)) / ray_direction(2);
     t2 = (pb_max(2) - ray_origin(2)) / ray_direction(2);
-elseif ray_direction(1) > tol
+elseif ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
     t1 = (pa_max(1) - ray_origin(1)) / ray_direction(1);
     t2 = (pb_max(1) - ray_origin(1)) / ray_direction(1);
 else 
     t1 = (pa_max(3) - ray_origin(3)) / ray_direction(3);
-    t2 = (pa_max(3) - ray_origin(3)) / ray_direction(3);
+    t2 = (pb_max(3) - ray_origin(3)) / ray_direction(3);
 end
 t_grid = max(t1,t2);
 
+% Determine the correct time to begin the traversal phase. If the ray
+% starts outside the grid at t_begin, snap to the grid and find the
+% corresopnding start time.
+if approximatelyEqual(r,sphere_max_radius,1e-12,1e-8)
+    if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
+        t_start = (p1_xy(1) - ray_origin(1))/ray_direction(1);
+    elseif ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
+        t_start = (p1_xy(2) - ray_origin(2))/ray_direction(2);
+    else
+        t_start = (p1_xz(2) - ray_origin(3))/ray_direction(3);
+    end
+else
+    t_start = t_begin;
+end
+    
 % TRAVERSAL PHASE
-t = t_begin;
+t = t_start;
 t_end = min(t_grid, t_end);
 previous_transition_flag = false;
-
+change_r = 0;
 while t < t_end    
     % 1. Calculate tMaxR, tMaxTheta, tMaxPhi
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
         current_voxel_ID_r, sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ...
         ray_sphere_vector, v, previous_transition_flag, verbose);
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-        num_angular_sections, sphere_center, t, verbose);
+        num_angular_sections, sphere_center, ...
+        [P_ang(current_voxel_ID_theta+1,:) ; P_ang(current_voxel_ID_theta+2,:)], ...
+        t, t_end, verbose);
     [tMaxPhi, tStepPhi] = azimuthal_hit(ray_origin, ray_direction, current_voxel_ID_phi,...
-      num_azimuthal_sections, sphere_center, t, verbose);
+      num_azimuthal_sections, sphere_center, ...
+      [P_azi(current_voxel_ID_phi+1,:) ; P_azi(current_voxel_ID_phi+2,:)], ...
+        t, t_end, verbose);
     
     rStepViolation = current_voxel_ID_r + tStepR == 0;
-  
+
     % 2. Compare tMaxR, tMaxTheta, tMaxPhi
-    if ((tMaxTheta < tMaxR && tMaxR < tMaxPhi) || rStepViolation) ...
-            && t < tMaxTheta && tMaxTheta < t_end
+    if ((strictlyLess(tMaxTheta,tMaxR,1e-12,1e-8)  && ...
+            strictlyLess(tMaxR, tMaxPhi,1e-12,1e-8)) || rStepViolation) ...
+            && strictlyLess(t,tMaxTheta,1e-12,1e-8) && ...
+            strictlyLess(tMaxTheta,t_end,1e-12,1e-8) 
         % Note 1: Case tMaxTheta is a minimum
         % Note 2: When the ray only intersects one radial shell but crosses an
         % angular boundary, we need the second half of disjunction
         t = tMaxTheta;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-    elseif tMaxR < tMaxTheta && tMaxR < tMaxPhi && t < tMaxR && tMaxR < t_end ...
+    elseif strictlyLess(tMaxR, tMaxTheta, 1e-12,1e-8) && ...
+            strictlyLess(tMaxR, tMaxPhi, 1e-12,1e-8) && ...
+            strictlyLess(t,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(tMaxR,t_end, 1e-12,1e-8) ...
             && ~rStepViolation
         % Case tMaxR is minimum
         t = tMaxR;
-        current_voxel_ID_r = current_voxel_ID_r + tStepR;   
-    elseif tMaxPhi < tMaxTheta && tMaxPhi < tMaxR && t < tMaxPhi && tMaxPhi < t_end
+        current_voxel_ID_r = current_voxel_ID_r + tStepR; 
+    elseif strictlyLess(tMaxPhi,tMaxTheta,1e-12,1e-8) && ...
+            strictlyLess(tMaxPhi,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(t,tMaxPhi,1e-12,1e-8) && ...
+            strictlyLess(tMaxPhi,t_end,1e-12,1e-8)
         % Case tMaxPhi is minimum
         t = tMaxPhi;
-        current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);   
-    elseif abs(tMaxPhi - tMaxTheta) < tol && abs(tMaxPhi - tMaxR) < tol && ...
-            t < tMaxR && tMaxR < t_end && ~rStepViolation
+        current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections); 
+    elseif approximatelyEqual(tMaxPhi,tMaxTheta,1e-12,1e-8) && ...
+            approximatelyEqual(tMaxPhi,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(t,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(tMaxR,t_end,1e-12,1e-8) && ~rStepViolation
         % Triple boundary intersection
         t = tMaxPhi;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
         current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);   
-    elseif abs(tMaxPhi - tMaxTheta) < tol && t < tMaxPhi && tMaxPhi < t_end
+    elseif approximatelyEqual(tMaxPhi, tMaxTheta, 1e-12,1e-8) && ...
+            strictlyLess(t,tMaxPhi,1e-12,1e-8) && ...
+            strictlyLess(tMaxPhi,t_end, 1e-12,1e-8)
         % Phi, Theta equal
-        if tMaxR < tMaxPhi && t < tMaxR && ~rStepViolation
+        if strictlyLess(tMaxR, tMaxPhi, 1e-12,1e-8) && ...
+                strictlyLess(t,tMaxR,1e-12,1e-8) && ~rStepViolation
             % R min
             t = tMaxR;
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
@@ -220,10 +321,13 @@ while t < t_end
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
         end
-    elseif abs(tMaxTheta - tMaxR) < tol && t < tMaxR && tMaxR < t_end && ...
+    elseif approximatelyEqual(tMaxTheta,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(t,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(tMaxR, t_end,1e-12,1e-8) && ...
             ~rStepViolation
         % R, Theta equal
-        if tMaxPhi < tMaxTheta && t < tMaxPhi
+        if strictlyLess(tMaxPhi,tMaxTheta,1e-12,1e-8) && ...
+                strictlyLess(t,tMaxPhi,1e-12,1e-8)
             % Phi min
             t = tMaxPhi;
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
@@ -232,10 +336,12 @@ while t < t_end
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
         end
-    elseif abs(tMaxR - tMaxPhi) < tol && t < tMaxR && tMaxR < t_end && ...
-            ~rStepViolation
+    elseif approximatelyEqual(tMaxR,tMaxPhi,1e-12,1e-8) && ...
+            strictlyLess(t,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(tMaxR, t_end, 1e-12,1e-8) && ~rStepViolation
         % R, Phi equal
-        if tMaxTheta < tMaxR && t < tMaxTheta
+        if strictlyLess(tMaxTheta,tMaxR,1e-12,1e-8) && ...
+                strictlyLess(t,tMaxTheta, 1e-12,1e-8)
             % Theta min
             t = tMaxTheta;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
@@ -251,4 +357,5 @@ while t < t_end
     angular_voxels = [angular_voxels, current_voxel_ID_theta];
     azimuthal_voxels = [azimuthal_voxels, current_voxel_ID_phi];
 end
+
 end

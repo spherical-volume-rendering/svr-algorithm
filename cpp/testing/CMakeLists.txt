@@ -7,7 +7,8 @@ set(SOURCE_FILES ../spherical_volume_rendering_util.h ../spherical_volume_render
 add_subdirectory(googletest)
 include_directories(${../cpp})
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+include_directories(${gmock_SOURCE_DIR}/include ${gmock_SOURCE_DIR})
 
 add_executable(${BINARY} ${SOURCE_FILES})
 add_test(NAME ${BINARY} COMMAND ${BINARY})
-target_link_libraries(${BINARY} gtest gtest_main)
+target_link_libraries(${BINARY} gtest gtest_main gmock gmock_main)

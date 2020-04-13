@@ -39,6 +39,17 @@ struct Ray final {
         return (p_z - origin().z()) * invDirection().z();
      }
 
+     // Similar to above implementation, but uses a given vector p.
+    inline double timeOfIntersectionAt(const Vec3& p) const {
+        if (xDirectionIsNonZero()) {
+            return (p.x() - origin().x()) * invDirection().x();
+        }
+        if (yDirectionIsNonZero()) {
+            return (p.y() - origin().y()) * invDirection().y();
+        }
+        return (p.z() - origin().z()) * invDirection().z();
+    }
+
     inline BoundVec3 origin() const { return this->origin_; }
     inline FreeVec3 direction() const { return this->direction_; }
     inline FreeVec3 invDirection() const { return this->inverse_direction_; }

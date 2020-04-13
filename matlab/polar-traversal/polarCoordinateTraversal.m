@@ -119,8 +119,7 @@ discr = r^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
 d = sqrt(discr);
 pa = ray_origin + (v-d).*ray_unit_vector;
 pb = ray_origin + (v+d).*ray_unit_vector;
-tol = 10^-15;
-if (abs(ray_direction(1)) < tol)
+if approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
     t1 = (pa(2) - ray_origin(2))/ray_direction(2);
     t2 = (pb(2) - ray_origin(2))/ray_direction(2);
 else
@@ -138,7 +137,7 @@ if t1 < t_begin && t2 < t_begin
 end
 
 % It may be a tangent hit
- if abs(t1 - t2) < tol
+if approximatelyEqual(t1,t2,1e-12,1e-8)
     if verbose
         fprintf("\nTangent hit.")
     end
@@ -152,18 +151,49 @@ if verbose
 end
 
 % II. Calculate Voxel ID Theta.
-if abs(ray_origin - circle_center) < tol 
+delta_theta = 2 * pi/ num_angular_sections;
+% Create an array of values representing the points of intersection between 
+% the lines corresponding to angular voxels boundaries and the initial 
+% radial voxel of the ray.
+P = [];
+k = 0;
+while k <= 2*pi
+    pt = [r * cos(k) + circle_center(1), r * sin(k) + circle_center(2)];
+    P = [P ; pt];
+    k = k + delta_theta;
+end
+ % Find the point of intersection between the vector created by the
+ % ray intersection with the initial radius and the circle center.
+if approximatelyEqual(ray_origin,circle_center,1e-12,1e-8)    
     % If the ray starts at the origin, we need to perturb slightly along its path to find the
     % correct angular voxel
     pert_t = 0.1;
     pert_x = ray_start_x + ray_direction_x * pert_t;
     pert_y = ray_start_y + ray_direction_y * pert_t;
-    current_voxel_ID_theta = floor(atan2(pert_y - circle_center_y, pert_x - circle_center_x) * num_angular_sections / (2 * pi));
+    a = circle_center(1) - pert_x;
+    b = circle_center(2) - pert_y;
+elseif approximatelyEqual(r,circle_max_radius,1e-12,1e-8)
+% If the ray origin is outside the grid, this will snap to the grid and use the
+% resulting intersection point as the ray origin for this calculation.
+    a = circle_center(1) - pa(1);
+    b = circle_center(2) - pa(2);
 else
-    current_voxel_ID_theta = floor(atan2(ray_start_y - circle_center_y, ray_start_x - circle_center_x) * num_angular_sections / (2 * pi));
+    a = circle_center(1) - ray_origin(1);
+    b = circle_center(2) - ray_origin(2);    
 end
-if current_voxel_ID_theta < 0
-    current_voxel_ID_theta = num_angular_sections + current_voxel_ID_theta;
+l = sqrt(a^2 + b^2);
+p1 = circle_center - (r/l) .* [a b];
+% This point will lie between two angular voxel boundaries iff the angle between
+% it and the angular boundary intersection points along the circle of 
+% max radius is obtuse. Equality represents the case when the
+% point lies on an angular boundary. 
+i = 1;    
+while i < length(P)
+    d1 = (P(i,1)-p1(1))^2 + (P(i,2)-p1(2))^2;
+    d2 = (P(i+1,1)-p1(1))^2 + (P(i+1,2)-p1(2))^2;
+    d3 = (P(i,1)-P(i+1,1))^2 + (P(i,2)-P(i+1,2))^2;
+    if d1 + d2 <= d3; current_voxel_ID_theta = i - 1; i = length(P);end
+    i = i + 1;
 end
 
 angular_voxels = [current_voxel_ID_theta];
@@ -174,7 +204,7 @@ discr = circle_max_radius^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
 d = sqrt(discr);
 pa_max = ray_origin + (v-d).*ray_unit_vector;
 pb_max = ray_origin + (v+d).*ray_unit_vector;
-if ray_direction(1) < tol
+if approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
     t1 = (pa_max(2) - ray_origin(2))/ray_direction(2);
     t2 = (pb_max(2) - ray_origin(2))/ray_direction(2);
 else
@@ -198,7 +228,9 @@ if verbose
         fprintf("\n Cord length calculated in terms of time: %d\n", t2 - t_begin)
     end
 end
-  
+
+change_r = 0;
+
 while t < t_end
     % 1. Calculate tMaxR, tMaxTheta
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ... 
@@ -206,11 +238,16 @@ while t < t_end
         circle_max_radius, delta_radius, t, ray_unit_vector, ...
         ray_circle_vector, v, previous_transition_flag, verbose);
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, ...
-        current_voxel_ID_theta, num_angular_sections, circle_center, ... 
-        t, verbose);
-    
+        current_voxel_ID_theta, num_angular_sections, circle_center, ...
+        [P(current_voxel_ID_theta+1,:) ; P(current_voxel_ID_theta+2,:)], ...
+        t, t_end, verbose);
+    rStepViolation = (current_voxel_ID_r + tStepR == 0);
     % 2. Compare tMaxR, tMaxTheta
-    if (tMaxTheta < tMaxR || current_voxel_ID_r + tStepR == 0) && t < tMaxTheta && tMaxTheta < t_end
+    if ((tMaxTheta < tMaxR && ~approximatelyEqual(tMaxTheta,tMaxR,1e-12,1e-8)) || ...
+            rStepViolation) && t < tMaxTheta && ...
+            tMaxTheta < t_end && ...
+            ~approximatelyEqual(tMaxTheta,t,1e-12,1e-8) && ...
+            ~approximatelyEqual(tMaxTheta,t_end,1e-12,1e-8)        
         % when the ray only intersects one radial shell but crosses an
         % angular boundary, we need the second half of conditional
         if verbose
@@ -218,7 +255,12 @@ while t < t_end
         end
         t = tMaxTheta;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-    elseif abs(tMaxTheta - tMaxR) < tol && t < tMaxR && tMaxR < t_end
+        change_r = 0;
+    elseif approximatelyEqual(tMaxR,tMaxTheta,1e-12,1e-8) && ...
+            t < tMaxR && tMaxR < t_end && ...
+            ~approximatelyEqual(tMaxR,t,1e-12,1e-8) && ...
+            ~approximatelyEqual(tMaxR,t_end,1e-12,1e-8) && ...
+            ~rStepViolation        
         % For the case when the ray simultaneously hits a radial and
         % angular boundary.
         if verbose
@@ -226,16 +268,30 @@ while t < t_end
         end
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-    elseif tMaxR < t_end && current_voxel_ID_r + tStepR ~= 0
-        if verbose
+
+        current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, ...
+            num_angular_sections);
+        if tStepR ~= 0; change_r = 1; else; change_r = 0; end    
+    elseif tMaxR < t_end && ~rStepViolation && ...
+            ~approximatelyEqual(tMaxR,t_end,1e-12,1e-8)
+         if verbose
             acc = acc + tMaxR - t;
-        end
-        t = tMaxR;
-        current_voxel_ID_r = current_voxel_ID_r + tStepR;
+         end   
+         t = tMaxR;
+         current_voxel_ID_r = current_voxel_ID_r + tStepR;
+         if tStepR ~= 0; change_r = 1; else; change_r = 0; end
     else 
        return;
     end 
+    % If the radial voxel changes, update the angular voxel boundary
+    % segments for intersection checks in angular hit.
+    if change_r == 1
+        r = circle_max_radius - delta_radius * (current_voxel_ID_r - 1);
+        a = circle_center - P;
+        l = (a(:,1).^2 + a(:,2).^2).^-0.5;
+        P(:,1) = circle_center(1) - (r*l) .* (circle_center(1) - P(:,1));
+        P(:,2) = circle_center(2) - (r*l) .* (circle_center(2) - P(:,2));
+    end
         angular_voxels = [angular_voxels, current_voxel_ID_theta];
         radial_voxels = [radial_voxels, current_voxel_ID_r];
     if verbose

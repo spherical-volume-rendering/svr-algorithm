@@ -49,8 +49,6 @@ else
 r_b = min(r + delta_radius, circle_max_radius);
 end
 
-tol = 10e-15;
-
 time_array_a = [];
 time_array_b = [];
 discr = r_a^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
@@ -59,9 +57,8 @@ if (discr >= 0 )
     ta = (v-d);
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
-    pb = ray_origin + tb.*ray_unit_vector;
-    
-    if abs(ray_direction(1)) < tol
+    pb = ray_origin + tb.*ray_unit_vector;    
+    if  approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
         t1 = (pa(2) - ray_origin(2))/ray_direction(2);
         t2 = (pb(2) - ray_origin(2))/ray_direction(2);
     else
@@ -79,7 +76,7 @@ else
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
-    if abs(ray_direction(1)) < tol
+    if approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
         t1 = (pa(2) - ray_origin(2))/ray_direction(2);
         t2 = (pb(2) - ray_origin(2))/ray_direction(2);
     else
@@ -97,7 +94,7 @@ if discr >= 0
     tb = (v+d);
     pa = ray_origin + ta.*ray_unit_vector;
     pb = ray_origin + tb.*ray_unit_vector;
-    if abs(ray_direction(1)) < tol
+    if approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
         t1 = (pa(2) - ray_origin(2))/ray_direction(2);
         t2 = (pb(2) - ray_origin(2))/ray_direction(2);
     else
@@ -112,12 +109,12 @@ time = time_array(time_array > t);
 
 % If it is a "glancing" blow (i.e. ray is tangent to the circle). This
 % occurs when the two intersections times are equal.
-if length(time)>1 &&  abs(time_array(1)-time_array(2)) < tol
+if length(time)>1 && approximatelyEqual(time_array(1),time_array(2),1e-12,1e-8)
     tMaxR = time(1);
     p = ray_origin + tMaxR.*ray_direction;
     r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
     tStepR = 0;
-    if (abs(r - r_new) < tol)
+    if approximatelyEqual(r_new,r,1e-12,1e-8)        
         transition_flag = true;
     else
         transition_flag = false;
@@ -144,13 +141,13 @@ p = ray_origin + tMaxR.*ray_direction;
 r_new = sqrt((p(1) - circle_center(1))^2 + (p(2) - circle_center(2))^2);
 
 %Flag for case that the ray has sequential hits with equal radii.
-if (abs(r - r_new) < tol)
+if approximatelyEqual(r_new,r,1e-12,1e-8)
     transition_flag = true;
 else
     transition_flag = false;
 end
 
-if (r_new - r < 0 && abs(r_new - r) > tol && ~(abs(r_new-r)) < tol) 
+if r_new < r && ~approximatelyEqual(r_new,r,1e-12,1e-8)
     tStepR = 1;
 else
     tStepR = -1;
