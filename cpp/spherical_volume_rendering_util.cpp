@@ -425,8 +425,8 @@ inline VoxelIntersectionType minimumIntersection(const RadialHitParameters& rad_
 // Each time the radius changes, we need to update the angular and azimuthal voxel boundary segments.
 // This function updates Px_angular, Py_angular, Px_azimuthal, and Pz_azimuthal.
 inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
-                                std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
-                                const SphericalVoxelGrid& grid, std::size_t current_voxel_ID_r) noexcept {
+                                        std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
+                                        const SphericalVoxelGrid& grid, std::size_t current_voxel_ID_r) noexcept {
     const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
     for (std::size_t l = 0; l < Px_angular.size(); ++l) {
         const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
