@@ -148,7 +148,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, in
     times_gt_t.erase(std::remove_if(times_gt_t.begin(), times_gt_t.end(), [t](double i) {
                                     return i < t || isKnEqual(i, t); }), times_gt_t.end());
     RadialHitParameters radial_params;
-    bool t_within_bounds;
+    bool t_within_bounds = false;
     if (times_gt_t.size() >= 2 && isKnEqual(intersection_times[0], intersection_times[1])) {
         // Ray is tangent to the circle, i.e. two intersection times are equal.
         radial_params.tMaxR = times_gt_t[0];
@@ -495,7 +495,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         k += grid.deltaPhi();
     }
 
-    int current_voxel_ID_theta, current_voxel_ID_phi;
+    int current_voxel_ID_theta = -1;
+    int current_voxel_ID_phi = -1;
     double a, b, c;
     if (isKnEqual(ray.origin(), grid.sphereCenter())) {
         // If the ray starts at the sphere's center, we need to perturb slightly along
