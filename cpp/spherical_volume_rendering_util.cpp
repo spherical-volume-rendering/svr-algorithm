@@ -604,7 +604,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
 #ifdef INITIALIZATION_DEBUG
     printf("\n----------------------------------"
            "\nInitialization Phase:"
-           "\nInitial Radial Voxel: %zu", current_voxel_ID_r);
+           "\nInitial Radial Voxel: %d", current_voxel_ID_r);
 #endif
 
     // Create an array of values representing the points of intersection between the lines corresponding
@@ -872,7 +872,7 @@ sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid
         printf("\n--Voxel Pushed: {phi=%d}", current_voxel_ID_phi);
         printf("\n--Phi Voxel List: {");
         for (const auto voxel: voxels) {
-            printf(" %d", voxel.angular_voxel);
+            printf(" %d", voxel.azimuthal_voxel);
         }
         printf(" }\n");
 #endif
