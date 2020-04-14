@@ -258,7 +258,6 @@ t_end = min(t_grid, t_end);
 previous_transition_flag = false;
 change_r = 0;
 while t < t_end    
-    t
     % 1. Calculate tMaxR, tMaxTheta, tMaxPhi
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
         current_voxel_ID_r, sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ...
