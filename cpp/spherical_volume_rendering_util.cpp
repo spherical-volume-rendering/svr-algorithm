@@ -421,6 +421,26 @@ inline VoxelIntersectionType minimumIntersection(const RadialHitParameters& rad_
     return VoxelIntersectionType::None;
 }
 
+// Create an array of values representing the points of intersection between the lines corresponding
+// to angular voxel boundaries and the initial radial voxel of the ray in the XY plane. This is similar for
+// azimuthal voxel boundaries, but in the XZ plane instead.
+inline void initializeVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
+                                       std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
+                                       const SphericalVoxelGrid& grid, double current_r) noexcept {
+    double radians = 0;
+    for (std::size_t j = 0; j < Px_angular.size(); ++j) {
+        Px_angular[j] = current_r * std::cos(radians) + grid.sphereCenter().x();
+        Py_angular[j] = current_r * std::sin(radians) + grid.sphereCenter().y();
+        radians += grid.deltaTheta();
+    }
+    radians = 0;
+    for (std::size_t n = 0; n < Px_azimuthal.size(); ++n) {
+        Px_azimuthal[n] = current_r * std::cos(radians) + grid.sphereCenter().x();
+        Pz_azimuthal[n] = current_r * std::sin(radians) + grid.sphereCenter().z();
+        radians += grid.deltaPhi();
+    }
+}
+
 // Each time the radius changes, we need to update the angular and azimuthal voxel boundary segments.
 // This function updates Px_angular, Py_angular, Px_azimuthal, and Pz_azimuthal.
 inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
@@ -428,23 +448,20 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
                                         const SphericalVoxelGrid& grid, std::size_t current_voxel_ID_r) noexcept {
     const double new_r = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
     for (std::size_t l = 0; l < Px_angular.size(); ++l) {
-        const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
-        const double new_angular_y = grid.sphereCenter().y() - Py_angular[l];
-        const double new_r_over_plane_length = new_r / std::sqrt(new_angular_x * new_angular_x +
-                                                                 new_angular_y * new_angular_y);
-        Px_angular[l] = grid.sphereCenter().x() - new_r_over_plane_length * (grid.sphereCenter().x() - Px_angular[l]);
-        Py_angular[l] = grid.sphereCenter().y() - new_r_over_plane_length * (grid.sphereCenter().y() - Py_angular[l]);
+        const double old_angular_x = grid.sphereCenter().x() - Px_angular[l];
+        const double old_angular_y = grid.sphereCenter().y() - Py_angular[l];
+        const double new_r_over_plane_length = new_r / std::sqrt(old_angular_x * old_angular_x +
+                                                                 old_angular_y * old_angular_y);
+        Px_angular[l] = grid.sphereCenter().x() - new_r_over_plane_length * old_angular_x;
+        Py_angular[l] = grid.sphereCenter().y() - new_r_over_plane_length * old_angular_y;
     }
     for (std::size_t m = 0; m < Px_azimuthal.size(); ++m) {
-        const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
-        const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[m];
-        const double new_r_over_plane_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x +
-
-                                                                 new_azimuthal_z * new_azimuthal_z);
-        Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_plane_length *
-                                                    (grid.sphereCenter().x() - Px_azimuthal[m]);
-        Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_plane_length *
-                                                    (grid.sphereCenter().z() - Pz_azimuthal[m]);
+        const double old_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
+        const double old_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[m];
+        const double new_r_over_plane_length = new_r / std::sqrt(old_azimuthal_x * old_azimuthal_x +
+                                                                 old_azimuthal_z * old_azimuthal_z);
+        Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_plane_length * old_azimuthal_x;
+        Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_plane_length * old_azimuthal_z;
     }
 }
 
@@ -460,7 +477,6 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     double current_r = grid.deltaRadius();
 
     const double ray_sphere_vector_dot = ray_sphere_vector.dot(ray_sphere_vector);
-
     while (ray_sphere_vector_dot > (current_r * current_r) && current_r < grid.sphereMaxRadius()) {
         current_r += grid.deltaRadius();
     }
@@ -484,29 +500,15 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         return voxels;
     }
     int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - current_r) * grid.invDeltaRadius();
+    int current_voxel_ID_theta = -1;
+    int current_voxel_ID_phi = -1;
 
-    // Create an array of values representing the points of intersection between the lines corresponding
-    // to angular voxel boundaries and the initial radial voxel of the ray in the XY plane. This is similar for
-    // azimuthal voxel boundaries, but in the XZ plane instead.
     std::vector<double> Px_angular(grid.numAngularVoxels() + 1);
     std::vector<double> Py_angular(grid.numAngularVoxels() + 1);
     std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
     std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
-    double k = 0;
-    for (std::size_t j = 0; j < Px_angular.size(); ++j) {
-        Px_angular[j] = current_r * std::cos(k) + grid.sphereCenter().x();
-        Py_angular[j] = current_r * std::sin(k) + grid.sphereCenter().y();
-        k += grid.deltaTheta();
-    }
-    k = 0;
-    for (std::size_t n = 0; n < Px_azimuthal.size(); ++n) {
-        Px_azimuthal[n] = current_r * std::cos(k) + grid.sphereCenter().x();
-        Pz_azimuthal[n] = current_r * std::sin(k) + grid.sphereCenter().z();
-        k += grid.deltaPhi();
-    }
+    initializeVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, current_r);
 
-    int current_voxel_ID_theta = -1;
-    int current_voxel_ID_phi = -1;
     double a, b, c;
     if (isKnEqual(ray.origin(), grid.sphereCenter())) {
         // If the ray starts at the sphere's center, we need to perturb slightly along
