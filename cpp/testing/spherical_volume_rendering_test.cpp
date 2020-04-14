@@ -24,7 +24,7 @@ namespace {
         std::vector<int> theta_voxels(num_voxels);
         std::vector<int> phi_voxels(num_voxels);
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), radial_voxels.begin(),
-                [](const SphericalVoxel& sv) -> int { return sv.radial_voxel; });
+                       [](const SphericalVoxel& sv) -> int { return sv.radial_voxel; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), theta_voxels.begin(),
                        [](const SphericalVoxel& sv) -> int { return sv.angular_voxel; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), phi_voxels.begin(),

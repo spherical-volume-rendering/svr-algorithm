@@ -176,7 +176,6 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, in
     } else if (times_gt_t.empty()) {
         // No intersection.
         radial_params.tMaxR = std::numeric_limits<double>::infinity();
-        radial_params.within_bounds = false;
         radial_params.tStepR = 0;
         radial_params.previous_transition_flag = false;
     } else {
@@ -208,7 +207,7 @@ RadialHitParameters radialHit(const Ray& ray, const SphericalVoxelGrid& grid, in
 }
 
 // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
-// is the 2-d plane that they exist in, this portion can be generalized to a single function. The calculations
+// is the 2-d plane for which they exist in, this portion can be generalized to a single function call. The calculations
 // presented below follow closely the works of [Foley et al, 1996], [O'Rourke, 1998].
 // Quick reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
 GenHitParameters generalizedPlaneHit(const Ray& ray, double perp_uv_min, double perp_uv_max, double perp_uw_min,
@@ -432,7 +431,7 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
         const double new_angular_x = grid.sphereCenter().x() - Px_angular[l];
         const double new_angular_y = grid.sphereCenter().y() - Py_angular[l];
         const double new_r_over_plane_length = new_r / std::sqrt(new_angular_x * new_angular_x +
-                                                           new_angular_y * new_angular_y);
+                                                                 new_angular_y * new_angular_y);
         Px_angular[l] = grid.sphereCenter().x() - new_r_over_plane_length * (grid.sphereCenter().x() - Px_angular[l]);
         Py_angular[l] = grid.sphereCenter().y() - new_r_over_plane_length * (grid.sphereCenter().y() - Py_angular[l]);
     }
@@ -440,7 +439,8 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
         const double new_azimuthal_x = grid.sphereCenter().x() - Px_azimuthal[m];
         const double new_azimuthal_z = grid.sphereCenter().z() - Pz_azimuthal[m];
         const double new_r_over_plane_length = new_r / std::sqrt(new_azimuthal_x * new_azimuthal_x +
-                                                           new_azimuthal_z * new_azimuthal_z);
+
+                                                                 new_azimuthal_z * new_azimuthal_z);
         Px_azimuthal[m] = grid.sphereCenter().x() - new_r_over_plane_length *
                                                     (grid.sphereCenter().x() - Px_azimuthal[m]);
         Pz_azimuthal[m] = grid.sphereCenter().z() - new_r_over_plane_length *
