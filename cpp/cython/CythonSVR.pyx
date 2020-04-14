@@ -7,7 +7,7 @@ from libcpp.vector cimport vector
 
 cdef extern from "../spherical_volume_rendering_util.h":
     cdef cppclass SphericalVoxel:
-        size_t radial_voxel, angular_voxel, azimuthal_voxel
+        int radial_voxel, angular_voxel, azimuthal_voxel
 
     vector[SphericalVoxel] sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
                                                                double* min_bound, double* max_bound,
