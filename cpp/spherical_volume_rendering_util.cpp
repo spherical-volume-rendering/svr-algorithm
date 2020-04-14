@@ -474,17 +474,17 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     // Determine ray location at t_begin.
     const BoundVec3 point_at_t_begin = ray.pointAtParameter(t_begin);
     const FreeVec3 ray_sphere_vector = grid.sphereCenter() - point_at_t_begin;
-    double current_r = grid.deltaRadius();
+    double entry_radius = grid.deltaRadius(); // The radius at which the ray first enters the sphere.
 
     const double ray_sphere_vector_dot = ray_sphere_vector.dot(ray_sphere_vector);
-    while (ray_sphere_vector_dot > (current_r * current_r) && current_r < grid.sphereMaxRadius()) {
-        current_r += grid.deltaRadius();
+    while (ray_sphere_vector_dot > (entry_radius * entry_radius) && entry_radius < grid.sphereMaxRadius()) {
+        entry_radius += grid.deltaRadius();
     }
 
     // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
     // This will determine if the ray intersects the sphere.
     const double v = ray_sphere_vector.dot(ray.unitDirection().to_free());
-    const double discriminant = (current_r * current_r) - (ray_sphere_vector_dot - v * v);
+    const double discriminant = (entry_radius * entry_radius) - (ray_sphere_vector_dot - v * v);
 
     if (discriminant <= 0.0) { return voxels; }
     const double d = std::sqrt(discriminant);
@@ -499,7 +499,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         // Case 2: Tangent hit.
         return voxels;
     }
-    int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - current_r) * grid.invDeltaRadius();
+    int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - entry_radius) * grid.invDeltaRadius();
     int current_voxel_ID_theta = -1;
     int current_voxel_ID_phi = -1;
 
@@ -507,21 +507,18 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     std::vector<double> Py_angular(grid.numAngularVoxels() + 1);
     std::vector<double> Px_azimuthal(grid.numAzimuthalVoxels() + 1);
     std::vector<double> Pz_azimuthal(grid.numAzimuthalVoxels() + 1);
-    initializeVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, current_r);
+    initializeVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, entry_radius);
 
     double a, b, c;
+    const bool ray_origin_is_outside_grid = isKnEqual(entry_radius, grid.sphereMaxRadius());
     if (isKnEqual(ray.origin(), grid.sphereCenter())) {
         // If the ray starts at the sphere's center, we need to perturb slightly along
         // the path to determine the correct angular and azimuthal voxel.
         const double perturbed_t = 0.1;
-        const double perturbed_x = point_at_t_begin.x() + ray.direction().x() * perturbed_t;
-        const double perturbed_y = point_at_t_begin.y() + ray.direction().y() * perturbed_t;
-        const double perturbed_z = point_at_t_begin.z() + ray.direction().z() * perturbed_t;
-        a = grid.sphereCenter().x() - perturbed_x;
-        b = grid.sphereCenter().y() - perturbed_y;
-        c = grid.sphereCenter().z() - perturbed_z;
-    } else if (isKnEqual(current_r, grid.sphereMaxRadius())) {
-        // If the ray origin is outside the grid, use the first ray intersection.
+        a = grid.sphereCenter().x() - (point_at_t_begin.x() + ray.direction().x() * perturbed_t);
+        b = grid.sphereCenter().y() - (point_at_t_begin.y() + ray.direction().y() * perturbed_t);
+        c = grid.sphereCenter().z() - (point_at_t_begin.z() + ray.direction().z() * perturbed_t);
+    } else if (ray_origin_is_outside_grid) {
         const BoundVec3 pa = ray.pointAtParameter(t_begin_t1);
         a = grid.sphereCenter().x() - pa.x();
         b = grid.sphereCenter().y() - pa.y();
@@ -535,10 +532,10 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     const double ang_plane_length = std::sqrt(a * a + b * b);
     BoundVec3 p_ang(0.0, 0.0, 0.0);
     if (isKnEqual(ang_plane_length, 0.0)) {
-        p_ang.x() = grid.sphereCenter().x() + current_r;
+        p_ang.x() = grid.sphereCenter().x() + entry_radius;
         p_ang.y() = grid.sphereCenter().y();
     } else {
-        p_ang = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r / ang_plane_length);
+        p_ang = grid.sphereCenter() - FreeVec3(a, b, c) * (entry_radius / ang_plane_length);
     }
 
     // p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
@@ -564,10 +561,10 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     const double azi_plane_length = std::sqrt(a * a + c * c);
     BoundVec3 p_azi(0.0, 0.0, 0.0);
     if (isKnEqual(azi_plane_length, 0.0)) {
-        p_azi.x() = grid.sphereCenter().x() + current_r;
+        p_azi.x() = grid.sphereCenter().x() + entry_radius;
         p_azi.z() = grid.sphereCenter().z();
     } else {
-        p_azi = grid.sphereCenter() - FreeVec3(a, b, c) * (current_r / azi_plane_length);
+        p_azi = grid.sphereCenter() - FreeVec3(a, b, c) * (entry_radius / azi_plane_length);
     }
 
     i = 0;
@@ -598,15 +595,9 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
 
     // Find the correct time to begin the traversal phase.
     double t;
-    if (isKnEqual(current_r, grid.sphereMaxRadius())) {
-        if (ray.zDirectionIsNonZero()) {
-            t = ray.timeOfIntersectionAt(p_azi);
-        } else {
-            t = ray.timeOfIntersectionAt(p_ang);
-        }
-    } else {
-        t = t_begin;
-    }
+    if (ray_origin_is_outside_grid) {
+        t = ray.zDirectionIsNonZero() ? ray.timeOfIntersectionAt(p_azi) : ray.timeOfIntersectionAt(p_ang);
+    } else { t = t_begin; }
 
     /* TRAVERSAL PHASE */
     bool previous_transition_flag = false;
