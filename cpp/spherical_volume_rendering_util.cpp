@@ -550,25 +550,28 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         c = grid.sphereCenter().z() - ray.origin().z();
     }
 
+    double p_x, p_y, p_z;
     const double ang_plane_length = std::sqrt(a * a + b * b);
-    BoundVec3 p_ang(0.0, 0.0, 0.0);
     if (isKnEqual(ang_plane_length, 0.0)) {
-        p_ang.x() = grid.sphereCenter().x() + entry_radius;
-        p_ang.y() = grid.sphereCenter().y();
+        p_x = grid.sphereCenter().x() + entry_radius;
+        p_y = grid.sphereCenter().y();
     } else {
-        p_ang = grid.sphereCenter() - FreeVec3(a, b, c) * (entry_radius / ang_plane_length);
+        const double r_over_ang_plane_length = entry_radius / ang_plane_length;
+        p_x = grid.sphereCenter().x() - a * r_over_ang_plane_length;
+        p_y = grid.sphereCenter().y() - b * r_over_ang_plane_length;
     }
-    int current_voxel_ID_theta = calculateVoxelID(Px_angular, Py_angular, p_ang.x(), p_ang.y());
+    int current_voxel_ID_theta = calculateVoxelID(Px_angular, Py_angular, p_x, p_y);
 
     const double azi_plane_length = std::sqrt(a * a + c * c);
-    BoundVec3 p_azi(0.0, 0.0, 0.0);
     if (isKnEqual(azi_plane_length, 0.0)) {
-        p_azi.x() = grid.sphereCenter().x() + entry_radius;
-        p_azi.z() = grid.sphereCenter().z();
+        p_x = grid.sphereCenter().x() + entry_radius;
+        p_z = grid.sphereCenter().z();
     } else {
-        p_azi = grid.sphereCenter() - FreeVec3(a, b, c) * (entry_radius / azi_plane_length);
+        const double r_over_azi_plane_length = entry_radius / azi_plane_length;
+        p_x = grid.sphereCenter().x() - a * r_over_azi_plane_length;
+        p_z = grid.sphereCenter().z() - c * r_over_azi_plane_length;
     }
-    int current_voxel_ID_phi = calculateVoxelID(Px_azimuthal, Pz_azimuthal, p_azi.x(), p_azi.z());
+    int current_voxel_ID_phi = calculateVoxelID(Px_azimuthal, Pz_azimuthal, p_x, p_z);
 
     voxels.push_back({.radial_voxel=current_voxel_ID_r,
                       .angular_voxel=current_voxel_ID_theta,
@@ -582,7 +585,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     // Find the correct time to begin the traversal phase.
     double t;
     if (ray_origin_is_outside_grid) {
-        t = ray.zDirectionIsNonZero() ? ray.timeOfIntersectionAt(p_azi) : ray.timeOfIntersectionAt(p_ang);
+        t = ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z));
     } else { t = t_begin; }
 
     /* TRAVERSAL PHASE */
