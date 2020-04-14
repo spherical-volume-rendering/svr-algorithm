@@ -9,15 +9,14 @@ import CythonSVR
 class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
     # Verifies correctness of the voxel traversal coordinates.
     def verify_voxels(self, voxels, expected_radial_voxels,  expected_theta_voxels,  expected_phi_voxels):
-        i = 0
         actual_radial_voxels = []
         actual_theta_voxels = []
         actual_phi_voxels = []
-        while i < voxels.size:
-            actual_radial_voxels.append(voxels[i])
-            actual_theta_voxels.append(voxels[i+1])
-            actual_phi_voxels.append(voxels[i+2])
-            i += 3
+        for x in range(voxels.shape[0]):
+            actual_radial_voxels.append(voxels[x, 0])
+            actual_theta_voxels.append(voxels[x, 1])
+            actual_phi_voxels.append(voxels[x, 2])
+
         self.assertListEqual(actual_radial_voxels, expected_radial_voxels)
         self.assertListEqual(actual_theta_voxels, expected_theta_voxels)
         self.assertListEqual(actual_phi_voxels, expected_phi_voxels)
@@ -37,7 +36,7 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
         voxels = CythonSVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,
                                      num_angular_sections, num_azimuthal_sections, sphere_center, sphere_max_radius,
                                      t_begin, t_end)
-        assert np.array_equal(voxels, [])
+        assert voxels.size == 0
 
     def test_sphere_center_at_origin(self):
         ray_origin = np.array([-13.0, -13.0, -13.0])
