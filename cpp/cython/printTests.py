@@ -5,7 +5,7 @@ import sys
 # print both tests.
 
 cpp_title = ""
-python_title =""
+python_title = ""
 min_bound = np.array([0.0, 0.0, 0.0])
 max_bound = np.array([0.0, 0.0, 0.0])
 sphere_center = np.array([0.0,0.0,0.0])
