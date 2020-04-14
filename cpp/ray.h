@@ -7,9 +7,9 @@
 // This consists of two components, the origin of the ray,
 // and the direction of the ray.
 struct Ray final {
-     Ray(const BoundVec3& origin, const FreeVec3& direction)
+    Ray(const BoundVec3 &origin, const FreeVec3 &direction)
             : origin_(origin), direction_(direction), unit_direction_(direction),
-            inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z())),
+              inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z())),
               x_dir_is_non_zero_(std::abs(direction.x()) > 0.0), y_dir_is_non_zero_(std::abs(direction.y()) > 0.0),
               z_dir_is_non_zero_(std::abs(direction.z()) > 0.0) {}
 
@@ -27,20 +27,20 @@ struct Ray final {
     // Since Point p = ray.origin() + ray.direction() * (v +/- discriminant),
     // We can simply provide the difference or addition of v and the discriminant.
     inline double timeOfIntersectionAt(double discriminant_v) const {
-         if (xDirectionIsNonZero()) {
-             const double p_x = origin().x() + unitDirection().x() * discriminant_v;
-             return (p_x - origin().x()) * invDirection().x();
-         }
-         if (yDirectionIsNonZero()) {
-             const double p_y = origin().y() + unitDirection().y() * discriminant_v;
-             return (p_y - origin().y()) * invDirection().y();
-         }
+        if (xDirectionIsNonZero()) {
+            const double p_x = origin().x() + unitDirection().x() * discriminant_v;
+            return (p_x - origin().x()) * invDirection().x();
+        }
+        if (yDirectionIsNonZero()) {
+            const double p_y = origin().y() + unitDirection().y() * discriminant_v;
+            return (p_y - origin().y()) * invDirection().y();
+        }
         const double p_z = origin().z() + unitDirection().z() * discriminant_v;
         return (p_z - origin().z()) * invDirection().z();
-     }
+    }
 
-     // Similar to above implementation, but uses a given vector p.
-    inline double timeOfIntersectionAt(const Vec3& p) const {
+    // Similar to above implementation, but uses a given vector p.
+    inline double timeOfIntersectionAt(const Vec3 &p) const {
         if (xDirectionIsNonZero()) {
             return (p.x() - origin().x()) * invDirection().x();
         }
@@ -51,11 +51,17 @@ struct Ray final {
     }
 
     inline BoundVec3 origin() const { return this->origin_; }
+
     inline FreeVec3 direction() const { return this->direction_; }
+
     inline FreeVec3 invDirection() const { return this->inverse_direction_; }
+
     inline UnitVec3 unitDirection() const { return this->unit_direction_; }
+
     inline bool xDirectionIsNonZero() const { return x_dir_is_non_zero_; }
+
     inline bool yDirectionIsNonZero() const { return y_dir_is_non_zero_; }
+
     inline bool zDirectionIsNonZero() const { return z_dir_is_non_zero_; }
 
 private:

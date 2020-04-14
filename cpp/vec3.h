@@ -52,6 +52,7 @@ private:
 struct FreeVec3 : Vec3 {
 
     explicit FreeVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
+
     explicit FreeVec3(double x, double y, double z) : Vec3(x, y, z) {}
 
     inline double dot(const Vec3 &other) const {
@@ -114,6 +115,7 @@ inline FreeVec3 operator/(FreeVec3 v, const double scalar) {
 // in space, relative to some frame of reference.
 struct BoundVec3 : Vec3 {
     explicit BoundVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
+
     explicit BoundVec3(double x, double y, double z) : Vec3(x, y, z) {}
 
     inline double dot(const Vec3 &other) const {
