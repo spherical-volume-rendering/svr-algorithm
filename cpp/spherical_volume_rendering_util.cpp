@@ -584,10 +584,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     const double t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
 
     // Find the correct time to begin the traversal phase.
-    double t;
-    if (ray_origin_is_outside_grid) {
-        t = ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z));
-    } else { t = t_begin; }
+    double t = ray_origin_is_outside_grid ? ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z)) : t_begin;
 
     /* TRAVERSAL PHASE */
     bool previous_transition_flag = false;
