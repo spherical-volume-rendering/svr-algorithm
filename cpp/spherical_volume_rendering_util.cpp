@@ -575,8 +575,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     int current_voxel_ID_phi = calculateVoxelID(Px_azimuthal, Pz_azimuthal, p_x, p_z);
 
     voxels.push_back({.radial_voxel=current_voxel_ID_r,
-                             .angular_voxel=current_voxel_ID_theta,
-                             .azimuthal_voxel=current_voxel_ID_phi});
+                      .angular_voxel=current_voxel_ID_theta,
+                      .azimuthal_voxel=current_voxel_ID_phi});
 
     // Find the maximum time the ray will be in the grid.
     const double max_discriminant = grid.sphereMaxRadius() * grid.sphereMaxRadius() - (ray_sphere_vector_dot - v * v);
@@ -661,8 +661,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
             radius_has_stepped = false;
         }
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
-                                 .angular_voxel=current_voxel_ID_theta,
-                                 .azimuthal_voxel=current_voxel_ID_phi});
+                          .angular_voxel=current_voxel_ID_theta,
+                          .azimuthal_voxel=current_voxel_ID_phi});
     }
     return voxels;
 }
