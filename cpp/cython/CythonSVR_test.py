@@ -34,8 +34,8 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
         t_begin = 0.0
         t_end = 15.0
         voxels = CythonSVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,
-                                     num_angular_sections, num_azimuthal_sections, sphere_center, sphere_max_radius,
-                                     t_begin, t_end)
+                                                 num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                 sphere_max_radius, t_begin, t_end)
         assert voxels.size == 0
 
     def test_sphere_center_at_origin(self):
