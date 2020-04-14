@@ -425,8 +425,8 @@ inline VoxelIntersectionType minimumIntersection(const RadialHitParameters& rad_
 // to angular voxel boundaries and the initial radial voxel of the ray in the XY plane. This is similar for
 // azimuthal voxel boundaries, but in the XZ plane instead.
 inline void initializeVoxelBoundarySegments(std::vector<double>& Px_angular, std::vector<double>& Py_angular,
-                                       std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
-                                       const SphericalVoxelGrid& grid, double current_r) noexcept {
+                                            std::vector<double>& Px_azimuthal, std::vector<double>& Pz_azimuthal,
+                                            const SphericalVoxelGrid& grid, double current_r) noexcept {
     double radians = 0;
     for (std::size_t j = 0; j < Px_angular.size(); ++j) {
         Px_angular[j] = current_r * std::cos(radians) + grid.sphereCenter().x();
