@@ -13,17 +13,10 @@ struct SphericalVoxel {
     int azimuthal_voxel;
 };
 
-// A spherical coordinate voxel traversal algorithm. The algorithm traces the 'ray' over the spherical voxel grid
-// provided. 't_begin' is the time the ray begins, and 't_end' is the time the ray ends.
-//
-// Requires:
-//    'ray' is a valid Ray.
-//    'grid' is a valid SphericalVoxelGrid.
-//    t_end > t_begin >= 0.0
-//
-// Returns:
-//    A vector of the spherical coordinate voxels traversed. Recall that if, for example, a radial hit occurs,
-//    The azimuthal and angular voxels will remain the same as before. This applies for each traversal.
+// A spherical coordinate voxel traversal algorithm. The algorithm traces the ray over the spherical voxel grid
+// provided. t_begin is the time the ray begins, and t_end is the time at which the ray ends. Returns a vector of the
+// spherical coordinate voxels traversed. Recall that if, for example, a radial hit occurs, The azimuthal and
+// angular voxels will remain the same as before. This applies for each traversal type.
 //
 // Notes: For further documentation and visualization, see the Progress Report for the algorithm:
 // https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?usp=sharing
