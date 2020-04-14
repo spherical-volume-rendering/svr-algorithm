@@ -465,6 +465,29 @@ inline void updateVoxelBoundarySegments(std::vector<double>& Px_angular, std::ve
     }
 }
 
+// p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
+// points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
+// boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane (XY for angular, XZ
+// for azimuthal), this can be generalized to a single function.
+inline int calculateVoxelID(const std::vector<double> plane1, const std::vector<double> plane2,
+                            double p1, double p2) noexcept {
+    std::size_t i = 0;
+    while (i < plane1.size() - 1) {
+        const double px_diff = plane1[i] - plane1[i+1];
+        const double py_diff = plane2[i] - plane2[i+1];
+        const double px_p1_diff = plane1[i] - p1;
+        const double py_p1_diff = plane2[i] - p2;
+        const double n_px_p1_diff = plane1[i+1] - p1;
+        const double n_py_p1_diff = plane2[i+1] - p2;
+        const double d1 = (px_p1_diff * px_p1_diff) + (py_p1_diff * py_p1_diff);
+        const double d2 = (n_px_p1_diff * n_px_p1_diff) + (n_py_p1_diff * n_py_p1_diff);
+        const double d3 = (px_diff * px_diff) + (py_diff * py_diff);
+        if (d1 + d2 <= d3) { return i; }
+        ++i;
+    }
+    return -1;
+}
+
 std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid,
                                                               double t_begin, double t_end) noexcept {
     std::vector<SphericalVoxel> voxels;
@@ -500,8 +523,6 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         return voxels;
     }
     int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - entry_radius) * grid.invDeltaRadius();
-    int current_voxel_ID_theta = -1;
-    int current_voxel_ID_phi = -1;
 
     std::vector<double> Px_angular(grid.numAngularVoxels() + 1);
     std::vector<double> Py_angular(grid.numAngularVoxels() + 1);
@@ -537,27 +558,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     } else {
         p_ang = grid.sphereCenter() - FreeVec3(a, b, c) * (entry_radius / ang_plane_length);
     }
+    int current_voxel_ID_theta = calculateVoxelID(Px_angular, Py_angular, p_ang.x(), p_ang.y());
 
-    // p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
-    // points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
-    // boundary. This is similar for azimuthal boundaries.
-    std::size_t i = 0;
-    while (i < Px_angular.size() - 1) {
-        const double px_diff = Px_angular[i] - Px_angular[i+1];
-        const double py_diff = Py_angular[i] - Py_angular[i+1];
-        const double px_p1_diff = Px_angular[i] - p_ang.x();
-        const double py_p1_diff = Py_angular[i] - p_ang.y();
-        const double n_px_p1_diff = Px_angular[i+1] - p_ang.x();
-        const double n_py_p1_diff = Py_angular[i+1] - p_ang.y();
-        const double d1 = (px_p1_diff * px_p1_diff) + (py_p1_diff * py_p1_diff);
-        const double d2 = (n_px_p1_diff * n_px_p1_diff) + (n_py_p1_diff * n_py_p1_diff);
-        const double d3 = (px_diff * px_diff) + (py_diff * py_diff);
-        if (d1 + d2 <= d3) {
-            current_voxel_ID_theta = i;
-            break;
-        }
-        ++i;
-    }
     const double azi_plane_length = std::sqrt(a * a + c * c);
     BoundVec3 p_azi(0.0, 0.0, 0.0);
     if (isKnEqual(azi_plane_length, 0.0)) {
@@ -566,24 +568,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     } else {
         p_azi = grid.sphereCenter() - FreeVec3(a, b, c) * (entry_radius / azi_plane_length);
     }
+    int current_voxel_ID_phi = calculateVoxelID(Px_azimuthal, Pz_azimuthal, p_azi.x(), p_azi.z());
 
-    i = 0;
-    while (i < Px_azimuthal.size() - 1) {
-        const double px_diff = Px_azimuthal[i] - Px_azimuthal[i+1];
-        const double pz_diff = Pz_azimuthal[i] - Pz_azimuthal[i+1];
-        const double px_p1_diff = Px_azimuthal[i] - p_azi.x();
-        const double pz_p1_diff = Pz_azimuthal[i] - p_azi.z();
-        const double n_px_p1_diff = Px_azimuthal[i+1] - p_azi.x();
-        const double n_pz_p1_diff = Pz_azimuthal[i+1] - p_azi.z();
-        const double d1 = (px_p1_diff * px_p1_diff) + (pz_p1_diff * pz_p1_diff);
-        const double d2 = (n_px_p1_diff * n_px_p1_diff) + (n_pz_p1_diff * n_pz_p1_diff);
-        const double d3 = (px_diff * px_diff) + (pz_diff * pz_diff);
-        if (d1 + d2 <= d3) {
-            current_voxel_ID_phi = i;
-            break;
-        }
-        ++i;
-    }
     voxels.push_back({.radial_voxel=current_voxel_ID_r,
                       .angular_voxel=current_voxel_ID_theta,
                       .azimuthal_voxel=current_voxel_ID_phi});
