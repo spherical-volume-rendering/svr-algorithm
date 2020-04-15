@@ -5,6 +5,7 @@
 // (2) Traversal parallel to y-axis.
 // (3) Traversal parallel to z-axis.
 // (4) Traversal parallel to x-axis.
+// (5) Ray does not enter the spherical volume 10,000 times.
 int main() {
     // Traversal from bottom left to upper right.
     const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
@@ -77,5 +78,22 @@ int main() {
     const double t_begin4 = 0.0;
     const double t_end4 = 100000.0;
     const auto actual_voxels4 = sphericalCoordinateVoxelTraversal(ray4, grid4, t_begin4, t_end4);
+
+    const BoundVec3 min_bound5(0.0, 0.0, 0.0);
+    const BoundVec3 max_bound5(30.0, 30.0, 30.0);
+    const BoundVec3 sphere_center5(15.0, 15.0, 15.0);
+    const double sphere_max_radius5 = 10.0;
+    const std::size_t num_radial_sections5 = 4;
+    const std::size_t num_angular_sections5 = 8;
+    const std::size_t num_azimuthal_sections5 = 4;
+    const SphericalVoxelGrid grid5(min_bound5, max_bound5, num_radial_sections5,
+                                   num_angular_sections5,
+                                   num_azimuthal_sections5, sphere_center5, sphere_max_radius5);
+    const BoundVec3 ray_origin5(3.0, 3.0, 3.0);
+    const FreeVec3 ray_direction5(-2.0, -1.3, 1.0);
+    const Ray ray5(ray_origin5, ray_direction5);
+    const double t_begin5 = 0.0;
+    const double t_end5 = 15.0;
+    for (int i = 0; i < 10000; ++i) { sphericalCoordinateVoxelTraversal(ray5, grid5, t_begin5, t_end5); }
 }
 
