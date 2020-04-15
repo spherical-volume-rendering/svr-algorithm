@@ -126,7 +126,6 @@ RadialHitParameters radialHit(const Ray &ray, const SphericalVoxelGrid &grid, in
                               bool previous_transition_flag) noexcept {
     const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
     double r_a = std::max(current_radius - grid.deltaRadius(), grid.deltaRadius());
-
     double r_b;
     if (!previous_transition_flag) {
         // To find the next radius, we need to check the previous_transition_flag:
@@ -470,7 +469,7 @@ inline void updateVoxelBoundarySegments(std::vector<double> &Px_angular, std::ve
 // points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
 // boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane (XY for angular, XZ
 // for azimuthal), this can be generalized to a single function.
-inline int calculateVoxelID(const std::vector<double> plane1, const std::vector<double> plane2,
+inline int calculateVoxelID(const std::vector<double> &plane1, const std::vector<double> &plane2,
                             double p1, double p2) noexcept {
     std::size_t i = 0;
     while (i < plane1.size() - 1) {
@@ -649,9 +648,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
                 radius_has_stepped = radial_params.tStepR != 0;
                 break;
             }
-            case None: {
-                return voxels;
-            }
+            case None: { return voxels; }
         }
         if (radius_has_stepped) {
             updateVoxelBoundarySegments(Px_angular, Py_angular, Px_azimuthal, Pz_azimuthal, grid, current_voxel_ID_r);
