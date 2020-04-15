@@ -403,6 +403,9 @@ while t < t_end
     else
        return;
     end
+    if verbose:
+        fprintf('\nCurrently, we have spent %d time on traversal\n',acc)
+    end
     % If the radial voxel changes, update the angular voxel boundary
     % segments for intersection checks in angular hit.
     if change_r == 1
