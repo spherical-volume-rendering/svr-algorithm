@@ -194,6 +194,7 @@ if approximatelyEqual(l,0.0,1e-12,1e-8)
 else
     p1_xz = sphere_center_xz - (r/l) .* [a c];
 end
+
 % This point will lie between two angular voxel boundaries iff the angle between
 % it and the angular boundary intersection points along the circle of 
 % max radius is obtuse. Equality represents the case when the
@@ -251,7 +252,16 @@ if approximatelyEqual(r,sphere_max_radius,1e-12,1e-8)
 else
     t_start = t_begin;
 end
-    
+
+% The chord length test. We first find the exit time and entrance
+% time for the ray. We also need to check that if the ray
+% begins/end within the grid, not the outside. Acc is used
+% to keep track of total time spent on traversal
+if verbose
+    fprintf('\nExpected chord length is: %d', min(t2,t_end)-max(t1,t_begin))
+    acc = 0.0
+end
+
 % TRAVERSAL PHASE
 t = t_start;
 t_end = min(t_grid, t_end);
@@ -281,6 +291,9 @@ while t < t_end
         % Note 1: Case tMaxTheta is a minimum
         % Note 2: When the ray only intersects one radial shell but crosses an
         % angular boundary, we need the second half of disjunction
+        if verbose
+            acc = acc + tMaxTheta - t
+        end
         t = tMaxTheta;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
         change_r = 0;
@@ -290,6 +303,9 @@ while t < t_end
             strictlyLess(tMaxR,t_end, 1e-12,1e-8) ...
             && ~rStepViolation
         % Case tMaxR is minimum
+        if verbose
+            acc = acc + tMaxR - t
+        end
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR; 
         if tStepR ~= 0; change_r = 1; else; change_r = 0; end
@@ -298,6 +314,9 @@ while t < t_end
             strictlyLess(t,tMaxPhi,1e-12,1e-8) && ...
             strictlyLess(tMaxPhi,t_end,1e-12,1e-8)
         % Case tMaxPhi is minimum
+        if verbose
+            acc = acc + tMaxPhi - t
+        end
         t = tMaxPhi;
         current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections); 
         change_r = 0;
@@ -306,6 +325,9 @@ while t < t_end
             strictlyLess(t,tMaxR,1e-12,1e-8) && ...
             strictlyLess(tMaxR,t_end,1e-12,1e-8) && ~rStepViolation
         % Triple boundary intersection
+        if verbose
+            acc = acc + tMaxPhi - t
+        end
         t = tMaxPhi;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
@@ -318,10 +340,16 @@ while t < t_end
         if strictlyLess(tMaxR, tMaxPhi, 1e-12,1e-8) && ...
                 strictlyLess(t,tMaxR,1e-12,1e-8) && ~rStepViolation
             % R min
+            if verbose
+                acc = acc + tMaxR - t
+            end
             t = tMaxR;
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
             if tStepR ~= 0; change_r = 1; else; change_r = 0; end
         else
+            if verbose
+                acc = acc + tMaxPhi - t
+            end
             t = tMaxPhi;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
@@ -335,10 +363,16 @@ while t < t_end
         if strictlyLess(tMaxPhi,tMaxTheta,1e-12,1e-8) && ...
                 strictlyLess(t,tMaxPhi,1e-12,1e-8)
             % Phi min
+            if verbose
+                acc = acc + tMaxPhi - t
+            end
             t = tMaxPhi;
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
             change_r = 0;
         else
+            if verbose
+                acc = acc + tMaxTheta - t
+            end
             t = tMaxTheta;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
@@ -351,10 +385,16 @@ while t < t_end
         if strictlyLess(tMaxTheta,tMaxR,1e-12,1e-8) && ...
                 strictlyLess(t,tMaxTheta, 1e-12,1e-8)
             % Theta min
+            if verbose
+                acc = acc + tMaxTheta - t
+            end
             t = tMaxTheta;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             change_r = 0;
         else
+            if verbose
+                acc = acc + tMaxR - t
+            end
             t = tMaxR;
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
