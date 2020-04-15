@@ -8,7 +8,7 @@
 //   >  git clone https://github.com/google/googletest.git
 //
 //   2. CMake
-//   >  mkdir build && cd build && cmake .. && make all && ./run_svr_tests
+//   >  mkdir build && cd build && cmake .. && make all && ./SVR_tests
 //
 // For information on Google Test, see: https://github.com/google/googletest/blob/master/googletest/README.md
 // For examples of Google Test, see: https://github.com/google/googletest/tree/master/googletest/samples
