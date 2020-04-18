@@ -182,9 +182,10 @@ RadialHitParameters radialHit(const Ray &ray, const SphericalVoxelGrid &grid, in
         intersection_times[2] = ray.timeOfIntersectionAt(v - d_b);
         intersection_times[3] = ray.timeOfIntersectionAt(v + d_b);
     }
-    std::array<double, 4> times_gt_t;
+    std::vector<double> times_gt_t;
+    times_gt_t.reserve(4);
     std::copy_if(intersection_times.cbegin(), intersection_times.cend(),
-            times_gt_t.begin(), [t](double i) { return i > t; });
+            std::back_inserter(times_gt_t), [t](double i) { return i > t; });
     RadialHitParameters radial_params;
     bool t_within_bounds = false;
     if (times_gt_t.size() >= 2 && isKnEqual(intersection_times[0], intersection_times[1])) {
