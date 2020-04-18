@@ -91,7 +91,7 @@ struct RadialHitData {
         times_gt_t.reserve(4);
         previous_transition_flag = false;
     }
-    double ray_sphere_vector_dot, v;
+    double v, ray_sphere_vector_dot;
     std::array<double, 4> intersection_times;
     std::vector<double> times_gt_t;
     bool previous_transition_flag;
@@ -166,8 +166,8 @@ inline int calculateVoxelID(const std::vector<LineSegment> plane, double p1, dou
 // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
 // The struct RadialHitData is used to provide already initialized data structures, as well as avoiding unnecessary
 // duplicate calculations that have already been done in the initialization phase.
-RadialHitParameters radialHit(const Ray &ray, const SphericalVoxelGrid &grid, RadialHitData& data, double t,
-                              double t_end, int current_voxel_ID_r) noexcept {
+RadialHitParameters radialHit(const Ray &ray, const SphericalVoxelGrid &grid, RadialHitData& data,
+                              int current_voxel_ID_r, double t, double t_end) noexcept {
     const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
     double r_a = MAX(current_radius - grid.deltaRadius(), grid.deltaRadius());
     double r_b;
@@ -585,7 +585,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
 
     RadialHitData radial_hit_data(v, ray_sphere_vector_dot);
     while (true) {
-        const auto radial_params = radialHit(ray, grid, radial_hit_data, t, t_end, current_voxel_ID_r);
+        const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
         radial_hit_data.previous_transition_flag = radial_params.previous_transition_flag;
         const auto angular_params = angularHit(ray, grid, P_max_angular, current_voxel_ID_theta, t, t_end);
         const auto azimuthal_params = azimuthalHit(ray, grid, P_max_azimuthal, current_voxel_ID_phi, t, t_end);
