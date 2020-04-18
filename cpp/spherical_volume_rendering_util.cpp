@@ -86,9 +86,8 @@ struct LineSegment {
 // in the initialization phase, so unnecessary to re-calculate again for radial hit. intersection_times and times_gt_t
 // are used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
 struct RadialHitData {
-    inline RadialHitData(double given_v, double given_ray_sphere_vector_dot) {
-        v = given_v;
-        ray_sphere_vector_dot = given_ray_sphere_vector_dot;
+    inline RadialHitData(double t_v, double t_ray_sphere_vector_dot) :
+    v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot) {
         times_gt_t.reserve(4);
         previous_transition_flag = false;
     }
