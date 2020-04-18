@@ -113,10 +113,11 @@ inline bool KnLessThan(double a, double b) noexcept {
     return a < b && !isKnEqual(a, b);
 }
 
-// p1 will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
+// A point will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
 // points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
 // boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane (XY for angular, XZ
-// for azimuthal), this can be generalized to a single function.
+// for azimuthal), this can be generalized to a single function. Since angular and azimuthal voxel boundaries range from
+// [0, N], returns -1 in the case where the point does not lie within the boundaries.
 inline int calculateVoxelID(const std::vector<LineSegment> plane, double p1, double p2) noexcept {
     std::size_t i = 0;
     while (i < plane.size() - 1) {
@@ -126,10 +127,9 @@ inline int calculateVoxelID(const std::vector<LineSegment> plane, double p1, dou
         const double py_p1_diff = plane[i].P2 - p2;
         const double n_px_p1_diff = plane[i + 1].P1 - p1;
         const double n_py_p1_diff = plane[i + 1].P2 - p2;
-        const double d1 = (px_p1_diff * px_p1_diff) + (py_p1_diff * py_p1_diff);
-        const double d2 = (n_px_p1_diff * n_px_p1_diff) + (n_py_p1_diff * n_py_p1_diff);
+        const double d1d2 = (px_p1_diff * px_p1_diff) + (py_p1_diff * py_p1_diff) +
+                            (n_px_p1_diff * n_px_p1_diff) + (n_py_p1_diff * n_py_p1_diff);
         const double d3 = (px_diff * px_diff) + (py_diff * py_diff);
-        const double d1d2 = d1 + d2;
         if (KnLessThan(d1d2, d3) || isKnEqual(d1d2, d3)) { return i; }
         ++i;
     }
