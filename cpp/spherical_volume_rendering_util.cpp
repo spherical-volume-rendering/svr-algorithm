@@ -98,14 +98,10 @@ struct RadialHitData {
 };
 
 template <class T>
-inline T MAX(const T& a, const T& b) noexcept {
-    return a > b ? a : b;
-}
+inline T MAX(const T& a, const T& b) noexcept { return a > b ? a : b; }
 
 template <class T>
-inline T MIN(const T& a, const T& b) noexcept {
-    return a < b ? a : b;
-}
+inline T MIN(const T& a, const T& b) noexcept { return a < b ? a : b; }
 
 // Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
 // uses a modified version of an algorithm developed by Donald Knuth (which in turn relies upon relative epsilon).
