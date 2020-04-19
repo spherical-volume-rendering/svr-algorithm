@@ -484,9 +484,6 @@ inline void initializeVoxelBoundarySegments(std::vector<LineSegment> &P_angular,
 
 std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid,
                                                               double t_begin, double t_end) noexcept {
-    std::vector<SphericalVoxel> voxels;
-    voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
-
     // Determine ray location at t_begin.
     const BoundVec3 point_at_t_begin = ray.pointAtParameter(t_begin);
     const FreeVec3 ray_sphere_vector = grid.sphereCenter() - point_at_t_begin;
@@ -502,7 +499,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     const double v = ray_sphere_vector.dot(ray.unitDirection().to_free());
     const double discriminant = (entry_radius * entry_radius) - (ray_sphere_vector_dot - v * v);
 
-    if (discriminant <= 0.0) { return voxels; }
+    if (discriminant <= 0.0) { return {}; }
     const double d = std::sqrt(discriminant);
 
     // Calculate the time of entrance and exit of the ray.
@@ -513,7 +510,7 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     if ((t_begin_t1 < t_begin && t_begin_t2 < t_begin) || isKnEqual(t_begin_t1, t_begin_t2)) {
         // Case 1: No intersection.
         // Case 2: Tangent hit.
-        return voxels;
+        return {};
     }
     int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - entry_radius) * grid.invDeltaRadius();
     const std::size_t angular_initializer_size = grid.numAngularVoxels() + 1;
@@ -567,6 +564,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     }
     int current_voxel_ID_phi = calculateVoxelID(P_azimuthal, p_x, p_z);
 
+    std::vector<SphericalVoxel> voxels;
+    voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
     voxels.push_back({.radial_voxel=current_voxel_ID_r,
                       .angular_voxel=current_voxel_ID_theta,
                       .azimuthal_voxel=current_voxel_ID_phi});
