@@ -75,13 +75,6 @@ struct GenHitParameters {
     bool within_bounds;
 };
 
-// Represents a line segment. This is most commonly used to represent the points of intersections between
-// the lines corresponding to voxel boundaries and a given radial voxel.
-struct LineSegment {
-    double P1;
-    double P2;
-};
-
 // The necessary information to calculate a radial hit. ray_sphere_vector_dot and v are calculated
 // in the initialization phase, so unnecessary to re-calculate again for radial hit. intersection_times and times_gt_t
 // are used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
@@ -139,7 +132,7 @@ inline bool KnLessThan(double a, double b) noexcept {
 // boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane (XY for angular, XZ
 // for azimuthal), this can be generalized to a single function. Since angular and azimuthal voxel boundaries range from
 // [0, N], returns -1 in the case where the point does not lie within the boundaries.
-inline int calculateVoxelID(const std::vector<LineSegment> plane, double p1, double p2) noexcept {
+inline int calculateVoxelID(const std::vector<LineSegment> &plane, double p1, double p2) noexcept {
     std::size_t i = 0;
     while (i < plane.size() - 1) {
         const double px_diff = plane[i].P1 - plane[i + 1].P1;
@@ -328,7 +321,6 @@ GenHitParameters generalizedPlaneHit(const SphericalVoxelGrid &grid, const Ray &
 // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
 // the ray and an angular section. The angular sections live in the XY plane.
 AngularHitParameters angularHit(const Ray &ray, const SphericalVoxelGrid &grid,
-                                const std::vector<LineSegment> &P_max_angular,
                                 int current_voxel_ID_theta, double t, double t_end) noexcept {
     // Ray segment vector.
     const BoundVec3 p = ray.pointAtParameter(t);
@@ -336,8 +328,10 @@ AngularHitParameters angularHit(const Ray &ray, const SphericalVoxelGrid &grid,
     const FreeVec3 v = p_end - p;
 
     // Calculate the voxel boundary vectors.
-    const FreeVec3 p_one(P_max_angular[current_voxel_ID_theta].P1, P_max_angular[current_voxel_ID_theta].P2, 0.0);
-    const FreeVec3 p_two(P_max_angular[current_voxel_ID_theta+1].P1, P_max_angular[current_voxel_ID_theta+1].P2, 0.0);
+    const FreeVec3 p_one(grid.pMaxAngular(current_voxel_ID_theta).P1,
+                         grid.pMaxAngular(current_voxel_ID_theta).P2, 0.0);
+    const FreeVec3 p_two(grid.pMaxAngular(current_voxel_ID_theta+1).P1,
+                         grid.pMaxAngular(current_voxel_ID_theta+1).P2, 0.0);
     const BoundVec3 u_min = grid.sphereCenter() - p_one;
     const BoundVec3 u_max = grid.sphereCenter() - p_two;
     const FreeVec3 w_min = p_one - FreeVec3(p);
@@ -350,22 +344,23 @@ AngularHitParameters angularHit(const Ray &ray, const SphericalVoxelGrid &grid,
     const double perp_vw_max = v.x() * w_max.y() - v.y() * w_max.x();
     const GenHitParameters params = generalizedPlaneHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
                                                         perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().y(),
-                                                        grid.sphereCenter().y(), P_max_angular, current_voxel_ID_theta);
+                                                        grid.sphereCenter().y(), grid.pMaxAngular(), current_voxel_ID_theta);
     return {.tMaxTheta=params.tMax, .tStepTheta=params.tStep, .within_bounds=params.within_bounds};
 }
 
 // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is considered an intersection with
 // the ray and an azimuthal section. The azimuthal sections live in the XZ plane.
 AzimuthalHitParameters azimuthalHit(const Ray &ray, const SphericalVoxelGrid &grid,
-                                    const std::vector<LineSegment> &P_max_azimuthal,
                                     int current_voxel_ID_phi, double t, double t_end) noexcept {
     // Ray segment vector.
     const BoundVec3 p = ray.pointAtParameter(t);
     const BoundVec3 p_end = ray.pointAtParameter(t_end);
     const FreeVec3 v = p_end - p;
     // Calculate the voxel boundary vectors.
-    const FreeVec3 p_one(P_max_azimuthal[current_voxel_ID_phi].P1, 0.0, P_max_azimuthal[current_voxel_ID_phi].P2);
-    const FreeVec3 p_two(P_max_azimuthal[current_voxel_ID_phi+1].P1, 0.0, P_max_azimuthal[current_voxel_ID_phi+1].P2);
+    const FreeVec3 p_one(grid.pMaxAzimuthal(current_voxel_ID_phi).P1, 0.0,
+                         grid.pMaxAzimuthal(current_voxel_ID_phi).P2);
+    const FreeVec3 p_two(grid.pMaxAzimuthal(current_voxel_ID_phi+1).P1, 0.0,
+                         grid.pMaxAzimuthal(current_voxel_ID_phi+1).P2);
     const BoundVec3 u_min = grid.sphereCenter() - p_one;
     const BoundVec3 u_max = grid.sphereCenter() - p_two;
     const FreeVec3 w_min = p_one - FreeVec3(p);
@@ -378,7 +373,7 @@ AzimuthalHitParameters azimuthalHit(const Ray &ray, const SphericalVoxelGrid &gr
     const double perp_vw_max = v.x() * w_max.z() - v.z() * w_max.x();
     const GenHitParameters params = generalizedPlaneHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min, perp_uw_max,
                                                         perp_vw_min, perp_vw_max, p, v, t, t_end, ray.direction().z(),
-                                                        grid.sphereCenter().z(), P_max_azimuthal, current_voxel_ID_phi);
+                                                        grid.sphereCenter().z(), grid.pMaxAzimuthal(), current_voxel_ID_phi);
     return {.tMaxPhi=params.tMax, .tStepPhi=params.tStep, .within_bounds=params.within_bounds};
 }
 
@@ -432,52 +427,34 @@ inline VoxelIntersectionType minimumIntersection(const RadialHitParameters &rad_
 
 // Create an array of values representing the points of intersection between the lines corresponding
 // to voxel boundaries and a given radial voxel in the XY plane and XZ plane. Here, P_* represents
-// these points with a given radius 'current_radius', while P_max_* uses the grid's max radius.
-// The case where the number of angular voxels is equal to the number of azimuthal voxels is also checked to reduce
-// the number of trigonometric and floating point calculations.
+// these points with a given radius 'current_radius'. The case where the number of angular voxels is
+// equal to the number of azimuthal voxels is also checked to reduce the number of trigonometric
+// and floating point calculations.
 inline void initializeVoxelBoundarySegments(std::vector<LineSegment> &P_angular,
-                                            std::vector<LineSegment> &P_max_angular,
                                             std::vector<LineSegment> &P_azimuthal,
-                                            std::vector<LineSegment> &P_max_azimuthal,
                                             const SphericalVoxelGrid &grid, double current_radius) noexcept {
     double radians = 0;
     if (grid.numAngularVoxels() == grid.numAzimuthalVoxels()) {
         for (std::size_t i = 0; i < P_angular.size(); ++i) {
-            const double c = std::cos(radians);
-            const double s = std::sin(radians);
-            const double px_value = current_radius * c + grid.sphereCenter().x();
-            const double px_max_value = grid.sphereMaxRadius() * c + grid.sphereCenter().x();
-            const double current_radius_times_s = current_radius * s;
-            const double max_radius_times_s = grid.sphereMaxRadius() * s;
+            const double px_value = current_radius * std::cos(radians) + grid.sphereCenter().x();
+            const double current_radius_times_sin = current_radius * std::sin(radians);
             P_angular[i].P1 = px_value;
-            P_angular[i].P2 = current_radius_times_s + grid.sphereCenter().y();
-            P_max_angular[i].P1 = px_max_value;
-            P_max_angular[i].P2 = max_radius_times_s + grid.sphereCenter().y();
+            P_angular[i].P2 = current_radius_times_sin + grid.sphereCenter().y();
             P_azimuthal[i].P1 = px_value;
-            P_azimuthal[i].P2 = current_radius_times_s + grid.sphereCenter().z();
-            P_max_azimuthal[i].P1 = px_max_value;
-            P_max_azimuthal[i].P2 = max_radius_times_s + grid.sphereCenter().z();
-            radians += grid.deltaPhi();
+            P_azimuthal[i].P2 = current_radius_times_sin + grid.sphereCenter().z();
+            radians += grid.deltaTheta();
         }
         return;
     }
     for (std::size_t j = 0; j < P_angular.size(); ++j) {
-        const double c = std::cos(radians);
-        const double s = std::sin(radians);
-        P_angular[j].P1 = current_radius * c + grid.sphereCenter().x();
-        P_angular[j].P2 = current_radius * s + grid.sphereCenter().y();
-        P_max_angular[j].P1 = grid.sphereMaxRadius() * c + grid.sphereCenter().x();
-        P_max_angular[j].P2 = grid.sphereMaxRadius() * s + grid.sphereCenter().y();
+        P_angular[j].P1 = current_radius * std::cos(radians) + grid.sphereCenter().x();
+        P_angular[j].P2 = current_radius * std::sin(radians) + grid.sphereCenter().y();
         radians += grid.deltaTheta();
     }
     radians = 0;
     for (std::size_t k = 0; k < P_azimuthal.size(); ++k) {
-        const double c = std::cos(radians);
-        const double s = std::sin(radians);
-        P_azimuthal[k].P1 = current_radius * c + grid.sphereCenter().x();
-        P_azimuthal[k].P2 = current_radius * s + grid.sphereCenter().z();
-        P_max_azimuthal[k].P1 = grid.sphereMaxRadius() * c + grid.sphereCenter().x();
-        P_max_azimuthal[k].P2 = grid.sphereMaxRadius() * s + grid.sphereCenter().z();
+        P_azimuthal[k].P1 = current_radius * std::cos(radians) + grid.sphereCenter().x();
+        P_azimuthal[k].P2 = current_radius * std::sin(radians) + grid.sphereCenter().z();
         radians += grid.deltaPhi();
     }
 }
@@ -513,13 +490,9 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
         return {};
     }
     int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - entry_radius) * grid.invDeltaRadius();
-    const std::size_t angular_initializer_size = grid.numAngularVoxels() + 1;
-    const std::size_t azimuthal_initializer_size = grid.numAzimuthalVoxels() + 1;
-    std::vector<LineSegment> P_angular(angular_initializer_size);
-    std::vector<LineSegment> P_max_angular(angular_initializer_size);
-    std::vector<LineSegment> P_azimuthal(azimuthal_initializer_size);
-    std::vector<LineSegment> P_max_azimuthal(azimuthal_initializer_size);
-    initializeVoxelBoundarySegments(P_angular, P_max_angular, P_azimuthal, P_max_azimuthal, grid, entry_radius);
+    std::vector<LineSegment> P_angular(grid.numAngularVoxels() + 1);
+    std::vector<LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
+    initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius);
 
     double a, b, c;
     const bool ray_origin_is_outside_grid = isKnEqual(entry_radius, grid.sphereMaxRadius());
@@ -582,8 +555,8 @@ std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, co
     while (true) {
         const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
         radial_hit_data.previous_transition_flag = radial_params.previous_transition_flag;
-        const auto angular_params = angularHit(ray, grid, P_max_angular, current_voxel_ID_theta, t, t_end);
-        const auto azimuthal_params = azimuthalHit(ray, grid, P_max_azimuthal, current_voxel_ID_phi, t, t_end);
+        const auto angular_params = angularHit(ray, grid, current_voxel_ID_theta, t, t_end);
+        const auto azimuthal_params = azimuthalHit(ray, grid, current_voxel_ID_phi, t, t_end);
         const auto voxel_intersection = minimumIntersection(radial_params, angular_params, azimuthal_params);
         switch (voxel_intersection) {
             case Radial: {

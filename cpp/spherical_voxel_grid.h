@@ -2,6 +2,14 @@
 #define SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H
 
 #include "vec3.h"
+#include <vector>
+
+// Represents a line segment. This is used to represent the points of intersections between
+// the lines corresponding to voxel boundaries and a given radial voxel.
+struct LineSegment {
+    double P1;
+    double P2;
+};
 
 // Represents a 3-dimensional spherical voxel grid. The minimum and maximum bounds [min_bound_, max_bound_]
 // contain the entirety of the sphere that is to be traversed.
@@ -31,7 +39,36 @@ public:
             delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_),
             inv_delta_radius_(1.0 / delta_radius_),
             inv_delta_theta_(1.0 / delta_theta_),
-            inv_delta_phi_(1.0 / delta_phi_) {}
+            inv_delta_phi_(1.0 / delta_phi_) {
+
+        double radians = 0;
+        P_max_angular_.resize(num_angular_voxels + 1);
+        P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
+
+        if (num_angular_voxels == num_azimuthal_voxels) {
+            for (std::size_t i = 0; i < num_angular_voxels; ++i) {
+                const double px_max_value = sphere_max_radius * std::cos(radians) + sphere_center.x();
+                const double max_radius_times_s = sphere_max_radius * std::sin(radians);
+                P_max_angular_[i].P1 = px_max_value;
+                P_max_angular_[i].P2 = max_radius_times_s + sphere_center.y();
+                P_max_azimuthal_[i].P1 = px_max_value;
+                P_max_azimuthal_[i].P2 = max_radius_times_s + sphere_center.z();
+                radians += delta_phi_;
+            }
+            return;
+        }
+        for (std::size_t j = 0; j < num_angular_voxels; ++j) {
+            P_max_angular_[j].P1 = sphere_max_radius * std::cos(radians) + sphere_center.x();
+            P_max_angular_[j].P2 = sphere_max_radius * std::sin(radians) + sphere_center.y();
+            radians += delta_theta_;
+        }
+        radians = 0;
+        for (std::size_t k = 0; k < num_azimuthal_voxels; ++k) {
+            P_max_azimuthal_[k].P1 = sphere_max_radius * std::cos(radians) + sphere_center.x();
+            P_max_azimuthal_[k].P2 = sphere_max_radius * std::sin(radians) + sphere_center.z();
+            radians += delta_phi_;
+        }
+    }
 
     inline std::size_t numRadialVoxels() const { return num_radial_voxels_; }
 
@@ -65,6 +102,14 @@ public:
 
     inline double invDeltaPhi() const { return inv_delta_phi_; }
 
+    inline LineSegment pMaxAngular(int i) const { return P_max_angular_[i]; }
+
+    inline const std::vector<LineSegment>& pMaxAngular() const { return P_max_angular_; }
+
+    inline const LineSegment pMaxAzimuthal(int i) const { return P_max_azimuthal_[i]; }
+
+    inline const std::vector<LineSegment>& pMaxAzimuthal() const { return P_max_azimuthal_; }
+
 private:
     // The minimum bound vector of the voxel grid.
     const BoundVec3 min_bound_;
@@ -92,6 +137,12 @@ private:
 
     // Inverse of the above delta values.
     const double inv_delta_radius_, inv_delta_theta_, inv_delta_phi_;
+
+    // The maximum radius line segments for angular voxels.
+    std::vector<LineSegment> P_max_angular_;
+
+    // The maximum radius line segments for azimuthal voxels.
+    std::vector<LineSegment> P_max_azimuthal_;
 };
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H
