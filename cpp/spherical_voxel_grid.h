@@ -70,45 +70,45 @@ public:
         }
     }
 
-    inline std::size_t numRadialVoxels() const { return num_radial_voxels_; }
+    inline std::size_t numRadialVoxels() const noexcept { return this->num_radial_voxels_; }
 
-    inline std::size_t numAngularVoxels() const { return num_angular_voxels_; }
+    inline std::size_t numAngularVoxels() const noexcept { return this->num_angular_voxels_; }
 
-    inline std::size_t numAzimuthalVoxels() const { return num_azimuthal_voxels_; }
+    inline std::size_t numAzimuthalVoxels() const noexcept { return this->num_azimuthal_voxels_; }
 
-    inline double invNumRadialVoxels() const { return inv_num_radial_voxels_; }
+    inline double invNumRadialVoxels() const noexcept{ return this->inv_num_radial_voxels_; }
 
-    inline double invNumAngularVoxels() const { return inv_num_angular_voxels_; }
+    inline double invNumAngularVoxels() const noexcept { return this->inv_num_angular_voxels_; }
 
-    inline double invNumAzimuthalVoxels() const { return inv_num_azimuthal_voxels_; }
+    inline double invNumAzimuthalVoxels() const noexcept { return this->inv_num_azimuthal_voxels_; }
 
-    inline BoundVec3 minBound() const { return min_bound_; }
+    inline BoundVec3 minBound() const noexcept { return this->min_bound_; }
 
-    inline BoundVec3 maxBound() const { return max_bound_; }
+    inline BoundVec3 maxBound() const noexcept { return this->max_bound_; }
 
-    inline double sphereMaxRadius() const { return sphere_max_radius_; }
+    inline double sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
-    inline BoundVec3 sphereCenter() const { return sphere_center_; }
+    inline BoundVec3 sphereCenter() const noexcept { return this->sphere_center_; }
 
-    inline double deltaRadius() const { return delta_radius_; }
+    inline double deltaRadius() const noexcept { return this->delta_radius_; }
 
-    inline double deltaTheta() const { return delta_theta_; }
+    inline double deltaTheta() const noexcept { return this->delta_theta_; }
 
-    inline double deltaPhi() const { return delta_phi_; }
+    inline double deltaPhi() const noexcept { return this->delta_phi_; }
 
-    inline double invDeltaRadius() const { return inv_delta_radius_; }
+    inline double invDeltaRadius() const noexcept { return this->inv_delta_radius_; }
 
-    inline double invDeltaTheta() const { return inv_delta_theta_; }
+    inline double invDeltaTheta() const noexcept { return this->inv_delta_theta_; }
 
-    inline double invDeltaPhi() const { return inv_delta_phi_; }
+    inline double invDeltaPhi() const noexcept { return this->inv_delta_phi_; }
 
-    inline LineSegment pMaxAngular(int i) const { return P_max_angular_[i]; }
+    inline const LineSegment& pMaxAngular(int i) const noexcept { return this->P_max_angular_[i]; }
 
-    inline const std::vector<LineSegment>& pMaxAngular() const { return P_max_angular_; }
+    inline const std::vector<LineSegment>& pMaxAngular() const noexcept { return this->P_max_angular_; }
 
-    inline const LineSegment pMaxAzimuthal(int i) const { return P_max_azimuthal_[i]; }
+    inline const LineSegment& pMaxAzimuthal(int i) const noexcept { return this->P_max_azimuthal_[i]; }
 
-    inline const std::vector<LineSegment>& pMaxAzimuthal() const { return P_max_azimuthal_; }
+    inline const std::vector<LineSegment>& pMaxAzimuthal() const noexcept { return this->P_max_azimuthal_; }
 
 private:
     // The minimum bound vector of the voxel grid.

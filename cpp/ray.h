@@ -15,7 +15,7 @@ struct Ray final {
 
     // Represents the function p(t) = origin + t * direction,
     // where p is a 3-dimensional position, and t is a scalar.
-    inline BoundVec3 pointAtParameter(const double t) const {
+    inline BoundVec3 pointAtParameter(const double t) const noexcept {
         return this->origin_ + (this->direction_ * t);
     }
 
@@ -26,7 +26,7 @@ struct Ray final {
     // we can do the following:
     // Since Point p = ray.origin() + ray.direction() * (v +/- discriminant),
     // We can simply provide the difference or addition of v and the discriminant.
-    inline double timeOfIntersectionAt(double discriminant_v) const {
+    inline double timeOfIntersectionAt(double discriminant_v) const noexcept {
         if (xDirectionIsNonZero()) {
             const double p_x = origin().x() + unitDirection().x() * discriminant_v;
             return (p_x - origin().x()) * invDirection().x();
@@ -40,7 +40,7 @@ struct Ray final {
     }
 
     // Similar to above implementation, but uses a given vector p.
-    inline double timeOfIntersectionAt(const Vec3 &p) const {
+    inline double timeOfIntersectionAt(const Vec3 &p) const noexcept {
         if (xDirectionIsNonZero()) {
             return (p.x() - origin().x()) * invDirection().x();
         }
@@ -50,19 +50,19 @@ struct Ray final {
         return (p.z() - origin().z()) * invDirection().z();
     }
 
-    inline BoundVec3 origin() const { return this->origin_; }
+    inline BoundVec3 origin() const noexcept { return this->origin_; }
 
-    inline FreeVec3 direction() const { return this->direction_; }
+    inline FreeVec3 direction() const noexcept { return this->direction_; }
 
-    inline FreeVec3 invDirection() const { return this->inverse_direction_; }
+    inline FreeVec3 invDirection() const noexcept { return this->inverse_direction_; }
 
-    inline UnitVec3 unitDirection() const { return this->unit_direction_; }
+    inline UnitVec3 unitDirection() const noexcept { return this->unit_direction_; }
 
-    inline bool xDirectionIsNonZero() const { return x_dir_is_non_zero_; }
+    inline bool xDirectionIsNonZero() const noexcept { return this->x_dir_is_non_zero_; }
 
-    inline bool yDirectionIsNonZero() const { return y_dir_is_non_zero_; }
+    inline bool yDirectionIsNonZero() const noexcept { return this->y_dir_is_non_zero_; }
 
-    inline bool zDirectionIsNonZero() const { return z_dir_is_non_zero_; }
+    inline bool zDirectionIsNonZero() const noexcept { return this->z_dir_is_non_zero_; }
 
 private:
     // The origin of the ray.

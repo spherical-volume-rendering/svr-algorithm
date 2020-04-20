@@ -132,7 +132,7 @@ static void MultipleRayNoIntersection(benchmark::State& state) {
 
 static void MultipleRayIntersection(benchmark::State& state) {
     for (auto _ : state) {
-        const int number_of_rays = 10;
+        const int number_of_rays = 100;
         const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
         const BoundVec3 max_bound(20000.0, 20000.0, 20000.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -152,7 +152,7 @@ static void MultipleRayIntersection(benchmark::State& state) {
             const FreeVec3 ray_direction(1.0, 0.0, 0.0);
             const Ray ray(ray_origin, ray_direction);
             const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-            ray_origin_x += 1000.0;
+            ray_origin_x += 100.0;
         }
     }
 }
