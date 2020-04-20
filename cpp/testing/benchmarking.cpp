@@ -130,11 +130,39 @@ static void MultipleRayNoIntersection(benchmark::State& state) {
     }
 }
 
+static void MultipleRayIntersection(benchmark::State& state) {
+    for (auto _ : state) {
+        const int number_of_rays = 10;
+        const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
+        const BoundVec3 max_bound(20000.0, 20000.0, 20000.0);
+        const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+        const double sphere_max_radius = 10000.0;
+        const std::size_t num_radial_sections = 10000;
+        const std::size_t num_angular_sections = 10000;
+        const std::size_t num_azimuthal_sections = 10000;
+        const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                      num_angular_sections,
+                                      num_azimuthal_sections, sphere_center, sphere_max_radius);
+        const double t_begin = 0.0;
+        const double t_end = 100000.0;
+
+        double ray_origin_x = -5000.0;
+        for (int i = 0; i < number_of_rays; ++i) {
+            const BoundVec3 ray_origin(ray_origin_x, 0.0, 0.0);
+            const FreeVec3 ray_direction(1.0, 0.0, 0.0);
+            const Ray ray(ray_origin, ray_direction);
+            const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+            ray_origin_x += 1000.0;
+        }
+    }
+}
+
 BENCHMARK(TraversalOne)->Unit(benchmark::kMillisecond);
 BENCHMARK(TraversalTwo)->Unit(benchmark::kMillisecond);
 BENCHMARK(TraversalParallelX)->Unit(benchmark::kMillisecond);
 BENCHMARK(TraversalParallelY)->Unit(benchmark::kMillisecond);
 BENCHMARK(TraversalParallelZ)->Unit(benchmark::kMillisecond);
 BENCHMARK(MultipleRayNoIntersection)->Unit(benchmark::kMillisecond);
+BENCHMARK(MultipleRayIntersection)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();
