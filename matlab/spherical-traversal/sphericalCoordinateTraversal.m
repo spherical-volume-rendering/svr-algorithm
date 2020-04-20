@@ -106,21 +106,23 @@ delta_phi = 2 * pi/ num_azimuthal_sections;
 % the lines corresponding to angular voxels boundaries and the initial 
 % radial voxel of the ray. Note that spherical coordinates are unnecessary,
 % this is just marking the voxel boundaries in the plane. 
-P_ang = [];
-k_ang = 0;
-while k_ang <= 2*pi
-    pt = [r * cos(k_ang) + sphere_center(1), r * sin(k_ang) + sphere_center(2)];
-    P_ang = [P_ang ; pt];
-    k_ang = k_ang + delta_theta;
+k = 0;
+trig_ang = [];
+while k <= 2*pi 
+    trig_ang = [trig_ang; cos(k), sin(k)];
+    k = k + delta_theta;
 end
+P_max_ang = sphere_max_radius .* trig_ang + [sphere_center(1) sphere_center(2)];
+P_ang = r .* trig_ang + [sphere_center(1) sphere_center(2)];
 
-P_azi = [];
-k_azi = 0;
-while k_azi <= 2*pi
-    pt = [r * cos(k_azi) + sphere_center(1), r * sin(k_azi) + sphere_center(3)];
-    P_azi = [P_azi ; pt];
-    k_azi = k_azi + delta_phi;
+j=0;
+trig_azi = [];
+while j <= 2*pi 
+    trig_azi = [trig_azi; cos(j), sin(j)];
+    j = j + delta_phi;
 end
+P_max_azi = sphere_max_radius .* trig_azi + [sphere_center(1) sphere_center(3)];
+P_azi = r .* trig_azi + [sphere_center(1) sphere_center(3)];
 
 % Find the point of intersection between the vector created by the
 % ray intersection with the initial sphere radius and the sphere center.
@@ -160,7 +162,8 @@ while i < length(P_ang)
     d1 = (P_ang(i,1)-p1_xy(1))^2 + (P_ang(i,2)-p1_xy(2))^2;
     d2 = (P_ang(i+1,1)-p1_xy(1))^2 + (P_ang(i+1,2)-p1_xy(2))^2;
     d3 = (P_ang(i,1)-P_ang(i+1,1))^2 + (P_ang(i,2)-P_ang(i+1,2))^2;
-    if d1 + d2 <= d3
+    if strictlyLess(d1+d2,d3,1e-12,1e-8) || ...
+                approximatelyEqual(d1+d2,d3,1e-12,1e-8)
         current_voxel_ID_theta = i - 1;
         i = length(P_ang);
     end
@@ -202,8 +205,9 @@ i = 1;
 while i < length(P_azi)
     d1 = (P_azi(i,1)-p1_xz(1))^2 + (P_azi(i,2)-p1_xz(2))^2;
     d2 = (P_azi(i+1,1)-p1_xz(1))^2 + (P_azi(i+1,2)-p1_xz(2))^2;
-    d3 = (P_azi(i,1)-P_ang(i+1,1))^2 + (P_azi(i,2)-P_ang(i+1,2))^2;
-    if d1 + d2 <= d3
+    d3 = (P_azi(i,1)-P_azi(i+1,1))^2 + (P_azi(i,2)-P_azi(i+1,2))^2;
+    if strictlyLess(d1+d2,d3,1e-12,1e-8) || ...
+                approximatelyEqual(d1+d2,d3,1e-12,1e-8)
         current_voxel_ID_phi = i - 1;
         i = length(P_azi);
     end
@@ -256,20 +260,15 @@ end
 t = t_start;
 t_end = min(t_grid, t_end);
 previous_transition_flag = false;
-change_r = 0;
 while t < t_end    
     % 1. Calculate tMaxR, tMaxTheta, tMaxPhi
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
         current_voxel_ID_r, sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ...
         ray_sphere_vector, v, previous_transition_flag, verbose);
     [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-        num_angular_sections, sphere_center, ...
-        [P_ang(current_voxel_ID_theta+1,:) ; P_ang(current_voxel_ID_theta+2,:)], ...
-        t, t_end, verbose);
+        sphere_center, P_max_ang, sphere_max_radius, t, t_end, verbose);
     [tMaxPhi, tStepPhi] = azimuthal_hit(ray_origin, ray_direction, current_voxel_ID_phi,...
-      num_azimuthal_sections, sphere_center, ...
-      [P_azi(current_voxel_ID_phi+1,:) ; P_azi(current_voxel_ID_phi+2,:)], ...
-        t, t_end, verbose);
+        sphere_center, P_max_azi, sphere_max_radius, t, t_end, verbose);
     
     rStepViolation = current_voxel_ID_r + tStepR == 0;
 
@@ -283,7 +282,6 @@ while t < t_end
         % angular boundary, we need the second half of disjunction
         t = tMaxTheta;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-        change_r = 0;
     elseif strictlyLess(tMaxR, tMaxTheta, 1e-12,1e-8) && ...
             strictlyLess(tMaxR, tMaxPhi, 1e-12,1e-8) && ...
             strictlyLess(t,tMaxR,1e-12,1e-8) && ...
@@ -292,7 +290,6 @@ while t < t_end
         % Case tMaxR is minimum
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR; 
-        if tStepR ~= 0; change_r = 1; else; change_r = 0; end
     elseif strictlyLess(tMaxPhi,tMaxTheta,1e-12,1e-8) && ...
             strictlyLess(tMaxPhi,tMaxR,1e-12,1e-8) && ...
             strictlyLess(t,tMaxPhi,1e-12,1e-8) && ...
@@ -300,7 +297,6 @@ while t < t_end
         % Case tMaxPhi is minimum
         t = tMaxPhi;
         current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections); 
-        change_r = 0;
     elseif approximatelyEqual(tMaxPhi,tMaxTheta,1e-12,1e-8) && ...
             approximatelyEqual(tMaxPhi,tMaxR,1e-12,1e-8) && ...
             strictlyLess(t,tMaxR,1e-12,1e-8) && ...
@@ -310,7 +306,6 @@ while t < t_end
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
         current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
-        if tStepR ~= 0; change_r = 1; else; change_r = 0; end
     elseif approximatelyEqual(tMaxPhi, tMaxTheta, 1e-12,1e-8) && ...
             strictlyLess(t,tMaxPhi,1e-12,1e-8) && ...
             strictlyLess(tMaxPhi,t_end, 1e-12,1e-8)
@@ -320,12 +315,10 @@ while t < t_end
             % R min
             t = tMaxR;
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
-            if tStepR ~= 0; change_r = 1; else; change_r = 0; end
         else
             t = tMaxPhi;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
-            change_r = 0;
         end
     elseif approximatelyEqual(tMaxTheta,tMaxR,1e-12,1e-8) && ...
             strictlyLess(t,tMaxR,1e-12,1e-8) && ...
@@ -337,12 +330,10 @@ while t < t_end
             % Phi min
             t = tMaxPhi;
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
-            change_r = 0;
         else
             t = tMaxTheta;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
-            if tStepR ~= 0; change_r = 1; else; change_r = 0; end
         end
     elseif approximatelyEqual(tMaxR,tMaxPhi,1e-12,1e-8) && ...
             strictlyLess(t,tMaxR,1e-12,1e-8) && ...
@@ -353,28 +344,13 @@ while t < t_end
             % Theta min
             t = tMaxTheta;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-            change_r = 0;
         else
             t = tMaxR;
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
-            if tStepR ~= 0; change_r = 1; else; change_r = 0; end
         end
     else
        return;
-    end
-    % If the radial voxel changes, update the angular voxel boundary
-    % segments for intersection checks in angular hit.
-    if change_r == 1
-        r = sphere_max_radius - delta_radius * (current_voxel_ID_r - 1);
-        a = [sphere_center(1) sphere_center(2)] - P_ang;
-        l1 = (a(:,1).^2 + a(:,2).^2).^-0.5;
-        c = [sphere_center(1) sphere_center(3)] - P_azi;
-        l2 = (c(:,1).^2 + c(:,2).^2).^-0.5;
-        P_ang(:,1) = sphere_center(1) - (r*l1) .* (sphere_center(1) - P_ang(:,1));
-        P_ang(:,2) = sphere_center(2) - (r*l1) .* (sphere_center(2) - P_ang(:,2)); 
-        P_azi(:,1) = sphere_center(1) - (r*l2) .* (sphere_center(1) - P_azi(:,1));
-        P_azi(:,2) = sphere_center(3) - (r*l2) .* (sphere_center(3) - P_azi(:,2));
     end
     radial_voxels = [radial_voxels, current_voxel_ID_r];
     angular_voxels = [angular_voxels, current_voxel_ID_theta];
