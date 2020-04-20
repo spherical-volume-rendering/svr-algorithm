@@ -102,11 +102,11 @@ public:
 
     inline double invDeltaPhi() const { return inv_delta_phi_; }
 
-    inline LineSegment pMaxAngular(int i) const { return P_max_angular_[i]; }
+    inline const LineSegment& pMaxAngular(int i) const { return P_max_angular_[i]; }
 
     inline const std::vector<LineSegment>& pMaxAngular() const { return P_max_angular_; }
 
-    inline const LineSegment pMaxAzimuthal(int i) const { return P_max_azimuthal_[i]; }
+    inline const LineSegment& pMaxAzimuthal(int i) const { return P_max_azimuthal_[i]; }
 
     inline const std::vector<LineSegment>& pMaxAzimuthal() const { return P_max_azimuthal_; }
 
