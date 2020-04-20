@@ -42,8 +42,8 @@ public:
             inv_delta_phi_(1.0 / delta_phi_) {
 
         double radians = 0;
-        P_max_angular_.resize(num_angular_voxels);
-        P_max_azimuthal_.resize(num_azimuthal_voxels);
+        P_max_angular_.resize(num_angular_voxels + 1);
+        P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
 
         if (num_angular_voxels == num_azimuthal_voxels) {
             for (std::size_t i = 0; i < num_angular_voxels; ++i) {
