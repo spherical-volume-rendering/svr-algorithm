@@ -4,7 +4,7 @@
 #include "vec3.h"
 #include <vector>
 
-// Represents a line segment. This is most commonly used to represent the points of intersections between
+// Represents a line segment. This is used to represent the points of intersections between
 // the lines corresponding to voxel boundaries and a given radial voxel.
 struct LineSegment {
     double P1;
