@@ -1,8 +1,7 @@
 import numpy as np
 import sys
 
-# To verify that the C++ and Cythonized versions both work, this script allows for me to type the inputs once and
-# print both tests.
+# This script allows me to type inputs once and print a cpp Google Test and a Python unittest.
 
 cpp_title = "RayDirectionNegativeXPositiveYZ"
 python_title = "test_ray_dir_neg_X_positive_YZ"
