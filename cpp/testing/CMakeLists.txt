@@ -4,8 +4,8 @@ project(SVR)
 
 set(TESTING_BINARY ${CMAKE_PROJECT_NAME}_tests)
 set(BENCHMARK_BINARY ${CMAKE_PROJECT_NAME}_benchmark)
-set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp spherical_volume_rendering_test.cpp)
-set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp benchmarking.cpp)
+set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp SVR_tests.cpp)
+set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp SVR_benchmarks.cpp)
 
 add_definitions(-DNDEBUG)
 add_subdirectory(googletest)
