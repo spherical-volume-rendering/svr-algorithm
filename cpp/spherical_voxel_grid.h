@@ -4,23 +4,23 @@
 #include "vec3.h"
 #include <vector>
 
-namespace SVR {
+namespace svr {
 
-// Represents a line segment. This is used to represent the points of intersections between
-// the lines corresponding to voxel boundaries and a given radial voxel.
+    // Represents a line segment. This is used to represent the points of intersections between
+    // the lines corresponding to voxel boundaries and a given radial voxel.
     struct LineSegment {
         double P1;
         double P2;
     };
 
-// Represents a 3-dimensional spherical voxel grid. The minimum and maximum bounds [min_bound_, max_bound_]
-// contain the entirety of the sphere that is to be traversed.
-// Requires:
-//   max_bound > min_bound
-//   num_radial_voxels > 0
-//   num_angular_voxels > 0
-//   num_azimuthal_voxels > 0
-//   sphere_max_radius > 0.0
+    // Represents a 3-dimensional spherical voxel grid. The minimum and maximum bounds [min_bound_, max_bound_]
+    // contain the entirety of the sphere that is to be traversed.
+    // Requires:
+    //   max_bound > min_bound
+    //   num_radial_voxels > 0
+    //   num_angular_voxels > 0
+    //   num_azimuthal_voxels > 0
+    //   sphere_max_radius > 0.0
     struct SphericalVoxelGrid {
     public:
         SphericalVoxelGrid(const BoundVec3 &min_bound, const BoundVec3 &max_bound, std::size_t num_radial_voxels,
@@ -148,6 +148,6 @@ namespace SVR {
         std::vector<LineSegment> P_max_azimuthal_;
     };
 
-} // namespace SVR
+} // namespace svr
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H
