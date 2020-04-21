@@ -17,8 +17,8 @@ struct Ray final {
     Ray(const BoundVec3 &origin, const FreeVec3 &direction)
             : origin_(origin), direction_(direction), unit_direction_(direction),
               inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z())),
-              NZD_index_(std::abs(direction.x()) > 0 ? X_DIRECTION :
-                         std::abs(direction.y()) > 0 ? Y_DIRECTION : Z_DIRECTION),
+              NZD_index_(std::abs(direction.x()) > 0.0 ? X_DIRECTION :
+                         std::abs(direction.y()) > 0.0 ? Y_DIRECTION : Z_DIRECTION),
               NZD_origin_(origin[NZD_index_]),
               NZD_inverse_direction_(inverse_direction_[NZD_index_]),
               NZD_unit_direction_(unit_direction_[NZD_index_]) {}
@@ -30,7 +30,7 @@ struct Ray final {
     }
 
     // Returns the time of intersection at a Point p.
-    // The calculation: t = [p.a() - ray.origin().a()] / ray.Direction().a()
+    // The calculation: t = [p.a() - ray.origin().a()] / ray.direction().a()
     //                  where a is a non-zero direction of the ray.
     // To reduce a vector multiplication to a single multiplication for the given direction,
     // we can do the following:
