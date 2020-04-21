@@ -6,12 +6,14 @@
 #include "spherical_voxel_grid.h"
 #include <vector>
 
+namespace SVR {
+
 // Represents a spherical voxel coordinate.
-struct SphericalVoxel {
-    int radial_voxel;
-    int angular_voxel;
-    int azimuthal_voxel;
-};
+    struct SphericalVoxel {
+        int radial_voxel;
+        int angular_voxel;
+        int azimuthal_voxel;
+    };
 
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the ray over the spherical voxel grid
 // provided. t_begin is the time the ray begins, and t_end is the time at which the ray ends. Returns a vector of the
@@ -20,16 +22,19 @@ struct SphericalVoxel {
 //
 // Notes: For further documentation and visualization, see the Progress Report for the algorithm:
 // https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?usp=sharing
-std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const SphericalVoxelGrid &grid,
-                                                              double t_begin, double t_end) noexcept;
+    std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const SVR::SphericalVoxelGrid &grid,
+                                                                  double t_begin, double t_end) noexcept;
 
 // Simplified parameters to Cythonize the function; implementation remains the same as above.
-std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double *ray_origin, double *ray_direction,
-                                                                double *min_bound, double *max_bound,
-                                                                std::size_t num_radial_voxels,
-                                                                std::size_t num_angular_voxels,
-                                                                std::size_t num_azimuthal_voxels, double *sphere_center,
-                                                                double sphere_max_radius, double t_begin,
-                                                                double t_end) noexcept;
+    std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversalCy(double *ray_origin, double *ray_direction,
+                                                                    double *min_bound, double *max_bound,
+                                                                    std::size_t num_radial_voxels,
+                                                                    std::size_t num_angular_voxels,
+                                                                    std::size_t num_azimuthal_voxels,
+                                                                    double *sphere_center,
+                                                                    double sphere_max_radius, double t_begin,
+                                                                    double t_end) noexcept;
+
+} // namespace SVR
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOLUMERENDERINGUTIL_H
