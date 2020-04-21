@@ -6,6 +6,7 @@
 // https://github.com/google/benchmark
 
 namespace {
+
     static void TraversalOne(benchmark::State &state) {
         for (auto _ : state) {
             // Traversal from bottom left to upper right.
@@ -16,7 +17,7 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                           num_angular_sections,
                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(-13000.0, -13000.0, -13000.0);
@@ -38,7 +39,7 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                           num_angular_sections,
                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(13000.0, 13000.0, 13000.0);
@@ -59,7 +60,7 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                            num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(-13000.0, 10.0, 10.0);
@@ -80,7 +81,7 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                            num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(10.0, -13000.0, 0.0);
@@ -101,7 +102,7 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                            num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(10.0, 0.0, -13000.0);
@@ -123,7 +124,7 @@ namespace {
             const std::size_t num_radial_sections = 4;
             const std::size_t num_angular_sections = 8;
             const std::size_t num_azimuthal_sections = 4;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                            num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(3.0, 3.0, 3.0);
@@ -147,7 +148,7 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                           num_angular_sections,
                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
             const double t_begin = 0.0;
@@ -173,7 +174,7 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                           num_angular_sections,
                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
             const double t_begin = 0.0;
@@ -202,6 +203,7 @@ namespace {
     BENCHMARK(MultipleRayNoIntersection)->Unit(benchmark::kMillisecond);
     BENCHMARK(MultipleRayIntersection)->Unit(benchmark::kMillisecond);
     BENCHMARK(OrthographicRayTrace)->Unit(benchmark::kMillisecond);
-}
+
+} // namespace
 
 BENCHMARK_MAIN();
