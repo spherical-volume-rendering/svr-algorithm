@@ -2,7 +2,7 @@
 Setup file for the spherical coordinate voxel traversal algorithm.
 
 Code must be compiled before use:
-> python Cython_SVR_setup.py build_ext --inplace
+> python cython_SVR_setup.py build_ext --inplace
 '''
 
 import numpy
@@ -11,8 +11,8 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 
 ext_modules = [Extension(
-    name="CythonSVR",
-    sources=["Cython_SVR.pyx", "../spherical_volume_rendering_util.cpp"],
+    name="cython_SVR",
+    sources=["cython_SVR.pyx", "../spherical_volume_rendering_util.cpp"],
     language="c++",
     extra_compile_args=["-std=c++11", "-O3"],
     define_macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')], # Hides deprecated Numpy warning.
@@ -24,7 +24,7 @@ for e in ext_modules:
     e.cython_directives = {'language_level': "3"}
 
 setup(
-    name = 'CythonSVR',
+    name = 'cython_SVR',
     cmdclass = {'build_ext': build_ext},
     ext_modules = ext_modules,
 )

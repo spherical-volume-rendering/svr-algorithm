@@ -8,9 +8,9 @@
 
 # Cython
 /cpp/cython/build/
-/cpp/cython/CythonSVR.so
-/cpp/cython/CythonSVR.cpp
-/cpp/cython/CythonSVR.cpython-37m-darwin.so
+/cpp/cython/cython_SVR.so
+/cpp/cython/cython_SVR.cpp
+/cpp/cython/cython_SVR.cpython-37m-darwin.so
 /cpp/cython/.DS_Store
 /cpp/testing/build/
 /cpp/testing/SVR_debug_code.cpp
