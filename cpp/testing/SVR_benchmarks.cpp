@@ -2,6 +2,8 @@
 #include "../spherical_volume_rendering_util.h"
 
 // Benchmarking for the Spherical Volume Rendering algorithm.
+// Uses the Google Benchmark library found at:
+// https://github.com/google/benchmark
 
 namespace {
     static void TraversalOne(benchmark::State &state) {
