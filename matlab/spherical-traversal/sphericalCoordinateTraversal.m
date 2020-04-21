@@ -1,4 +1,4 @@
-function [radial_voxels, angular_voxels, azimuthal_voxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, sphere_center, ...
+function [radial_voxels, angular_voxels, azimuthal_voxels, time_test, traversal_time] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, sphere_center, ...
     sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
@@ -259,8 +259,11 @@ end
 % TRAVERSAL PHASE
 t = t_start;
 t_end = min(t_grid, t_end);
+time_test = t_end-t_start;
+traversal_time = 0;
 previous_transition_flag = false;
-while t < t_end    
+while t < t_end
+    t_past = t;
     % 1. Calculate tMaxR, tMaxTheta, tMaxPhi
     [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
         current_voxel_ID_r, sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ...
@@ -350,8 +353,10 @@ while t < t_end
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
         end
     else
+       traversal_time = traversal_time + (t_end - t_past);
        return;
     end
+    traversal_time = traversal_time + (t - t_past);
     radial_voxels = [radial_voxels, current_voxel_ID_r];
     angular_voxels = [angular_voxels, current_voxel_ID_theta];
     azimuthal_voxels = [azimuthal_voxels, current_voxel_ID_phi];

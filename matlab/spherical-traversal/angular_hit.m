@@ -198,14 +198,13 @@ elseif (intersect_min == 1 && intersect_max == 1) || ...
             fprintf("no hit within time bound\n")
         end
      end
- else
+else
      tStepTheta = 0;
      tMaxTheta = t_end;
      if verbose
         fprintf("no hit within voxel bound\n")
      end
- end
-
+end
 
 if verbose
     fprintf(['\ntMaxTheta: %d \n' ...
