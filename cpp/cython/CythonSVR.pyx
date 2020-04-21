@@ -64,10 +64,10 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     assert(sphere_center.size == 3)
 
     cdef vector[SphericalVoxel] voxels = sphericalCoordinateVoxelTraversalCy(&ray_origin[0], &ray_direction[0],
-                                                                                  &min_bound[0], &max_bound[0],
-                                                                                  num_radial_voxels, num_angular_voxels,
-                                                                                  num_azimuthal_voxels, &sphere_center[0],
-                                                                                  sphere_max_radius, t_begin, t_end)
+                                                                             &min_bound[0], &max_bound[0],
+                                                                             num_radial_voxels, num_angular_voxels,
+                                                                             num_azimuthal_voxels, &sphere_center[0],
+                                                                             sphere_max_radius, t_begin, t_end)
     cdef np.ndarray cyVoxels = np.empty((voxels.size(), 3), dtype=int)
     for i in range(voxels.size()):
         cyVoxels[i,0] = voxels[i].radial_voxel
