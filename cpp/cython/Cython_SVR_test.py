@@ -1,5 +1,5 @@
 '''
-Testing for cythonized version of the spherical coorinate voxel traversal algorithm.
+Testing for cythonized version of the spherical coordinate voxel traversal algorithm.
 '''
 
 import unittest
