@@ -27,20 +27,20 @@ public:
     inline double &z() noexcept { return this->z_; }
 
     inline double length() const noexcept {
-        return std::sqrt(this->x() * this->x() + this->y() * this->y() + this->z() * this->z());
+        return std::sqrt(this->x_ * this->x_ + this->y_ * this->y_ + this->z_ * this->z_);
     }
 
     inline double squared_length() const noexcept {
-        return x() * x() + y() * y() + z() * z();
+        return x_ * x_ + y_ * y_ + z_ * z_;
     }
 
   inline double operator[](const std::size_t index) const noexcept {
       switch(index) {
-        case 0: return this->x();
-        case 1: return this->y();
-        case 2: return this->z();
+        case 0: return this->x_;
+        case 1: return this->y_;
+        case 2: return this->z_;
       }
-      return -1;
+      return NAN;
   }
 
 private:
@@ -180,7 +180,7 @@ struct UnitVec3 {
         case 1: return this->y();
         case 2: return this->z();
       }
-      return -1;
+      return NAN;
     }
 
 private:
