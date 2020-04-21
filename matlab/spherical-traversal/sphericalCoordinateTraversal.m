@@ -60,7 +60,6 @@ discr = r^2 - (dot(ray_sphere_vector,ray_sphere_vector) - v^2);
 d = sqrt(discr);
 pa = ray_origin + (v-d) .* ray_unit_vector;
 pb = ray_origin + (v+d) .* ray_unit_vector;
-tol = 10^-16;
 % Calculate the time of entrance and exit of the ray.
 if ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
     % Use the y-direction if it is non-zero.
@@ -79,6 +78,8 @@ end
 % The ray may not intersect the grid at all. 
 % In particular, if the ray is outside the grid at t_begin.
 if t1 < t_begin && t2 < t_begin 
+    time_test = 1.0;
+    traversal_time = 1.0;
     if verbose
         fprintf("\nRay does not intersect spherical grid for t_begin.")
     end
@@ -87,6 +88,8 @@ end
 
 % It may be a tangent hit.
  if approximatelyEqual(t1,t2,1e-12,1e-8)
+    time_test = 1.0;
+    traversal_time = 1.0;
     if verbose
         fprintf("\nTangent hit.")
     end
@@ -106,19 +109,25 @@ delta_phi = 2 * pi/ num_azimuthal_sections;
 % the lines corresponding to angular voxels boundaries and the initial 
 % radial voxel of the ray. Note that spherical coordinates are unnecessary,
 % this is just marking the voxel boundaries in the plane. 
+i = 1;
 k = 0;
-trig_ang = [];
+trig_ang = zeros(num_angular_sections,2);
 while k <= 2*pi 
-    trig_ang = [trig_ang; cos(k), sin(k)];
+    trig_ang(i,1) = cos(k);
+    trig_ang(i,2) = sin(k);
     k = k + delta_theta;
+    i = i + 1;
 end
 P_max_ang = sphere_max_radius .* trig_ang + [sphere_center(1) sphere_center(2)];
 P_ang = r .* trig_ang + [sphere_center(1) sphere_center(2)];
 
-j=0;
-trig_azi = [];
+i = 1;
+j = 0;
+trig_azi = zeros(num_azimuthal_sections,2);
 while j <= 2*pi 
-    trig_azi = [trig_azi; cos(j), sin(j)];
+    trig_azi(i,1) = cos(j);
+    trig_azi(i,2) = sin(j);
+    i = i + 1;
     j = j + delta_phi;
 end
 P_max_azi = sphere_max_radius .* trig_azi + [sphere_center(1) sphere_center(3)];

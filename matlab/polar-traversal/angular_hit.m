@@ -1,5 +1,5 @@
 function [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
-    num_angular_sections, circle_center, pointArray, t, t_end, verbose)
+    circle_center, P_max, circle_max_radius, t, t_end, verbose)
 % Determines whether an angular hit occurs for the given ray.
 % Input:
 %    ray_origin: vector of the origin of the ray in cartesian coordinate.
@@ -25,7 +25,7 @@ end
 if verbose
     fprintf("\nCurrent Voxel ID Theta: %d\n", current_voxel_ID_theta)
 end
-
+pointArray = [P_max(current_voxel_ID_theta+1,:) ; P_max(current_voxel_ID_theta+2,:)];
 % Get current ray location to use as start point
 p = ray_origin + ray_direction * t;
 % Get ray exit point to use as end point
@@ -46,16 +46,39 @@ perpvw_min = v(1) * w_min(2) - v(2) * w_min(1);
 perpvw_max = v(1) * w_max(2) - v(2) * w_max(1);
 
 % check to see if ray is parallel to each angular voxel boundary
-% if the ray is parallel to or collinear with a given voxel boundary,
-% then intersection does not occur between the given voxel boundary and
-% the ray.
-if approximatelyEqual(perpuv_min,0.0,1e-12,1e-8) ; parallel_min = 1; else; parallel_min = 0; end
-if approximatelyEqual(perpuv_max,0.0,1e-12,1e-8) ; parallel_max = 1; else; parallel_max = 0; end
-
+if approximatelyEqual(perpuv_min,0.0,1e-12,1e-8) 
+    parallel_min = 1;
+    % check to see if the ray is colliner with the angular voxel boundary
+    if approximatelyEqual(perpuw_min,0.0,1e-12,1e-8) && ...
+            approximatelyEqual(perpvw_min,0.0,1e-12,1e-8)
+        collinear_min = 1;
+        p_min = circle_center;
+    else
+        collinear_min = 0;
+    end
+else
+    parallel_min = 0;
+    collinear_min = 0;
+end
+if approximatelyEqual(perpuv_max,0.0,1e-12,1e-8)
+    parallel_max = 1;
+    if approximatelyEqual(perpuw_max,0.0,1e-12,1e-8) && ...
+            approximatelyEqual(perpvw_max,0.0,1e-12,1e-8)
+        collinear_max = 1;
+        p_max = circle_center;
+    else
+        collinear_max = 0;
+    end
+else
+    parallel_max = 0;
+    collinear_max = 0;
+end
+% Determine intersection points, p_min and p_max
 if parallel_min == 0
     a = perpvw_min / perpuv_min;
     b = perpuw_min / perpuv_min;
-    if (a < 0 || a > 1) || (b < 0 || b > 1)
+    if (strictlyLess(a,0.0,1e-12,1e-8) || strictlyLess(1.0,a,1e-12,1e-8)) || ...
+            (strictlyLess(b,0.0,1e-12,1e-8) || strictlyLess(1.0,b,1e-12,1e-8))
         intersect_min = 0;
     else
         intersect_min = 1;
@@ -64,11 +87,11 @@ if parallel_min == 0
 else
     intersect_min = 0;
 end
-
 if parallel_max == 0
     a = perpvw_max / perpuv_max;
     b = perpuw_max / perpuv_max;
-    if (a < 0 || a > 1) || (b < 0 || b > 1)
+    if (strictlyLess(a,0.0,1e-12,1e-8) || strictlyLess(1.0,a,1e-12,1e-8)) || ...
+            (strictlyLess(b,0.0,1e-12,1e-8) || strictlyLess(1.0,b,1e-12,1e-8))
         intersect_max = 0;
     else
         intersect_max = 1;
@@ -77,71 +100,94 @@ if parallel_max == 0
 else
     intersect_max = 0;
 end
-
+% Compute inverses of slopes
 if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
     inv_dir = 1/ray_direction(1);
 else
     inv_dir = 1/ray_direction(2);
 end
-
-if intersect_max == 1
+% Compute intersection times
+if intersect_max == 1 || collinear_max == 1
     if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
-        inv_dir = 1/ray_direction(1);
         t_max = (p_max(1) - ray_origin(1)) * inv_dir;
     else
-        inv_dir = 1/ray_direction(2);
         t_max = (p_max(2) - ray_origin(2)) * inv_dir;
     end
 end
-
-if intersect_min == 1
+if intersect_min == 1 || collinear_min == 1
     if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
-        inv_dir = 1/ray_direction(1);
         t_min = (p_min(1) - ray_origin(1)) * inv_dir;
     else
-        inv_dir = 1/ray_direction(2);
         t_min = (p_min(2) - ray_origin(2)) * inv_dir;
      end
 end
-
-if intersect_max == 1 && intersect_min == 0 && ...
-        t < t_max && t_max < t_end && ...
-        ~approximatelyEqual(t,t_max,1e-12,1e-8)
+% Determine tStepTheta, tMaxTheta
+if intersect_max == 1 && intersect_min == 0 && collinear_min == 0 &&...
+        strictlyLess(t,t_max,1e-12,1e-8) && strictlyLess(t_max,t_end,1e-12,1e-8)
     tStepTheta = 1;
     tMaxTheta = t_max;
-elseif intersect_min == 1 && intersect_max == 0 && ...
-        t < t_min && t_min < t_end && ...
-        ~approximatelyEqual(t,t_min,1e-12,1e-8)
+elseif intersect_min == 1 && intersect_max == 0 && collinear_max == 0 && ...
+           strictlyLess(t,t_min,1e-12,1e-8) && ...
+           strictlyLess(t_min,t_end,1e-12,1e-8)
     tStepTheta = -1;
     tMaxTheta = t_min;
-elseif intersect_min == 1 && intersect_max == 1
+elseif (intersect_min == 1 && intersect_max == 1) || ...
+        (intersect_min == 1 && collinear_max == 1) || ...
+        (collinear_min == 1 && intersect_max == 1)
     % hit the min & max boundary simultaneously.
     if  approximatelyEqual(t_min,t_max,1e-12,1e-8) && ...
-            t < t_min && t_min < t_end && ...
-            ~approximatelyEqual(t,t_min,1e-12,1e-8)
+           strictlyLess(t,t_min,1e-12,1e-8) && ...
+            strictlyLess(t_min,t_end,1e-12,1e-8)
         tMaxTheta = t_max;
          if verbose
             fprintf("hit origin t\n")
+         end
+         pert_t = 0.1;
+         pert_x = circle_center(1) + ray_direction(1) * pert_t;
+         pert_y = circle_center(2) + ray_direction(2) * pert_t;
+         a = circle_center(1) - pert_x;
+         b = circle_center(2) - pert_y;
+         l = sqrt(a^2 + b^2);
+         p1 = circle_center - (circle_max_radius/l) .* [a b];
+         i = 1;    
+        while i < length(P_max)
+            d1 = (P_max(i,1)-p1(1))^2 + (P_max(i,2)-p1(2))^2;
+            d2 = (P_max(i+1,1)-p1(1))^2 + (P_max(i+1,2)-p1(2))^2;
+            d3 = (P_max(i,1)-P_max(i+1,1))^2 + (P_max(i,2)-P_max(i+1,2))^2;
+            if strictlyLess(d1+d2,d3,1e-12,1e-8) || ...
+                approximatelyEqual(d1+d2,d3,1e-12,1e-8)
+                next_vox = i - 1 ;
+                i = length(P_max);
+            end
+            i = i + 1;
         end
-        if ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
-            % change in theta is dependent on the slope of the line
-            tStepTheta = - num_angular_sections/2;
+        step = abs(current_voxel_ID_theta - next_vox);
+        if strictlyLess(ray_direction(2),0.0,1e-12,1e-8)
+            tStepTheta = step;
+        elseif strictlyLess(0.0,ray_direction(2),1e-12,1e-8)
+            tStepTheta = -step;
         else
-            tStepTheta = num_angular_sections/2;
+            if strictlyLess(ray_direction(1),0.0,1e-12,1e-8)
+                tStepTheta = step;
+            else
+                tStepTheta = -step;
+            end
         end
     % hit min bound
-    elseif t < t_min && t_min < t_end && ...
-            (t_min < t_max || approximatelyEqual(t,t_max,1e-12,1e-8)) && ...
-            ~approximatelyEqual(t,t_min,1e-12,1e-8)
+    elseif strictlyLess(t,t_min,1e-12,1e-8) && ...
+           strictlyLess(t_min,t_end,1e-12,1e-8) && ...
+            (strictlyLess(t_min,t_max,1e-12,1e-8) || ...
+            approximatelyEqual(t,t_max,1e-12,1e-8))
         tStepTheta = -1;
         tMaxTheta = t_min;
         if verbose
             fprintf("hit min bound\n")
         end
     % hit max bound
-    elseif t < t_max && t_max < t_end && ...
-            (t_max < t_min || approximatelyEqual(t,t_min,1e-12,1e-8)) && ...
-            ~approximatelyEqual(t,t_max,1e-12,1e-8)
+   elseif strictlyLess(t,t_max,1e-12,1e-8) && ...
+           strictlyLess(t_max,t_end,1e-12,1e-8) && ...
+            (strictlyLess(t_max,t_min,1e-12,1e-8) || ...
+            approximatelyEqual(t,t_min,1e-12,1e-8))
         tStepTheta = 1;
         tMaxTheta = t_max;
         if verbose
@@ -154,14 +200,13 @@ elseif intersect_min == 1 && intersect_max == 1
             fprintf("no hit within time bound\n")
         end
      end
- else
+else
      tStepTheta = 0;
      tMaxTheta = t_end;
      if verbose
         fprintf("no hit within voxel bound\n")
      end
- end
-
+end
 
 if verbose
     fprintf(['\ntMaxTheta: %d \n' ...

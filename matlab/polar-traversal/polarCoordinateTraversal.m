@@ -1,4 +1,4 @@
-function [radial_voxels, angular_voxels] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
+function [radial_voxels, angular_voxels, tTest, tTraversal] = polarCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, circle_center, ...
     circle_max_radius, num_radial_sections, num_angular_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
@@ -130,6 +130,8 @@ end
 % The ray may not intersect the grid at all. 
 % In particular, if the ray is outside the grid at t_begin.
 if t1 < t_begin && t2 < t_begin 
+    tTest = 1.0;
+    tTraversal = 1.0;
     if verbose
         fprintf("\nRay does not intersect polar grid for t_begin.")
     end
@@ -138,6 +140,8 @@ end
 
 % It may be a tangent hit
 if approximatelyEqual(t1,t2,1e-12,1e-8)
+    tTest = 1.0;
+    tTraversal = 1.0;
     if verbose
         fprintf("\nTangent hit.")
     end
@@ -155,15 +159,20 @@ delta_theta = 2 * pi/ num_angular_sections;
 % Create an array of values representing the points of intersection between 
 % the lines corresponding to angular voxels boundaries and the initial 
 % radial voxel of the ray.
-P = [];
+trig_ang = zeros(num_angular_sections,2);
+i = 1;
 k = 0;
 while k <= 2*pi
-    pt = [r * cos(k) + circle_center(1), r * sin(k) + circle_center(2)];
-    P = [P ; pt];
+    trig_ang(i,1) = cos(k);
+    trig_ang(i,2) = sin(k);
+    i= i + 1;
     k = k + delta_theta;
 end
- % Find the point of intersection between the vector created by the
- % ray intersection with the initial radius and the circle center.
+P = r .* trig_ang + circle_center;
+P_max = circle_max_radius .* trig_ang + circle_center;
+
+% Find the point of intersection between the vector created by the
+% ray intersection with the initial radius and the circle center.
 if approximatelyEqual(ray_origin,circle_center,1e-12,1e-8)    
     % If the ray starts at the origin, we need to perturb slightly along its path to find the
     % correct angular voxel
@@ -192,7 +201,11 @@ while i < length(P)
     d1 = (P(i,1)-p1(1))^2 + (P(i,2)-p1(2))^2;
     d2 = (P(i+1,1)-p1(1))^2 + (P(i+1,2)-p1(2))^2;
     d3 = (P(i,1)-P(i+1,1))^2 + (P(i,2)-P(i+1,2))^2;
-    if d1 + d2 <= d3; current_voxel_ID_theta = i - 1; i = length(P);end
+    if strictlyLess(d1+d2,d3,1e-12,1e-8) || ...
+                approximatelyEqual(d1+d2,d3,1e-12,1e-8)        
+        current_voxel_ID_theta = i - 1; 
+        i = length(P);
+    end
     i = i + 1;
 end
 
@@ -213,88 +226,61 @@ else
 end
 t_grid = max(t1,t2);
 
-% III. TRAVERSAL PHASE
-t = t_begin;
-t_end = min(t_grid, t_end);
-previous_transition_flag = false;
-
-% Initialize a variable to accumulate of time it takes for all traversals. This 
-% will be used to compare with the cord length (t2 - t1) we calculated earlier 
-if verbose
-    acc = 0.0;
-    if t_begin < t1
-        fprintf("\n Cord length calculated in terms of time: %d\n", t2 - t1)
-    else
-        fprintf("\n Cord length calculated in terms of time: %d\n", t2 - t_begin)
+% Determine the correct time to begin the traversal phase. If the ray
+% starts outside the grid at t_begin, snap to the grid and find the
+% corresopnding start time.
+if approximatelyEqual(r,circle_max_radius,1e-12,1e-8)
+    if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
+        t_start = (p1(1) - ray_origin(1))/ray_direction(1);
+    else 
+        t_start = (p1(2) - ray_origin(2))/ray_direction(2);
     end
+else
+    t_start = t_begin;
 end
 
-change_r = 0;
-
+% III. TRAVERSAL PHASE
+t = t_start;
+t_end = min(t_grid, t_end);
+tTest = t_end-t_start;
+tTraversal = 0;
+previous_transition_flag = false;
 while t < t_end
+    t_past = t;
     % 1. Calculate tMaxR, tMaxTheta
-    [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ... 
-        ray_direction, current_voxel_ID_r, circle_center, ...
-        circle_max_radius, delta_radius, t, ray_unit_vector, ...
+    [tMaxR, tStepR, previous_transition_flag] = radial_hit(ray_origin, ray_direction, ...
+        current_voxel_ID_r, circle_center, circle_max_radius, delta_radius, t, ray_unit_vector, ...
         ray_circle_vector, v, previous_transition_flag, verbose);
-    [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, ...
-        current_voxel_ID_theta, num_angular_sections, circle_center, ...
-        [P(current_voxel_ID_theta+1,:) ; P(current_voxel_ID_theta+2,:)], ...
-        t, t_end, verbose);
+    [tMaxTheta, tStepTheta] = angular_hit(ray_origin, ray_direction, current_voxel_ID_theta,...
+        circle_center, P_max, circle_max_radius, t, t_end, verbose);
     rStepViolation = (current_voxel_ID_r + tStepR == 0);
     % 2. Compare tMaxR, tMaxTheta
-    if ((tMaxTheta < tMaxR && ~approximatelyEqual(tMaxTheta,tMaxR,1e-12,1e-8)) || ...
-            rStepViolation) && t < tMaxTheta && ...
-            tMaxTheta < t_end && ...
-            ~approximatelyEqual(tMaxTheta,t,1e-12,1e-8) && ...
-            ~approximatelyEqual(tMaxTheta,t_end,1e-12,1e-8)        
+    if (strictlyLess(tMaxTheta,tMaxR,1e-12,1e-8) || ...
+            rStepViolation) && strictlyLess(t,tMaxTheta,1e-12,1e-8) && ...
+            strictlyLess(tMaxTheta,t_end,1e-12,1e-8)        
         % when the ray only intersects one radial shell but crosses an
         % angular boundary, we need the second half of conditional
-        if verbose
-            acc = acc + tMaxTheta - t;
-        end
         t = tMaxTheta;
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-        change_r = 0;
     elseif approximatelyEqual(tMaxR,tMaxTheta,1e-12,1e-8) && ...
-            t < tMaxR && tMaxR < t_end && ...
-            ~approximatelyEqual(tMaxR,t,1e-12,1e-8) && ...
-            ~approximatelyEqual(tMaxR,t_end,1e-12,1e-8) && ...
+            strictlyLess(t,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(tMaxR,t_end, 1e-12,1e-8) && ...
             ~rStepViolation        
         % For the case when the ray simultaneously hits a radial and
         % angular boundary.
-        if verbose
-            acc = acc + tMaxR - t;
-        end
         t = tMaxR;
         current_voxel_ID_r = current_voxel_ID_r + tStepR;
-
         current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, ...
             num_angular_sections);
-        if tStepR ~= 0; change_r = 1; else; change_r = 0; end    
-    elseif tMaxR < t_end && ~rStepViolation && ...
-            ~approximatelyEqual(tMaxR,t_end,1e-12,1e-8)
-         if verbose
-            acc = acc + tMaxR - t;
-         end   
+    elseif strictlyLess(t,tMaxR,1e-12,1e-8) && ...
+            strictlyLess(tMaxR,t_end, 1e-12,1e-8) && ~rStepViolation  
          t = tMaxR;
          current_voxel_ID_r = current_voxel_ID_r + tStepR;
-         if tStepR ~= 0; change_r = 1; else; change_r = 0; end
     else 
+       tTraversal = tTraversal + (t_end - t_past);
        return;
     end 
-    % If the radial voxel changes, update the angular voxel boundary
-    % segments for intersection checks in angular hit.
-    if change_r == 1
-        r = circle_max_radius - delta_radius * (current_voxel_ID_r - 1);
-        a = circle_center - P;
-        l = (a(:,1).^2 + a(:,2).^2).^-0.5;
-        P(:,1) = circle_center(1) - (r*l) .* (circle_center(1) - P(:,1));
-        P(:,2) = circle_center(2) - (r*l) .* (circle_center(2) - P(:,2));
-    end
+        tTraversal = tTraversal + (t - t_past);
         angular_voxels = [angular_voxels, current_voxel_ID_theta];
         radial_voxels = [radial_voxels, current_voxel_ID_r];
-    if verbose
-        fprintf("\nCurrent Total time spent from Traversal: %d\n", acc)
-    end   
 end
