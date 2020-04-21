@@ -14,7 +14,7 @@ ext_modules = [Extension(
     name="cython_SVR",
     sources=["cython_SVR.pyx", "../spherical_volume_rendering_util.cpp"],
     language="c++",
-    extra_compile_args=["-std=c++11", "-O3"],
+    extra_compile_args=["-std=c++11", "-O3", "-march=native", "-flto", "-fno-signed-zeros", "-funroll-loops"],
     define_macros = [('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION')], # Hides deprecated Numpy warning.
     include_dirs = [numpy.get_include()],
 )]
