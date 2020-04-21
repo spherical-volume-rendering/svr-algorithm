@@ -6,8 +6,8 @@
 
 namespace SVR {
 
-// Represents a line segment. This is used to represent the points of intersections between
-// the lines corresponding to voxel boundaries and a given radial voxel.
+    // Represents a line segment. This is used to represent the points of intersections between
+    // the lines corresponding to voxel boundaries and a given radial voxel.
     struct LineSegment {
         double P1;
         double P2;
