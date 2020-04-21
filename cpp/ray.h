@@ -5,7 +5,9 @@
 
 // The indices for Vec3. For example, Vec3[0] returns the x-direction.
 enum NonZeroDirectionIndex {
-  X_DIRECTION = 0, Y_DIRECTION = 1, Z_DIRECTION = 2
+  X_DIRECTION = 0,
+  Y_DIRECTION = 1,
+  Z_DIRECTION = 2
 };
 
 // Encapsulates the functionality of a ray. This consists of two components, the origin of the ray, and the
@@ -65,7 +67,7 @@ private:
     const FreeVec3 inverse_direction_;
 
     // Index of a non-zero direction.
-    NonZeroDirectionIndex NZD_index_;
+    const NonZeroDirectionIndex NZD_index_;
 
     // The non-zero direction values to avoid using the [] operator with each function call.
     const double NZD_origin_, NZD_inverse_direction_, NZD_unit_direction_;
