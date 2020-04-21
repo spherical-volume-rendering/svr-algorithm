@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include <limits>
 
 // Represents a Euclidean vector in 3-dimensional space.
 // Assumes vectors take the form of:
@@ -40,7 +41,7 @@ public:
         case 1: return this->y_;
         case 2: return this->z_;
       }
-      return NAN;
+      return std::numeric_limits<double>::quiet_NaN();
   }
 
 private:
@@ -180,7 +181,7 @@ struct UnitVec3 {
         case 1: return this->y();
         case 2: return this->z();
       }
-      return NAN;
+      return std::numeric_limits<double>::quiet_NaN();
     }
 
 private:
