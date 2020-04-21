@@ -286,7 +286,7 @@ while t < t_end
 
     % 2. Compare tMaxR, tMaxTheta, tMaxPhi
     if ((strictlyLess(tMaxTheta,tMaxR,1e-12,1e-8)  && ...
-            strictlyLess(tMaxR, tMaxPhi,1e-12,1e-8)) || rStepViolation) ...
+            strictlyLess(tMaxTheta, tMaxPhi,1e-12,1e-8)) || rStepViolation) ...
             && strictlyLess(t,tMaxTheta,1e-12,1e-8) && ...
             strictlyLess(tMaxTheta,t_end,1e-12,1e-8) 
         % Note 1: Case tMaxTheta is a minimum
@@ -321,46 +321,25 @@ while t < t_end
     elseif approximatelyEqual(tMaxPhi, tMaxTheta, 1e-12,1e-8) && ...
             strictlyLess(t,tMaxPhi,1e-12,1e-8) && ...
             strictlyLess(tMaxPhi,t_end, 1e-12,1e-8)
-        % Phi, Theta equal
-        if strictlyLess(tMaxR, tMaxPhi, 1e-12,1e-8) && ...
-                strictlyLess(t,tMaxR,1e-12,1e-8) && ~rStepViolation
-            % R min
-            t = tMaxR;
-            current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        else
+        % Phi, Theta equal mins
             t = tMaxPhi;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
-        end
     elseif approximatelyEqual(tMaxTheta,tMaxR,1e-12,1e-8) && ...
             strictlyLess(t,tMaxR,1e-12,1e-8) && ...
             strictlyLess(tMaxR, t_end,1e-12,1e-8) && ...
             ~rStepViolation
-        % R, Theta equal
-        if strictlyLess(tMaxPhi,tMaxTheta,1e-12,1e-8) && ...
-                strictlyLess(t,tMaxPhi,1e-12,1e-8)
-            % Phi min
-            t = tMaxPhi;
-            current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
-        else
+        % R, Theta equal mins
             t = tMaxTheta;
             current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        end
     elseif approximatelyEqual(tMaxR,tMaxPhi,1e-12,1e-8) && ...
             strictlyLess(t,tMaxR,1e-12,1e-8) && ...
             strictlyLess(tMaxR, t_end, 1e-12,1e-8) && ~rStepViolation
-        % R, Phi equal
-        if strictlyLess(tMaxTheta,tMaxR,1e-12,1e-8) && ...
-                strictlyLess(t,tMaxTheta, 1e-12,1e-8)
-            % Theta min
-            t = tMaxTheta;
-            current_voxel_ID_theta = mod(current_voxel_ID_theta + tStepTheta, num_angular_sections);
-        else
+        % R, Phi equal mins
             t = tMaxR;
             current_voxel_ID_phi = mod(current_voxel_ID_phi + tStepPhi, num_azimuthal_sections);
             current_voxel_ID_r = current_voxel_ID_r + tStepR;
-        end
     else
        traversal_time = traversal_time + (t_end - t_past);
        return;
