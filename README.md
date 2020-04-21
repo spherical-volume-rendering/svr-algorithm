@@ -1,4 +1,4 @@
-# Fast Voxel Traversal Algorithm Over Spherical Coordinate Grid
+# Fast Voxel Traversal Algorithm Over Spherical Grids
 ![Example ray tracing in spherical coordinates](images/polar_view_next_to_spherical_image.png)
 
 ## About
