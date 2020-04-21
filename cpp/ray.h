@@ -4,6 +4,7 @@
 #include <array>
 #include "vec3.h"
 
+// The indices for Vec3. For example, Vec3[0] returns the x-direction.
 enum NonZeroDirectionIndex {
   X_DIRECTION = 0, Y_DIRECTION = 1, Z_DIRECTION = 2
 };
