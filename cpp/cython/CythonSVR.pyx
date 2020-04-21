@@ -7,7 +7,7 @@ from libcpp.vector cimport vector
 
 cdef extern from "../spherical_volume_rendering_util.h":
     cdef cppclass SphericalVoxel:
-        size_t radial_voxel, angular_voxel, azimuthal_voxel
+        int radial_voxel, angular_voxel, azimuthal_voxel
 
     vector[SphericalVoxel] sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
                                                                double* min_bound, double* max_bound,
@@ -49,9 +49,9 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
            A numpy array of the spherical voxel coordinates.
            The voxel coordinates are as follows:
              For coordinate i in numpy array v:
-             v[i] = radial_voxel
-             v[i+1] = angular_voxel
-             v[i+2] = azimuthal_voxel
+             v[i,0] = radial_voxel
+             v[i,1] = angular_voxel
+             v[i,2] = azimuthal_voxel
 
     Notes:
         Code must be compiled before use:
@@ -63,14 +63,14 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     assert(max_bound.size == 3)
     assert(sphere_center.size == 3)
 
-    cdef vector[SphericalVoxel] v
-    v = sphericalCoordinateVoxelTraversalCy(&ray_origin[0], &ray_direction[0], &min_bound[0], &max_bound[0],
-                                            num_radial_voxels, num_angular_voxels, num_azimuthal_voxels,
-                                            &sphere_center[0], sphere_max_radius, t_begin, t_end)
-
-    cdef np.ndarray voxels = np.empty(v.size() * 3, dtype=int)
-    for i in range(v.size()):
-        voxels[i * 3] = v[i].radial_voxel
-        voxels[i * 3 + 1] = v[i].angular_voxel
-        voxels[i * 3 + 2] = v[i].azimuthal_voxel
-    return voxels
+    cdef vector[SphericalVoxel] voxels = sphericalCoordinateVoxelTraversalCy(&ray_origin[0], &ray_direction[0],
+                                                                             &min_bound[0], &max_bound[0],
+                                                                             num_radial_voxels, num_angular_voxels,
+                                                                             num_azimuthal_voxels, &sphere_center[0],
+                                                                             sphere_max_radius, t_begin, t_end)
+    cdef np.ndarray cyVoxels = np.empty((voxels.size(), 3), dtype=int)
+    for i in range(voxels.size()):
+        cyVoxels[i,0] = voxels[i].radial_voxel
+        cyVoxels[i,1] = voxels[i].angular_voxel
+        cyVoxels[i,2] = voxels[i].azimuthal_voxel
+    return cyVoxels

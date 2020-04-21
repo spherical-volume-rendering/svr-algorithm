@@ -2,6 +2,14 @@
 #define SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H
 
 #include "vec3.h"
+#include <vector>
+
+// Represents a line segment. This is used to represent the points of intersections between
+// the lines corresponding to voxel boundaries and a given radial voxel.
+struct LineSegment {
+    double P1;
+    double P2;
+};
 
 // Represents a 3-dimensional spherical voxel grid. The minimum and maximum bounds [min_bound_, max_bound_]
 // contain the entirety of the sphere that is to be traversed.
@@ -13,57 +21,94 @@
 //   sphere_max_radius > 0.0
 struct SphericalVoxelGrid {
 public:
-    SphericalVoxelGrid(const BoundVec3& min_bound, const BoundVec3& max_bound, std::size_t num_radial_voxels,
-                       std::size_t num_angular_voxels, std::size_t num_azimuthal_voxels, const BoundVec3& sphere_center,
+    SphericalVoxelGrid(const BoundVec3 &min_bound, const BoundVec3 &max_bound, std::size_t num_radial_voxels,
+                       std::size_t num_angular_voxels, std::size_t num_azimuthal_voxels, const BoundVec3 &sphere_center,
                        double sphere_max_radius) :
-                       min_bound_(min_bound),
-                       max_bound_(max_bound),
-                       num_radial_voxels_(num_radial_voxels),
-                       num_angular_voxels_(num_angular_voxels),
-                       num_azimuthal_voxels_(num_azimuthal_voxels),
-                       inv_num_radial_voxels_(1.0 / num_radial_voxels),
-                       inv_num_angular_voxels_(1.0 / num_angular_voxels),
-                       inv_num_azimuthal_voxels_(1.0 / num_azimuthal_voxels),
-                       sphere_center_(sphere_center),
-                       sphere_max_radius_(sphere_max_radius),
-                       delta_radius_(sphere_max_radius * inv_num_radial_voxels_),
-                       delta_theta_(2 * M_PI * inv_num_angular_voxels_),
-                       delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_),
-                       inv_delta_radius_(1.0 / delta_radius_),
-                       inv_delta_theta_(1.0 / delta_theta_),
-                       inv_delta_phi_(1.0 / delta_phi_) {}
+            min_bound_(min_bound),
+            max_bound_(max_bound),
+            num_radial_voxels_(num_radial_voxels),
+            num_angular_voxels_(num_angular_voxels),
+            num_azimuthal_voxels_(num_azimuthal_voxels),
+            inv_num_radial_voxels_(1.0 / num_radial_voxels),
+            inv_num_angular_voxels_(1.0 / num_angular_voxels),
+            inv_num_azimuthal_voxels_(1.0 / num_azimuthal_voxels),
+            sphere_center_(sphere_center),
+            sphere_max_radius_(sphere_max_radius),
+            delta_radius_(sphere_max_radius * inv_num_radial_voxels_),
+            delta_theta_(2 * M_PI * inv_num_angular_voxels_),
+            delta_phi_(2 * M_PI * inv_num_azimuthal_voxels_),
+            inv_delta_radius_(1.0 / delta_radius_),
+            inv_delta_theta_(1.0 / delta_theta_),
+            inv_delta_phi_(1.0 / delta_phi_) {
 
-    inline std::size_t numRadialVoxels() const { return num_radial_voxels_; }
+        double radians = 0;
+        P_max_angular_.resize(num_angular_voxels + 1);
+        P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
 
-    inline std::size_t numAngularVoxels() const { return num_angular_voxels_; }
+        if (num_angular_voxels == num_azimuthal_voxels) {
+            for (std::size_t i = 0; i < num_angular_voxels; ++i) {
+                const double px_max_value = sphere_max_radius * std::cos(radians) + sphere_center.x();
+                const double max_radius_times_s = sphere_max_radius * std::sin(radians);
+                P_max_angular_[i].P1 = px_max_value;
+                P_max_angular_[i].P2 = max_radius_times_s + sphere_center.y();
+                P_max_azimuthal_[i].P1 = px_max_value;
+                P_max_azimuthal_[i].P2 = max_radius_times_s + sphere_center.z();
+                radians += delta_phi_;
+            }
+            return;
+        }
+        for (std::size_t j = 0; j < num_angular_voxels; ++j) {
+            P_max_angular_[j].P1 = sphere_max_radius * std::cos(radians) + sphere_center.x();
+            P_max_angular_[j].P2 = sphere_max_radius * std::sin(radians) + sphere_center.y();
+            radians += delta_theta_;
+        }
+        radians = 0;
+        for (std::size_t k = 0; k < num_azimuthal_voxels; ++k) {
+            P_max_azimuthal_[k].P1 = sphere_max_radius * std::cos(radians) + sphere_center.x();
+            P_max_azimuthal_[k].P2 = sphere_max_radius * std::sin(radians) + sphere_center.z();
+            radians += delta_phi_;
+        }
+    }
 
-    inline std::size_t numAzimuthalVoxels() const { return num_azimuthal_voxels_; }
+    inline std::size_t numRadialVoxels() const noexcept { return this->num_radial_voxels_; }
 
-    inline double invNumRadialVoxels() const { return inv_num_radial_voxels_; }
+    inline std::size_t numAngularVoxels() const noexcept { return this->num_angular_voxels_; }
 
-    inline double invNumAngularVoxels() const { return inv_num_angular_voxels_; }
+    inline std::size_t numAzimuthalVoxels() const noexcept { return this->num_azimuthal_voxels_; }
 
-    inline double invNumAzimuthalVoxels() const { return inv_num_azimuthal_voxels_; }
+    inline double invNumRadialVoxels() const noexcept{ return this->inv_num_radial_voxels_; }
 
-    inline BoundVec3 minBound() const { return min_bound_; }
+    inline double invNumAngularVoxels() const noexcept { return this->inv_num_angular_voxels_; }
 
-    inline BoundVec3 maxBound() const { return max_bound_; }
+    inline double invNumAzimuthalVoxels() const noexcept { return this->inv_num_azimuthal_voxels_; }
 
-    inline double sphereMaxRadius() const { return sphere_max_radius_; }
+    inline BoundVec3 minBound() const noexcept { return this->min_bound_; }
 
-    inline BoundVec3 sphereCenter() const { return sphere_center_; }
+    inline BoundVec3 maxBound() const noexcept { return this->max_bound_; }
 
-    inline double deltaRadius() const { return delta_radius_; }
+    inline double sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
-    inline double deltaTheta() const { return delta_theta_; }
+    inline BoundVec3 sphereCenter() const noexcept { return this->sphere_center_; }
 
-    inline double deltaPhi() const { return delta_phi_; }
+    inline double deltaRadius() const noexcept { return this->delta_radius_; }
 
-    inline double invDeltaRadius() const { return inv_delta_radius_; }
+    inline double deltaTheta() const noexcept { return this->delta_theta_; }
 
-    inline double invDeltaTheta() const { return inv_delta_theta_; }
+    inline double deltaPhi() const noexcept { return this->delta_phi_; }
 
-    inline double invDeltaPhi() const { return inv_delta_phi_; }
+    inline double invDeltaRadius() const noexcept { return this->inv_delta_radius_; }
+
+    inline double invDeltaTheta() const noexcept { return this->inv_delta_theta_; }
+
+    inline double invDeltaPhi() const noexcept { return this->inv_delta_phi_; }
+
+    inline const LineSegment& pMaxAngular(int i) const noexcept { return this->P_max_angular_[i]; }
+
+    inline const std::vector<LineSegment>& pMaxAngular() const noexcept { return this->P_max_angular_; }
+
+    inline const LineSegment& pMaxAzimuthal(int i) const noexcept { return this->P_max_azimuthal_[i]; }
+
+    inline const std::vector<LineSegment>& pMaxAzimuthal() const noexcept { return this->P_max_azimuthal_; }
 
 private:
     // The minimum bound vector of the voxel grid.
@@ -92,6 +137,12 @@ private:
 
     // Inverse of the above delta values.
     const double inv_delta_radius_, inv_delta_theta_, inv_delta_phi_;
+
+    // The maximum radius line segments for angular voxels.
+    std::vector<LineSegment> P_max_angular_;
+
+    // The maximum radius line segments for azimuthal voxels.
+    std::vector<LineSegment> P_max_azimuthal_;
 };
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H
