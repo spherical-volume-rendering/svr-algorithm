@@ -76,7 +76,7 @@ public:
 
     inline std::size_t numAzimuthalVoxels() const noexcept { return this->num_azimuthal_voxels_; }
 
-    inline double invNumRadialVoxels() const noexcept{ return this->inv_num_radial_voxels_; }
+    inline double invNumRadialVoxels() const noexcept { return this->inv_num_radial_voxels_; }
 
     inline double invNumAngularVoxels() const noexcept { return this->inv_num_angular_voxels_; }
 
@@ -102,11 +102,11 @@ public:
 
     inline double invDeltaPhi() const noexcept { return this->inv_delta_phi_; }
 
-    inline const LineSegment& pMaxAngular(int i) const noexcept { return this->P_max_angular_[i]; }
+    inline const LineSegment& pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
 
     inline const std::vector<LineSegment>& pMaxAngular() const noexcept { return this->P_max_angular_; }
 
-    inline const LineSegment& pMaxAzimuthal(int i) const noexcept { return this->P_max_azimuthal_[i]; }
+    inline const LineSegment& pMaxAzimuthal(std::size_t i) const noexcept { return this->P_max_azimuthal_[i]; }
 
     inline const std::vector<LineSegment>& pMaxAzimuthal() const noexcept { return this->P_max_azimuthal_; }
 
