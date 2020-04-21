@@ -34,6 +34,15 @@ public:
         return x() * x() + y() * y() + z() * z();
     }
 
+  inline double operator[](const std::size_t index) const noexcept {
+      switch(index) {
+        case 0: return this->x();
+        case 1: return this->y();
+        case 2: return this->z();
+      }
+      return -1;
+  }
+
 private:
     // Represents the x-dimension value of the vector.
     double x_;
