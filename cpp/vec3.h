@@ -27,12 +27,21 @@ public:
     inline double &z() noexcept { return this->z_; }
 
     inline double length() const noexcept {
-        return std::sqrt(this->x() * this->x() + this->y() * this->y() + this->z() * this->z());
+        return std::sqrt(this->x_ * this->x_ + this->y_ * this->y_ + this->z_ * this->z_);
     }
 
     inline double squared_length() const noexcept {
-        return x() * x() + y() * y() + z() * z();
+        return x_ * x_ + y_ * y_ + z_ * z_;
     }
+
+  inline double operator[](const std::size_t index) const noexcept {
+      switch(index) {
+        case 0: return this->x_;
+        case 1: return this->y_;
+        case 2: return this->z_;
+      }
+      return NAN;
+  }
 
 private:
     // Represents the x-dimension value of the vector.
@@ -164,6 +173,15 @@ struct UnitVec3 {
     inline double z() const noexcept { return this->to_free().z(); }
 
     inline const FreeVec3 &to_free() const noexcept { return inner_; }
+
+    inline double operator[](const std::size_t index) const noexcept {
+      switch(index) {
+        case 0: return this->x();
+        case 1: return this->y();
+        case 2: return this->z();
+      }
+      return NAN;
+    }
 
 private:
     const FreeVec3 inner_;
