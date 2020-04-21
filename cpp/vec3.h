@@ -174,6 +174,15 @@ struct UnitVec3 {
 
     inline const FreeVec3 &to_free() const noexcept { return inner_; }
 
+    inline double operator[](const std::size_t index) const noexcept {
+      switch(index) {
+        case 0: return this->x();
+        case 1: return this->y();
+        case 2: return this->z();
+      }
+      return -1;
+    }
+
 private:
     const FreeVec3 inner_;
 };
