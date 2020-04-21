@@ -24,11 +24,12 @@ function testRayDoesNotEnterSphere(testCase)
     t_end = 15.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
         sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, []);
     verifyEqual(testCase, thetaVoxels, []);
     verifyEqual(testCase, phiVoxels, []);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray passes through origin
@@ -48,11 +49,12 @@ function testSphereCenteredAtOrigin(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,2,2,0,0,0,0]);
     verifyEqual(testCase, phiVoxels, [2,2,2,2,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Change direction of ray slightly in the XY plane.
@@ -71,11 +73,12 @@ function testRayOffsetInXYPlane(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, [1,2,2,3,2,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,1,1,1,0,0]);
     verifyEqual(testCase, phiVoxels, [2,2,2,2,2,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray travels up z-axis
@@ -94,13 +97,14 @@ function testRayTravelsAlongZAxis(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
      sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [0,0,0,0,0,0,0,0]);
     %   Note that phi_voxels transition is somewhat ambiguous, as long as
     %   voxels both lie along the z-axis this should be counted as correct
     verifyEqual(testCase, phiVoxels, [2,2,2,2,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray travels along x-axis
@@ -119,11 +123,12 @@ function testRayTravelsAlongXAxis(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
      sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
         verifyEqual(testCase, rVoxels, [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [3,3,3,3,0,0,0,0]);
     verifyEqual(testCase, phiVoxels,  [1,1,1,1,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray travels along y-axis
@@ -142,11 +147,12 @@ function testRayTravelsAlongYAxis(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
      sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [5,5,5,5,1,1,1,1]);
     verifyEqual(testCase, phiVoxels,  [0,0,0,0,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray parallel to the XY Plane.
@@ -165,11 +171,12 @@ function testRayParallelToXYPlane(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,2,2,0,0,0,0]);
     verifyEqual(testCase, phiVoxels, [1,1,1,1,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray parallel to the XZ Plane.
@@ -188,11 +195,12 @@ function testRayParallelToXZPlane(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [1,1,1,1,0,0,0,0]);
     verifyEqual(testCase, phiVoxels, [2,2,2,2,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray parallel to the YZ Plane.
@@ -211,11 +219,12 @@ function testRayParallelToYZPlane(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels, [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,2,2,0,0,0,0]);
     verifyEqual(testCase, phiVoxels, [2,2,2,2,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray with negative X positive YZ direction
@@ -234,11 +243,12 @@ function testRayNegXPosYZ(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels,     [1,2,3,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [3,3,3,2,2,1,1,1,1]);
     verifyEqual(testCase, phiVoxels,   [3,3,3,2,2,1,1,1,1]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray with negative Y positive XZ direction
@@ -257,11 +267,12 @@ function testRayNegYPosXZ(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels,     [1,2,3,3,4,4,3,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [1,1,1,1,1,0,0,3,3,3]);
     verifyEqual(testCase, phiVoxels,   [2,2,2,1,1,0,0,0,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray with negative Z positive XY direction, NOT COMPLETED
@@ -280,11 +291,12 @@ function testRayNegZPosXY(testCase)
     t_end = 30.0;
     verbose = false;
     
-    [rVoxels, thetaVoxels, phiVoxels] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels,     [1,1,2,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,1,1,0,0]);
     verifyEqual(testCase, phiVoxels,   [1,1,1,0,0]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
 % Ray with negative XY positive Z direction
