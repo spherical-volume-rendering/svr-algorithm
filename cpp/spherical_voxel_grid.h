@@ -4,7 +4,7 @@
 #include "vec3.h"
 #include <vector>
 
-namespace SVR {
+namespace svr {
 
     // Represents a line segment. This is used to represent the points of intersections between
     // the lines corresponding to voxel boundaries and a given radial voxel.
@@ -148,6 +148,6 @@ namespace SVR {
         std::vector<LineSegment> P_max_azimuthal_;
     };
 
-} // namespace SVR
+} // namespace svr
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOXELGRID_H

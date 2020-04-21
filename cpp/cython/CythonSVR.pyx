@@ -5,9 +5,9 @@ cimport numpy as np
 cimport cython
 from libcpp.vector cimport vector
 
-cdef extern from "../spherical_volume_rendering_util.h" namespace "SVR":
+cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
     cdef cppclass SphericalVoxel:
-        int radial_voxel, angular_voxel, azimuthal_voxel
+        int radial_voxel, angular_voxel, azimuthal_voxelgit a
 
     vector[SphericalVoxel] sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
                                                                double* min_bound, double* max_bound,

@@ -6,7 +6,7 @@
 #include "spherical_voxel_grid.h"
 #include <vector>
 
-namespace SVR {
+namespace svr {
 
     // Represents a spherical voxel coordinate.
     struct SphericalVoxel {
@@ -22,7 +22,7 @@ namespace SVR {
     //
     // Notes: For further documentation and visualization, see the Progress Report for the algorithm:
     // https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?usp=sharing
-    std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const SVR::SphericalVoxelGrid &grid,
+    std::vector<SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                                                   double t_begin, double t_end) noexcept;
 
     // Simplified parameters to Cythonize the function; implementation remains the same as above.
@@ -35,6 +35,6 @@ namespace SVR {
                                                                     double sphere_max_radius, double t_begin,
                                                                     double t_end) noexcept;
 
-} // namespace SVR
+} // namespace svr
 
 #endif //SPHERICAL_VOLUME_RENDERING_SPHERICALVOLUMERENDERINGUTIL_H

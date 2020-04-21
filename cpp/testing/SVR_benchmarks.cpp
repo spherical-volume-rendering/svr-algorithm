@@ -17,9 +17,9 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                          num_angular_sections,
-                                          num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(-13000.0, -13000.0, -13000.0);
             const FreeVec3 ray_direction(1.0, 1.0, 1.0);
             const Ray ray(ray_origin, ray_direction);
@@ -39,9 +39,9 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                          num_angular_sections,
-                                          num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(13000.0, 13000.0, 13000.0);
             const FreeVec3 ray_direction(-1.0, -1.0, -1.0);
             const Ray ray(ray_origin, ray_direction);
@@ -60,9 +60,9 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                           num_angular_sections,
-                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(-13000.0, 10.0, 10.0);
             const FreeVec3 ray_direction(1.0, 0.0, 0.0);
             const Ray ray(ray_origin, ray_direction);
@@ -81,9 +81,9 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                           num_angular_sections,
-                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(10.0, -13000.0, 0.0);
             const FreeVec3 ray_direction(0.0, 1.0, 0.0);
             const Ray ray(ray_origin, ray_direction);
@@ -102,9 +102,9 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                           num_angular_sections,
-                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(10.0, 0.0, -13000.0);
             const FreeVec3 ray_direction(0.0, 0.0, 1.0);
             const Ray ray(ray_origin, ray_direction);
@@ -124,9 +124,9 @@ namespace {
             const std::size_t num_radial_sections = 4;
             const std::size_t num_angular_sections = 8;
             const std::size_t num_azimuthal_sections = 4;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                           num_angular_sections,
-                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const BoundVec3 ray_origin(3.0, 3.0, 3.0);
             const FreeVec3 ray_direction(-2.0, -1.3, 1.0);
             const Ray ray(ray_origin, ray_direction);
@@ -148,9 +148,9 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                          num_angular_sections,
-                                          num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const double t_begin = 0.0;
             const double t_end = 100000.0;
 
@@ -174,9 +174,9 @@ namespace {
             const std::size_t num_radial_sections = 10000;
             const std::size_t num_angular_sections = 10000;
             const std::size_t num_azimuthal_sections = 10000;
-            const SVR::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
-                                          num_angular_sections,
-                                          num_azimuthal_sections, sphere_center, sphere_max_radius);
+            const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                               num_angular_sections,
+                                               num_azimuthal_sections, sphere_center, sphere_max_radius);
             const double t_begin = 0.0;
             const double t_end = 100000.0;
 
