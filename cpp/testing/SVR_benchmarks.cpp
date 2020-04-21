@@ -116,7 +116,7 @@ namespace {
 
     static void MultipleRayNoIntersection(benchmark::State &state) {
         for (auto _ : state) {
-            const int number_of_runs = 50000;
+            const int number_of_runs = 100000;
             const BoundVec3 min_bound(0.0, 0.0, 0.0);
             const BoundVec3 max_bound(30.0, 30.0, 30.0);
             const BoundVec3 sphere_center(15.0, 15.0, 15.0);
@@ -140,7 +140,7 @@ namespace {
 
     static void MultipleRayIntersection(benchmark::State &state) {
         for (auto _ : state) {
-            const int number_of_rays = 100;
+            const int number_of_rays = 1000;
             const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
             const BoundVec3 max_bound(20000.0, 20000.0, 20000.0);
             const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -160,7 +160,7 @@ namespace {
                 const FreeVec3 ray_direction(1.0, 0.0, 0.0);
                 const Ray ray(ray_origin, ray_direction);
                 const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-                ray_origin_x += 100.0;
+                ray_origin_x += 10.0;
             }
         }
     }

@@ -93,12 +93,6 @@ namespace svr {
         bool previous_transition_flag;
     };
 
-    template<class T>
-    inline T MAX(const T &a, const T &b) noexcept { return a > b ? a : b; }
-
-    template<class T>
-    inline T MIN(const T &a, const T &b) noexcept { return a < b ? a : b; }
-
     // Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
     // uses a modified version of an algorithm developed by Donald Knuth (which in turn relies upon relative epsilon).
     // Provides default values for the absolute and relative epsilon. The "Kn" in the function name is short for Knuth.
@@ -111,7 +105,7 @@ namespace svr {
     inline bool isKnEqual(double a, double b) noexcept {
         const double diff = std::abs(a - b);
         if (diff <= ABS_EPSILON) { return true; }
-        return diff <= MAX(std::abs(a), std::abs(b)) * REL_EPSILON;
+        return diff <= std::max(std::abs(a), std::abs(b)) * REL_EPSILON;
     }
 
     // Overloaded version that checks for Knuth equality with vector cartesian coordinates.
@@ -120,9 +114,9 @@ namespace svr {
         const double diff_y = std::abs(a.y() - b.y());
         const double diff_z = std::abs(a.z() - b.z());
         if (diff_x <= ABS_EPSILON && diff_y <= ABS_EPSILON && diff_z <= ABS_EPSILON) { return true; }
-        return diff_x <= MAX(std::abs(a.x()), std::abs(b.x())) * REL_EPSILON &&
-               diff_y <= MAX(std::abs(a.y()), std::abs(b.y())) * REL_EPSILON &&
-               diff_z <= MAX(std::abs(a.z()), std::abs(b.z())) * REL_EPSILON;
+        return diff_x <= std::max(std::abs(a.x()), std::abs(b.x())) * REL_EPSILON &&
+               diff_y <= std::max(std::abs(a.y()), std::abs(b.y())) * REL_EPSILON &&
+               diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * REL_EPSILON;
     }
 
     // Uses the Knuth algorithm in KnEqual() to ensure that a is strictly less than b.
@@ -161,14 +155,14 @@ namespace svr {
     RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
         const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
-        double r_a = MAX(current_radius - grid.deltaRadius(), grid.deltaRadius());
+        double r_a = std::max(current_radius - grid.deltaRadius(), grid.deltaRadius());
         double r_b;
         if (!data.previous_transition_flag) {
             // To find the next radius, we need to check the previous_transition_flag:
             // In the case that the ray has sequential hits with equal radii, e.g.
             // the innermost radial disc, this ensures that the proper radii are being checked.
-            r_b = MIN(current_radius + grid.deltaRadius(), grid.sphereMaxRadius());
-        } else { r_b = MIN(current_radius, grid.sphereMaxRadius()); }
+            r_b = std::min(current_radius + grid.deltaRadius(), grid.sphereMaxRadius());
+        } else { r_b = std::min(current_radius, grid.sphereMaxRadius()); }
         // Find the intersection times for the ray and the previous and next radial discs.
         const double ray_sphere_dot_minus_v_squared = data.ray_sphere_vector_dot - data.v * data.v;
         double discriminant_a = r_a * r_a - ray_sphere_dot_minus_v_squared;
@@ -561,10 +555,10 @@ namespace svr {
         const double max_discriminant =
                 grid.sphereMaxRadius() * grid.sphereMaxRadius() - (ray_sphere_vector_dot - v * v);
         const double max_d = std::sqrt(max_discriminant);
-        const double t_grid_exit = MAX(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
+        const double t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
         // Find the correct time to begin the traversal phase.
         double t = ray_origin_is_outside_grid ? ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z)) : t_begin;
-        t_end = MIN(t_grid_exit, t_end);
+        t_end = std::min(t_grid_exit, t_end);
 
         RadialHitData radial_hit_data(v, ray_sphere_vector_dot);
         while (true) {
