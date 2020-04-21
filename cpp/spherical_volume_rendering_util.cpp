@@ -7,11 +7,11 @@
 
 namespace SVR {
 
-// Epsilons used for floating point comparisons in Knuth's algorithm.
+    // Epsilons used for floating point comparisons in Knuth's algorithm.
     const double ABS_EPSILON = 1e-12;
     const double REL_EPSILON = 1e-8;
 
-// The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
+    // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
     enum VoxelIntersectionType {
         None = 0,
         Radial = 1,
@@ -23,7 +23,7 @@ namespace SVR {
         RadialAngularAzimuthal = 7
     };
 
-// The parameters returned by radialHit().
+    // The parameters returned by radialHit().
     struct RadialHitParameters {
         // The time at which a hit occurs for the ray at the next point of intersection with a radial section.
         // This is always calculated from the ray origin.
@@ -44,7 +44,7 @@ namespace SVR {
         bool exits_voxel_bounds;
     };
 
-// The parameters returned by angularHit().
+    // The parameters returned by angularHit().
     struct AngularHitParameters {
         // The time at which a hit occurs for the ray at the next point of intersection with an angular section.
         // This is always calculated from the ray origin.
@@ -57,7 +57,7 @@ namespace SVR {
         bool within_bounds;
     };
 
-// The parameters returned by azimuthalHit().
+    // The parameters returned by azimuthalHit().
     struct AzimuthalHitParameters {
         // The time at which a hit occurs for the ray at the next point of intersection with an azimuthal section.
         // This is always calculated from the ray origin.
@@ -70,16 +70,16 @@ namespace SVR {
         bool within_bounds;
     };
 
-// A generalized set of hit parameters.
+    // A generalized set of hit parameters.
     struct GenHitParameters {
         double tMax;
         int tStep;
         bool within_bounds;
     };
 
-// The necessary information to calculate a radial hit. ray_sphere_vector_dot and v are calculated
-// in the initialization phase, so unnecessary to re-calculate again for radial hit. intersection_times and times_gt_t
-// are used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
+    // The necessary information to calculate a radial hit. ray_sphere_vector_dot and v are calculated in the
+    // initialization phase, so unnecessary to re-calculate again for radial hit. intersection_times and times_gt_t
+    // are used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
     struct RadialHitData {
         inline RadialHitData(double t_v, double t_ray_sphere_vector_dot) :
                 v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot) {
@@ -99,22 +99,22 @@ namespace SVR {
     template<class T>
     inline T MIN(const T &a, const T &b) noexcept { return a < b ? a : b; }
 
-// Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
-// uses a modified version of an algorithm developed by Donald Knuth (which in turn relies upon relative epsilon).
-// Provides default values for the absolute and relative epsilon. The "Kn" in the function name is short for Knuth.
-// Related Boost document:
-//        https://www.boost.org/doc/libs/1_61_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/
-//        floating_point/floating_points_comparison_theory.html#equ1
-// Related reading:
-//        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
-//        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
+    // Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
+    // uses a modified version of an algorithm developed by Donald Knuth (which in turn relies upon relative epsilon).
+    // Provides default values for the absolute and relative epsilon. The "Kn" in the function name is short for Knuth.
+    // Related Boost document:
+    //        https://www.boost.org/doc/libs/1_61_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/
+    //        floating_point/floating_points_comparison_theory.html#equ1
+    // Related reading:
+    //        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
+    //        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
     inline bool isKnEqual(double a, double b) noexcept {
         const double diff = std::abs(a - b);
         if (diff <= ABS_EPSILON) { return true; }
         return diff <= MAX(std::abs(a), std::abs(b)) * REL_EPSILON;
     }
 
-// Overloaded version that checks for Knuth equality with vector cartesian coordinates.
+    // Overloaded version that checks for Knuth equality with vector cartesian coordinates.
     inline bool isKnEqual(const Vec3 &a, const Vec3 &b) noexcept {
         const double diff_x = std::abs(a.x() - b.x());
         const double diff_y = std::abs(a.y() - b.y());
@@ -125,16 +125,16 @@ namespace SVR {
                diff_z <= MAX(std::abs(a.z()), std::abs(b.z())) * REL_EPSILON;
     }
 
-// Uses the Knuth algorithm in KnEqual() to ensure that a is strictly less than b.
+    // Uses the Knuth algorithm in KnEqual() to ensure that a is strictly less than b.
     inline bool KnLessThan(double a, double b) noexcept {
         return a < b && !isKnEqual(a, b);
     }
 
-// A point will lie between two angular voxel boundaries iff the angle between it and the angular boundary intersection
-// points along the circle of max radius is obtuse. Equality represents the case when the point lies on an angular
-// boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane (XY for angular, XZ
-// for azimuthal), this can be generalized to a single function. Since angular and azimuthal voxel boundaries range from
-// [0, N], returns -1 in the case where the point does not lie within the boundaries.
+    // A point will lie between two angular voxel boundaries iff the angle between it and the angular boundary
+    // intersection points along the circle of max radius is obtuse. Equality represents the case when the point lies
+    // on an angular boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane
+    // (XY for angular, XZ for azimuthal), this can be generalized to a single function. Since angular and azimuthal
+    // voxel boundaries range from [0, N], returns -1 in the case where the point does not lie within the boundaries.
     inline int calculateVoxelID(const std::vector<SVR::LineSegment> &plane, double p1, double p2) noexcept {
         std::size_t i = 0;
         while (i < plane.size() - 1) {
@@ -153,11 +153,11 @@ namespace SVR {
         return -1;
     }
 
-// Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
-// the ray and a radial section. This follows closely the mathematics presented in:
-// http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
-// The struct RadialHitData is used to provide already initialized data structures, as well as avoiding unnecessary
-// duplicate calculations that have already been done in the initialization phase.
+    // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
+    // the ray and a radial section. This follows closely the mathematics presented in:
+    // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
+    // The struct RadialHitData is used to provide already initialized data structures, as well as avoiding unnecessary
+    // duplicate calculations that have already been done in the initialization phase.
     RadialHitParameters radialHit(const Ray &ray, const SVR::SphericalVoxelGrid &grid, RadialHitData &data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
         const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
@@ -231,12 +231,12 @@ namespace SVR {
         return radial_params;
     }
 
-// A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
-// is the 2-d plane for which they exist in, this portion can be generalized to a single function call. The variables
-// that are generalized take the form of *_plane_*, such as ray_plane_direction. If this called in AngularHit(),
-// ray_plane_direction == ray.direction.y(). The calculations presented below follow closely the
-// works of [Foley et al, 1996], [O'Rourke, 1998].
-// Reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
+    // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
+    // is the 2-d plane for which they exist in, this portion can be generalized to a single function call. The variables
+    // that are generalized take the form of *_plane_*, such as ray_plane_direction. If this called in AngularHit(),
+    // ray_plane_direction == ray.direction.y(). The calculations presented below follow closely the
+    // works of [Foley et al, 1996], [O'Rourke, 1998].
+    // Reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
     GenHitParameters
     generalizedPlaneHit(const SVR::SphericalVoxelGrid &grid, const Ray &ray, double perp_uv_min, double perp_uv_max,
                         double perp_uw_min, double perp_uw_max, double perp_vw_min, double perp_vw_max,
@@ -324,8 +324,8 @@ namespace SVR {
         return params;
     }
 
-// Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
-// the ray and an angular section. The angular sections live in the XY plane.
+    // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
+    // the ray and an angular section. The angular sections live in the XY plane.
     AngularHitParameters angularHit(const Ray &ray, const SVR::SphericalVoxelGrid &grid,
                                     int current_voxel_ID_theta, double t, double t_end) noexcept {
         // Ray segment vector.
@@ -357,8 +357,8 @@ namespace SVR {
         return {.tMaxTheta=params.tMax, .tStepTheta=params.tStep, .within_bounds=params.within_bounds};
     }
 
-// Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is considered an intersection with
-// the ray and an azimuthal section. The azimuthal sections live in the XZ plane.
+    // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is considered an intersection with
+    // the ray and an azimuthal section. The azimuthal sections live in the XZ plane.
     AzimuthalHitParameters azimuthalHit(const Ray &ray, const SVR::SphericalVoxelGrid &grid,
                                         int current_voxel_ID_phi, double t, double t_end) noexcept {
         // Ray segment vector.
@@ -389,24 +389,24 @@ namespace SVR {
         return {.tMaxPhi=params.tMax, .tStepPhi=params.tStep, .within_bounds=params.within_bounds};
     }
 
-// Calculates the voxel(s) with the minimal tMax for the next intersection. Since t is being updated
-// with each interval of the algorithm, this must check the following cases:
-// 1. tMaxTheta is the minimum.
-// 2. tMaxR is the minimum.
-// 3. tMaxPhi is the minimum.
-// 4. tMaxTheta, tMaxR, tMaxPhi equal intersection.
-// 5. tMaxR, tMaxPhi equal intersection.
-// 6. tMaxR, tMaxTheta equal intersection.
-// 7. tMaxPhi, tMaxTheta equal intersection.
-//
-// For each case, the following must hold:
-// (1) t < tMax < t_end
-// (2) If its a radial hit, the next step must be within bounds.
-//
-// In cases 1, 3 we also need to change the requirements slightly for when
-// the ray intersects a single shell, but still crosses an angular or azimuthal boundary:
-// (1) tMax must be within bounds
-// (2) Either tMax is a strict minimum OR the next step is a radial exit.
+    // Calculates the voxel(s) with the minimal tMax for the next intersection. Since t is being updated
+    // with each interval of the algorithm, this must check the following cases:
+    // 1. tMaxTheta is the minimum.
+    // 2. tMaxR is the minimum.
+    // 3. tMaxPhi is the minimum.
+    // 4. tMaxTheta, tMaxR, tMaxPhi equal intersection.
+    // 5. tMaxR, tMaxPhi equal intersection.
+    // 6. tMaxR, tMaxTheta equal intersection.
+    // 7. tMaxPhi, tMaxTheta equal intersection.
+    //
+    // For each case, the following must hold:
+    // (1) t < tMax < t_end
+    // (2) If its a radial hit, the next step must be within bounds.
+    //
+    // In cases 1, 3 we also need to change the requirements slightly for when
+    // the ray intersects a single shell, but still crosses an angular or azimuthal boundary:
+    // (1) tMax must be within bounds
+    // (2) Either tMax is a strict minimum OR the next step is a radial exit.
     inline VoxelIntersectionType minimumIntersection(const RadialHitParameters &rad_params,
                                                      const AngularHitParameters &ang_params,
                                                      const AzimuthalHitParameters &azi_params) noexcept {
@@ -438,11 +438,11 @@ namespace SVR {
         return VoxelIntersectionType::None;
     }
 
-// Create an array of values representing the points of intersection between the lines corresponding
-// to voxel boundaries and a given radial voxel in the XY plane and XZ plane. Here, P_* represents
-// these points with a given radius 'current_radius'. The case where the number of angular voxels is
-// equal to the number of azimuthal voxels is also checked to reduce the number of trigonometric
-// and floating point calculations.
+    // Create an array of values representing the points of intersection between the lines corresponding
+    // to voxel boundaries and a given radial voxel in the XY plane and XZ plane. Here, P_* represents
+    // these points with a given radius 'current_radius'. The case where the number of angular voxels is
+    // equal to the number of azimuthal voxels is also checked to reduce the number of trigonometric
+    // and floating point calculations.
     inline void initializeVoxelBoundarySegments(std::vector<SVR::LineSegment> &P_angular,
                                                 std::vector<SVR::LineSegment> &P_azimuthal,
                                                 const SVR::SphericalVoxelGrid &grid, double current_radius) noexcept {
