@@ -141,12 +141,13 @@ namespace {
     }
 
 	// 128^3 domain with 256^2 rays in 1 FPS for a scratch paper benchmark.
+	// In this case, all rays enter the sphere.
 	static void OrthographicOneFPS(benchmark::State &state) {
 		for (auto _ : state) {
 			const BoundVec3 min_bound(-200000.0, -200000.0, -200000.0);
 			const BoundVec3 max_bound(200000.0, 200000.0, 20000.0);
 			const BoundVec3 sphere_center(0.0, 0.0, 0.0);
-			const double sphere_max_radius = 1000.0 * 1000.0;
+			const double sphere_max_radius = 1000.0 * 10.0;
 			const std::size_t num_radial_sections = 128;
 			const std::size_t num_angular_sections = 128;
 			const std::size_t num_azimuthal_sections = 128;
@@ -166,7 +167,7 @@ namespace {
 				    const FreeVec3 ray_direction(0.0, 0.0, 1.0);
 				    const Ray ray(ray_origin, ray_direction);
 				    const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-				    ray_origin_y += ray_movement;
+				    ray_origin_y = (j != 255) ? ray_origin_y + ray_movement : -1000.0;
 				}
 				ray_origin_x += ray_movement;
 			}
