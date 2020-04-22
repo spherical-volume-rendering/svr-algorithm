@@ -226,9 +226,9 @@ namespace svr {
     }
 
     // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
-    // is the 2-d plane for which they exist in, this portion can be generalized to a single function call. The variables
-    // that are generalized take the form of *_plane_*, such as ray_plane_direction. If this called in AngularHit(),
-    // ray_plane_direction == ray.direction.y(). The calculations presented below follow closely the
+    // is the 2-d plane for which they exist in, this portion can be generalized to a single function call.
+    // The variables that are generalized take the form of *_plane_*, such as ray_plane_direction. If this called in
+    // AngularHit(), ray_plane_direction == ray.direction.y(). The calculations presented below follow closely the
     // works of [Foley et al, 1996], [O'Rourke, 1998].
     // Reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
     GenHitParameters
@@ -432,39 +432,38 @@ namespace svr {
         return VoxelIntersectionType::None;
     }
 
-    // Create an array of values representing the points of intersection between the lines corresponding
+    // Initialize an array of values representing the points of intersection between the lines corresponding
     // to voxel boundaries and a given radial voxel in the XY plane and XZ plane. Here, P_* represents
     // these points with a given radius 'current_radius'. The case where the number of angular voxels is
     // equal to the number of azimuthal voxels is also checked to reduce the number of trigonometric
     // and floating point calculations.
-    inline void initializeVoxelBoundarySegments(std::vector<svr::LineSegment> &P_angular,
-                                                std::vector<svr::LineSegment> &P_azimuthal,
-                                                const svr::SphericalVoxelGrid &grid, double current_radius) noexcept {
-        double radians = 0;
-        if (grid.numAngularVoxels() == grid.numAzimuthalVoxels()) {
-            for (std::size_t i = 0; i < P_angular.size(); ++i) {
-                const double px_value = current_radius * std::cos(radians) + grid.sphereCenter().x();
-                const double current_radius_times_sin = current_radius * std::sin(radians);
-                P_angular[i].P1 = px_value;
-                P_angular[i].P2 = current_radius_times_sin + grid.sphereCenter().y();
-                P_azimuthal[i].P1 = px_value;
-                P_azimuthal[i].P2 = current_radius_times_sin + grid.sphereCenter().z();
-                radians += grid.deltaTheta();
-            }
-            return;
-        }
-        for (std::size_t j = 0; j < P_angular.size(); ++j) {
-            P_angular[j].P1 = current_radius * std::cos(radians) + grid.sphereCenter().x();
-            P_angular[j].P2 = current_radius * std::sin(radians) + grid.sphereCenter().y();
-            radians += grid.deltaTheta();
-        }
-        radians = 0;
-        for (std::size_t k = 0; k < P_azimuthal.size(); ++k) {
-            P_azimuthal[k].P1 = current_radius * std::cos(radians) + grid.sphereCenter().x();
-            P_azimuthal[k].P2 = current_radius * std::sin(radians) + grid.sphereCenter().z();
-            radians += grid.deltaPhi();
-        }
-    }
+	inline void initializeVoxelBoundarySegments(std::vector<svr::LineSegment> &P_angular,
+												std::vector<svr::LineSegment> &P_azimuthal,
+												const svr::SphericalVoxelGrid &grid, double current_radius) noexcept {
+		if (grid.numAngularVoxels() == grid.numAzimuthalVoxels()) {
+			std::transform(grid.angularTrigValues().cbegin(), grid.angularTrigValues().cend(),
+						   P_angular.begin(),
+						   P_azimuthal.begin(),
+						   [current_radius, &grid](const TrigonometricValues &tv,
+												   LineSegment &angular_LS) -> LineSegment {
+							 const double px_value = current_radius * tv.cosine + grid.sphereCenter().x();
+							 const double current_radius_times_sin = current_radius * tv.sine;
+							 angular_LS = {.P1=px_value, .P2=current_radius_times_sin + grid.sphereCenter().y()};
+							 return {.P1=px_value, .P2=current_radius_times_sin + grid.sphereCenter().z()};
+						   });
+			return;
+		}
+		std::transform(grid.angularTrigValues().cbegin(), grid.angularTrigValues().cend(), P_angular.begin(),
+					   [current_radius, &grid](const TrigonometricValues &tv) -> LineSegment {
+						 return {.P1=current_radius * tv.cosine + grid.sphereCenter().x(),
+							 .P2=current_radius * tv.sine + grid.sphereCenter().y()};
+					   });
+		std::transform(grid.azimuthalTrigValues().cbegin(), grid.azimuthalTrigValues().cend(), P_azimuthal.begin(),
+					   [current_radius, &grid](const TrigonometricValues &tv) -> LineSegment {
+						 return {.P1=current_radius * tv.cosine + grid.sphereCenter().x(),
+							 .P2=current_radius * tv.sine + grid.sphereCenter().z()};
+					   });
+	}
 
     std::vector<svr::SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray,
                                                                        const svr::SphericalVoxelGrid &grid,
