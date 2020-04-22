@@ -13,7 +13,7 @@ namespace svr {
         double P2;
     };
 
-    // The trigonometric values for a given arc.
+    // The trigonometric values for a given radian.
     struct TrigonometricValues {
       double cosine;
       double sine;
