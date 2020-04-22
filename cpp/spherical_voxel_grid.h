@@ -58,16 +58,14 @@ struct SphericalVoxelGrid {
 
 	  if (num_angular_voxels == num_azimuthal_voxels) {
 		  double radians = 0.0;
-		  std::generate(angular_trig_values_.begin(),
-						angular_trig_values_.end(),
+		  std::generate(angular_trig_values_.begin(), angular_trig_values_.end(),
 						[&]() -> TrigonometricValues {
 						  const double cos = std::cos(radians);
 						  const double sin = std::sin(radians);
 						  radians += delta_theta_;
 						  return {.cosine=cos, .sine=sin};
 						});
-		  std::transform(angular_trig_values_.cbegin(),
-						 angular_trig_values_.cend(),
+		  std::transform(angular_trig_values_.cbegin(), angular_trig_values_.cend(),
 						 P_max_angular_.begin(),
 						 P_max_azimuthal_.begin(),
 						 [&](const TrigonometricValues &tv, LineSegment &ang_LS) -> LineSegment {
