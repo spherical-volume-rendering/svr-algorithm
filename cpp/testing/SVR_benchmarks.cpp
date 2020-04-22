@@ -141,8 +141,8 @@ namespace {
     }
 
 	// 128^3 domain with 256^2 rays in 1 FPS for a scratch paper benchmark.
-	// In this case, all rays enter the sphere.
-	static void OrthographicOneFPS(benchmark::State &state) {
+	// In this case, all rays intersect the sphere.
+	static void OrthographicAllRaysIntersect(benchmark::State &state) {
 		for (auto _ : state) {
 			const BoundVec3 min_bound(-200000.0, -200000.0, -200000.0);
 			const BoundVec3 max_bound(200000.0, 200000.0, 20000.0);
@@ -180,7 +180,7 @@ namespace {
     BENCHMARK(TraversalParallelY)->Unit(benchmark::kMillisecond);
     BENCHMARK(TraversalParallelZ)->Unit(benchmark::kMillisecond);
     BENCHMARK(MultipleRayNoIntersection)->Unit(benchmark::kMillisecond);
-	BENCHMARK(OrthographicOneFPS)->Unit(benchmark::kMillisecond);
+	BENCHMARK(OrthographicAllRaysIntersect)->Unit(benchmark::kMillisecond);
 
 } // namespace
 
