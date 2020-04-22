@@ -226,9 +226,9 @@ namespace svr {
     }
 
     // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
-    // is the 2-d plane for which they exist in, this portion can be generalized to a single function call. The variables
-    // that are generalized take the form of *_plane_*, such as ray_plane_direction. If this called in AngularHit(),
-    // ray_plane_direction == ray.direction.y(). The calculations presented below follow closely the
+    // is the 2-d plane for which they exist in, this portion can be generalized to a single function call.
+    // The variables that are generalized take the form of *_plane_*, such as ray_plane_direction. If this called in
+    // AngularHit(), ray_plane_direction == ray.direction.y(). The calculations presented below follow closely the
     // works of [Foley et al, 1996], [O'Rourke, 1998].
     // Reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
     GenHitParameters
@@ -445,23 +445,21 @@ namespace svr {
             for (std::size_t i = 0; i < P_angular.size(); ++i) {
                 const double px_value = current_radius * std::cos(radians) + grid.sphereCenter().x();
                 const double current_radius_times_sin = current_radius * std::sin(radians);
-                P_angular[i].P1 = px_value;
-                P_angular[i].P2 = current_radius_times_sin + grid.sphereCenter().y();
-                P_azimuthal[i].P1 = px_value;
-                P_azimuthal[i].P2 = current_radius_times_sin + grid.sphereCenter().z();
+                P_angular[i] = {.P1=px_value, .P2=current_radius_times_sin + grid.sphereCenter().y()};
+                P_azimuthal[i] = {.P1=px_value, .P2 = current_radius_times_sin + grid.sphereCenter().z()};
                 radians += grid.deltaTheta();
             }
             return;
         }
         for (std::size_t j = 0; j < P_angular.size(); ++j) {
-            P_angular[j].P1 = current_radius * std::cos(radians) + grid.sphereCenter().x();
-            P_angular[j].P2 = current_radius * std::sin(radians) + grid.sphereCenter().y();
+            P_angular[j] = {.P1=current_radius * std::cos(radians) + grid.sphereCenter().x(),
+                            .P2=current_radius * std::sin(radians) + grid.sphereCenter().y()};
             radians += grid.deltaTheta();
         }
         radians = 0;
         for (std::size_t k = 0; k < P_azimuthal.size(); ++k) {
-            P_azimuthal[k].P1 = current_radius * std::cos(radians) + grid.sphereCenter().x();
-            P_azimuthal[k].P2 = current_radius * std::sin(radians) + grid.sphereCenter().z();
+            P_azimuthal[k] = {.P1=current_radius * std::cos(radians) + grid.sphereCenter().x(),
+                              .P2=current_radius * std::sin(radians) + grid.sphereCenter().z()};
             radians += grid.deltaPhi();
         }
     }
