@@ -13,6 +13,12 @@ namespace svr {
         double P2;
     };
 
+    // The trigonometric values for a given arc.
+    struct TrigonometricValues {
+      double cosine;
+      double sine;
+    };
+
     // Represents a 3-dimensional spherical voxel grid. The minimum and maximum bounds [min_bound_, max_bound_]
     // contain the entirety of the sphere that is to be traversed.
     // Requires:
@@ -44,33 +50,56 @@ namespace svr {
                 inv_delta_theta_(1.0 / delta_theta_),
                 inv_delta_phi_(1.0 / delta_phi_) {
 
-            double radians = 0;
-            P_max_angular_.resize(num_angular_voxels + 1);
-            P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
+		    azimuthal_trig_values_.resize(num_azimuthal_voxels + 1);
+		    angular_trig_values_.resize(num_angular_voxels + 1);
+
+		    P_max_angular_.resize(num_angular_voxels + 1);
+		    P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
 
             if (num_angular_voxels == num_azimuthal_voxels) {
-                for (std::size_t i = 0; i < num_angular_voxels; ++i) {
-                    const double px_max_value = sphere_max_radius * std::cos(radians) + sphere_center.x();
-                    const double max_radius_times_s = sphere_max_radius * std::sin(radians);
-                    P_max_angular_[i].P1 = px_max_value;
-                    P_max_angular_[i].P2 = max_radius_times_s + sphere_center.y();
-                    P_max_azimuthal_[i].P1 = px_max_value;
-                    P_max_azimuthal_[i].P2 = max_radius_times_s + sphere_center.z();
-                    radians += delta_phi_;
-                }
+				double radians = 0.0;
+				std::generate(angular_trig_values_.begin(),
+					          angular_trig_values_.end(),
+							  [&]()->TrigonometricValues{
+								  const double cos = std::cos(radians);
+								  const double sin = std::sin(radians);
+								  radians += delta_theta_;
+								  return {.cosine=cos, .sine=sin}; });
+				std::transform(angular_trig_values_.cbegin(),
+					           angular_trig_values_.cend(),
+					           P_max_angular_.begin(),
+					           P_max_azimuthal_.begin(),
+					           [&](const TrigonometricValues& tv, LineSegment& ang_LS)->LineSegment{
+								   const double px_max_value = sphere_max_radius * tv.cosine + sphere_center.x();
+								   const double max_radius_times_s = sphere_max_radius * tv.sine;
+					               ang_LS = {.P1=px_max_value, .P2=max_radius_times_s + sphere_center.y()};
+					               return {.P1=px_max_value, .P2=max_radius_times_s + sphere_center.z()};
+				});
                 return;
             }
-            for (std::size_t j = 0; j < num_angular_voxels; ++j) {
-                P_max_angular_[j].P1 = sphere_max_radius * std::cos(radians) + sphere_center.x();
-                P_max_angular_[j].P2 = sphere_max_radius * std::sin(radians) + sphere_center.y();
-                radians += delta_theta_;
-            }
-            radians = 0;
-            for (std::size_t k = 0; k < num_azimuthal_voxels; ++k) {
-                P_max_azimuthal_[k].P1 = sphere_max_radius * std::cos(radians) + sphere_center.x();
-                P_max_azimuthal_[k].P2 = sphere_max_radius * std::sin(radians) + sphere_center.z();
-                radians += delta_phi_;
-            }
+
+            double radians = 0.0;
+			std::generate(angular_trig_values_.begin(), angular_trig_values_.end(), [&]()->TrigonometricValues {
+							const double cos = std::cos(radians);
+							const double sin = std::sin(radians);
+							radians += delta_theta_;
+							return {.cosine=cos, .sine=sin};
+			});
+            radians = 0.0;
+		    std::generate(azimuthal_trig_values_.begin(), azimuthal_trig_values_.end(), [&]()->TrigonometricValues {
+						  const double cos = std::cos(radians);
+						  const double sin = std::sin(radians);
+						  radians += delta_phi_;
+						  return {.cosine=cos, .sine=sin};
+		    });
+			std::transform(angular_trig_values_.cbegin(), angular_trig_values_.cend(), P_max_angular_.begin(),
+						   [&](const TrigonometricValues& ang_tv) -> LineSegment {
+							   return {.P1=sphere_max_radius * ang_tv.cosine + sphere_center.x(),
+				                       .P2= sphere_max_radius * ang_tv.sine + sphere_center.y()}; });
+			std::transform(azimuthal_trig_values_.cbegin(), azimuthal_trig_values_.cend(), P_max_azimuthal_.begin(),
+						   [&](const TrigonometricValues& azi_tv) -> LineSegment {
+							   return {.P1=sphere_max_radius * azi_tv.cosine + sphere_center.x(),
+				                       .P2=sphere_max_radius * azi_tv.sine + sphere_center.z()}; });
         }
 
         inline std::size_t numRadialVoxels() const noexcept { return this->num_radial_voxels_; }
@@ -105,13 +134,17 @@ namespace svr {
 
         inline double invDeltaPhi() const noexcept { return this->inv_delta_phi_; }
 
-        inline const LineSegment &pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
+        inline const LineSegment& pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
 
         inline const std::vector<LineSegment> &pMaxAngular() const noexcept { return this->P_max_angular_; }
 
-        inline const LineSegment &pMaxAzimuthal(std::size_t i) const noexcept { return this->P_max_azimuthal_[i]; }
+        inline const LineSegment& pMaxAzimuthal(std::size_t i) const noexcept { return this->P_max_azimuthal_[i]; }
 
         inline const std::vector<LineSegment> &pMaxAzimuthal() const noexcept { return this->P_max_azimuthal_; }
+
+        inline const std::vector<TrigonometricValues> &angularTrigValues() const noexcept { return angular_trig_values_; }
+
+        inline const std::vector<TrigonometricValues> &azimuthalTrigValues() const noexcept { return azimuthal_trig_values_; }
 
     private:
         // The minimum bound vector of the voxel grid.
@@ -146,6 +179,13 @@ namespace svr {
 
         // The maximum radius line segments for azimuthal voxels.
         std::vector<LineSegment> P_max_azimuthal_;
+
+        // The trigonometric values for each delta theta.
+        std::vector<TrigonometricValues> angular_trig_values_;
+
+        // The trigonometric values for each delta phi. In the case where delta theta is equal to delta phi,
+        // this is ignored and angular_trig_values_ is used.
+        std::vector<TrigonometricValues> azimuthal_trig_values_;
     };
 
 } // namespace svr
