@@ -2,8 +2,10 @@
 #include "../spherical_volume_rendering_util.h"
 
 // Benchmarking for the Spherical Volume Rendering algorithm.
-// Uses the Google Benchmark library found at:
+// Utilises the Google Benchmark library found at:
 // https://github.com/google/benchmark
+//
+// To use Google Benchmark, see: https://github.com/google/benchmark#installation
 
 namespace {
 
