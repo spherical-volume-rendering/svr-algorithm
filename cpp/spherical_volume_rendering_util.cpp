@@ -2,7 +2,6 @@
 #include <vector>
 #include <array>
 #include <algorithm>
-#include <cmath>
 #include <limits>
 
 namespace svr {
@@ -456,12 +455,12 @@ namespace svr {
 		std::transform(grid.angularTrigValues().cbegin(), grid.angularTrigValues().cend(), P_angular.begin(),
 					   [current_radius, &grid](const TrigonometricValues &tv) -> LineSegment {
 						 return {.P1=current_radius * tv.cosine + grid.sphereCenter().x(),
-							 .P2=current_radius * tv.sine + grid.sphereCenter().y()};
+							     .P2=current_radius * tv.sine + grid.sphereCenter().y()};
 					   });
 		std::transform(grid.azimuthalTrigValues().cbegin(), grid.azimuthalTrigValues().cend(), P_azimuthal.begin(),
 					   [current_radius, &grid](const TrigonometricValues &tv) -> LineSegment {
 						 return {.P1=current_radius * tv.cosine + grid.sphereCenter().x(),
-							 .P2=current_radius * tv.sine + grid.sphereCenter().z()};
+							     .P2=current_radius * tv.sine + grid.sphereCenter().z()};
 					   });
 	}
 
