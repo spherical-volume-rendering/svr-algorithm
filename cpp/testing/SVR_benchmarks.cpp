@@ -141,8 +141,8 @@ namespace {
     }
 
     // 128^3 domain with 256^2 rays for a scratch paper benchmark.
-    // In this case, we can imagine the ray's form a cube around the sphere,
-    // and thus not all rays will intersect.
+    // In this case, we can imagine the rays form a square projection
+    // on the sphere, and thus not all rays will intersect.
     static void OrthographicRayTracing(benchmark::State &state) {
         for (auto _ : state) {
             const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
@@ -175,7 +175,7 @@ namespace {
         }
     }
 
-    // 128^3 domain with 256^2 rays for a scratch paper benchmark.
+    // 64^3 domain with 256^2 rays for a scratch paper benchmark.
     // In this case, all rays intersect the sphere.
     static void OrthographicAllRaysIntersect(benchmark::State &state) {
         for (auto _ : state) {
@@ -183,9 +183,9 @@ namespace {
             const BoundVec3 max_bound(20000.0, 20000.0, 20000.0);
             const BoundVec3 sphere_center(0.0, 0.0, 0.0);
             const double sphere_max_radius = 1000.0 * 10.0;
-            const std::size_t num_radial_sections = 128;
-            const std::size_t num_angular_sections = 128;
-            const std::size_t num_azimuthal_sections = 128;
+            const std::size_t num_radial_sections = 64;
+            const std::size_t num_angular_sections = 64;
+            const std::size_t num_azimuthal_sections = 64;
             const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                                num_angular_sections, num_azimuthal_sections,
                                                sphere_center, sphere_max_radius);
