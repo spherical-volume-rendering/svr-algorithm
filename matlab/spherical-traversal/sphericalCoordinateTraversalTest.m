@@ -356,8 +356,8 @@ function testOddAngularSections(testCase)
     sphere_center = [0.0, 0.0, 0.0];
     sphere_max_radius = 9.0;
     
-    num_radial_sections = 3;
-    num_angular_sections = 4;
+    num_radial_sections = 4;
+    num_angular_sections = 3;
     num_azimuthal_sections = 4;
     t_begin = 0.0;
     t_end = 30.0;
