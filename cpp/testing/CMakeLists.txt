@@ -19,3 +19,5 @@ add_executable(${TESTING_BINARY} ${TESTING_SOURCE_FILES})
 
 target_link_libraries(${BENCHMARK_BINARY} benchmark::benchmark)
 target_link_libraries(${TESTING_BINARY} gtest gtest_main gmock gmock_main)
+
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-O3 -march=native -flto -fno-signed-zeros -funroll-loops -Wall -Wextra")

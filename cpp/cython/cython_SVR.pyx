@@ -55,7 +55,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
 
     Notes:
         Code must be compiled before use:
-        > python Cython_SVR_setup.py build_ext --inplace
+        > python cython_SVR_setup.py build_ext --inplace
     '''
     assert(ray_origin.size == 3)
     assert(ray_direction.size == 3)
