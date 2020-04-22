@@ -147,6 +147,7 @@ namespace {
     static void OrthographicRayTracing(benchmark::State &state) {
         for (auto _ : state) {
             const std::size_t voxel_count = 128;
+            const std::size_t ray_count = 256;
             const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
             const BoundVec3 max_bound(20000.0, 20000.0, 20000.0);
             const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -157,19 +158,20 @@ namespace {
             const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
                                                num_azimuthal_sections, sphere_center, sphere_max_radius);
             const double t_begin = 0.0;
-            const double t_end = 10000.0;
+            const double t_end = sphere_max_radius * 2.0;
 
-            double ray_origin_x = -1000.0;
-            double ray_origin_y = -1000.0;
+            const double ray_origin_begin = -1000.0;
+            double ray_origin_x = ray_origin_begin;
+            double ray_origin_y = ray_origin_begin;
             const double ray_origin_z = -sphere_max_radius - 100.0;
-            const double ray_movement = 2000.0 / 256.0;
-            for (int i = 0; i < 256; ++i) {
-                for (int j = 0; j < 256; ++j) {
+            const double ray_movement = std::abs(ray_origin_begin) * 2.0 / ray_count;
+            for (std::size_t i = 0; i < ray_count; ++i) {
+                for (std::size_t j = 0; j < ray_count; ++j) { // 256^2 iterations.
                     const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
                     const FreeVec3 ray_direction(0.0, 0.0, 1.0);
                     const Ray ray(ray_origin, ray_direction);
                     const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-                    ray_origin_y = (j == 255) ? -1000.0 : ray_origin_y + ray_movement;
+                    ray_origin_y = (j == ray_count - 1) ? ray_origin_begin : ray_origin_y + ray_movement;
                 }
                 ray_origin_x += ray_movement;
             }
@@ -177,11 +179,13 @@ namespace {
     }
 
     // 64^3 domain with 256^2 rays for a scratch paper benchmark.
-    // In this case, all rays intersect the sphere.
+    // Because the sphere maximum radius is 10x larger than the ray
+    // origin begin, all rays intersect the sphere.
     // Rays are perpendicular to the XY Plane.
     static void OrthographicAllRaysIntersect(benchmark::State &state) {
         for (auto _ : state) {
             const std::size_t voxel_count = 64;
+            const std::size_t ray_count = 256;
             const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
             const BoundVec3 max_bound(20000.0, 20000.0, 20000.0);
             const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -192,20 +196,21 @@ namespace {
             const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
                                                num_azimuthal_sections, sphere_center, sphere_max_radius);
             const double t_begin = 0.0;
-            const double t_end = 100000.0;
+            const double t_end = sphere_max_radius * 2.0;
 
-            double ray_origin_x = -1000.0;
-            double ray_origin_y = -1000.0;
+            const double ray_origin_begin = -1000.0;
+            double ray_origin_x = ray_origin_begin;
+            double ray_origin_y = ray_origin_begin;
             const double ray_origin_z = -sphere_max_radius - 100.0;
-            const double ray_movement = 2000.0 / 256.0;
-            for (int i = 0; i < 256; ++i) {
-                for (int j = 0; j < 256; ++j) {
+            const double ray_movement = std::abs(ray_origin_begin) * 2.0 / ray_count;
+            for (std::size_t i = 0; i < ray_count; ++i) {
+                for (std::size_t j = 0; j < ray_count; ++j) { // 256^2 iterations.
                     const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
                     const FreeVec3 ray_direction(0.0, 0.0, 1.0);
                     const Ray ray(ray_origin, ray_direction);
                     const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
                     assert(!actual_voxels.empty());
-                    ray_origin_y = (j == 255) ? -1000.0 : ray_origin_y + ray_movement;
+                    ray_origin_y = (j == ray_count - 1) ? ray_origin_begin : ray_origin_y + ray_movement;
                 }
                 ray_origin_x += ray_movement;
             }
