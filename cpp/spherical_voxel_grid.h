@@ -50,14 +50,12 @@ struct SphericalVoxelGrid {
 	  inv_delta_theta_(1.0 / delta_theta_),
 	  inv_delta_phi_(1.0 / delta_phi_) {
 
-	  azimuthal_trig_values_.resize(num_azimuthal_voxels + 1);
-	  angular_trig_values_.resize(num_angular_voxels + 1);
-
 	  P_max_angular_.resize(num_angular_voxels + 1);
 	  P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
 
 	  if (num_angular_voxels == num_azimuthal_voxels) {
 		  double radians = 0.0;
+		  angular_trig_values_.resize(num_angular_voxels + 1);
 		  std::generate(angular_trig_values_.begin(), angular_trig_values_.end(),
 						[&]() -> TrigonometricValues {
 						  const double cos = std::cos(radians);
@@ -78,6 +76,7 @@ struct SphericalVoxelGrid {
 	  }
 
 	  double radians = 0.0;
+	  angular_trig_values_.resize(num_angular_voxels + 1);
 	  std::generate(angular_trig_values_.begin(), angular_trig_values_.end(), [&]() -> TrigonometricValues {
 		const double cos = std::cos(radians);
 		const double sin = std::sin(radians);
@@ -85,6 +84,7 @@ struct SphericalVoxelGrid {
 		return {.cosine=cos, .sine=sin};
 	  });
 	  radians = 0.0;
+	  azimuthal_trig_values_.resize(num_azimuthal_voxels + 1);
 	  std::generate(azimuthal_trig_values_.begin(), azimuthal_trig_values_.end(), [&]() -> TrigonometricValues {
 		const double cos = std::cos(radians);
 		const double sin = std::sin(radians);
@@ -207,7 +207,7 @@ struct SphericalVoxelGrid {
   std::vector<TrigonometricValues> angular_trig_values_;
 
   // The trigonometric values for each delta phi. In the case where delta theta is equal to delta phi,
-  // this is ignored and angular_trig_values_ is used.
+  // this is left uninitialized and angular_trig_values_ is used.
   std::vector<TrigonometricValues> azimuthal_trig_values_;
 };
 
