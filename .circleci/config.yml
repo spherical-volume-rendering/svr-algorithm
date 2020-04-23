@@ -8,14 +8,7 @@ jobs:
       - checkout
       - run:
           name: Install python 3.7
-          command: |
-            add-apt-repository --yes ppa:deadsnakes/ppa
-            apt-get update
-            apt-get install python3.7
-            wget https://bootstrap.pypa.io/get-pip.py
-            python3.7 get-pip.py
-            python3.7 -m pip install --upgrade pip setuptools wheel
-            python3.7 -m pip install pipenv
+          command: 'apt-get update && apt-get install python3.7'
       - run:
           name: "Compile and Run Tests"
           command: 'cd cpp/cython && python cython_SVR_setup.py build_ext --inplace && python cython_SVR_tests.py'
