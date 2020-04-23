@@ -21,3 +21,4 @@ target_link_libraries(${BENCHMARK_BINARY} benchmark::benchmark)
 target_link_libraries(${TESTING_BINARY} gtest gtest_main gmock gmock_main)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-O3 -march=native -flto -fno-signed-zeros -funroll-loops -Wall -Wextra")
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
