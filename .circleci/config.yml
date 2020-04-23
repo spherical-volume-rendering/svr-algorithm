@@ -18,12 +18,9 @@ jobs:
       - run:
           name: Install GIT
           command: 'apt-get update && apt-get install -y git'
-      - run:
-          name: Go to Testing folder
-          command: 'cd cpp/testing'
       - run: 
           name: Install Google Tests
-          command: 'git clone https://github.com/google/googletest.git'
+          command: ' cd cpp/testing git clone https://github.com/google/googletest.git'
       - run: 
           name: Install Google Benchmark I
           command: 'git clone https://github.com/google/benchmark.git'
@@ -35,7 +32,7 @@ jobs:
           command: 'cd benchmark && mkdir build && cd build && cmake ../ && make'
       - run: 
           name: Build Tests
-          command: 'cd cpp && cd testing && cmake .. && make all'
+          command: 'cd cpp/testing && cmake .. && make all'
       - run:
           name: SVR Unit Testing
-          command: 'cd build && ./SVR_tests'
+          command: 'cd cpp/testing && ls && cd build && ls && ./SVR_tests'
