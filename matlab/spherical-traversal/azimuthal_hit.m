@@ -1,5 +1,5 @@
 function [tMaxPhi, tStepPhi] = azimuthal_hit(ray_origin, ray_direction, current_voxel_ID_phi,...
-    num_azimuthal_sections, sphere_center, pointArray, t, t_end, verbose)
+    sphere_center, P_max, sphere_max_radius, t, t_end, verbose)
 % Determines whether an azimuthal hit occurs for the given ray.
 % Input:
 %    ray_origin: vector of the origin of the ray in cartesian coordinate.
@@ -22,7 +22,7 @@ end
 if verbose
     fprintf("\nCurrent Voxel ID Phi: %d\n", current_voxel_ID_phi)
 end
-pointArray
+pointArray = [P_max(current_voxel_ID_phi+1,:) ; P_max(current_voxel_ID_phi+2,:)];
 % Get current ray location to use as start point
 p = ray_origin + ray_direction * t;
 % Get ray exit point to use as end point
@@ -35,20 +35,42 @@ u_max = [sphere_center(1) sphere_center(3)] - pointArray(2,:);
 % http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
 w_min = pointArray(1,:) - [p(1) p(3)];
 w_max = pointArray(2,:) - [p(1) p(3)];
-perpuv_min = u_min(1) * v(2) - u_min(2) * v(1);
-perpuv_max = u_max(1) * v(2) - u_max(2) * v(1);
+perpuv_min = u_min(1) * v(3) - u_min(2) * v(1);
+perpuv_max = u_max(1) * v(3) - u_max(2) * v(1);
 perpuw_min = u_min(1) * w_min(2) - u_min(2) * w_min(1);
 perpuw_max = u_max(1) * w_max(2) - u_max(2) * w_max(1);
-perpvw_min = v(1) * w_min(2) - v(2) * w_min(1);
-perpvw_max = v(1) * w_max(2) - v(2) * w_max(1);
+perpvw_min = v(1) * w_min(2) - v(3) * w_min(1);
+perpvw_max = v(1) * w_max(2) - v(3) * w_max(1);
 
-% check to see if ray is parallel to each azimuthal voxel boundary
-% if the ray is parallel to or collinear with a given voxel boundary,
-% then intersection does not occur between the given voxel boundary and
-% the ray.
-if approximatelyEqual(perpuv_min,0.0,1e-12,1e-8) ; parallel_min = 1; else; parallel_min = 0; end
-if approximatelyEqual(perpuv_max,0.0,1e-12,1e-8) ; parallel_max = 1; else; parallel_max = 0; end
-
+% check to see if ray is parallel to each angular voxel boundary
+if approximatelyEqual(perpuv_min,0.0,1e-12,1e-8) 
+    parallel_min = 1;
+    % check to see if the ray is colliner with the angular voxel boundary
+    if approximatelyEqual(perpuw_min,0.0,1e-12,1e-8) && ...
+            approximatelyEqual(perpvw_min,0.0,1e-12,1e-8)
+        collinear_min = 1;
+        p_min = sphere_center;
+    else
+        collinear_min = 0;
+    end
+else
+    parallel_min = 0;
+    collinear_min = 0;
+end
+if approximatelyEqual(perpuv_max,0.0,1e-12,1e-8)
+    parallel_max = 1;
+    if approximatelyEqual(perpuw_max,0.0,1e-12,1e-8) && ...
+            approximatelyEqual(perpvw_max,0.0,1e-12,1e-8)
+        collinear_max = 1;
+        p_max = sphere_center;
+    else
+        collinear_max = 0;
+    end
+else
+    parallel_max = 0;
+    collinear_max = 0;
+end
+% Determine intersection points, p_min and p_max
 if parallel_min == 0
     a = perpvw_min / perpuv_min;
     b = perpuw_min / perpuv_min;
@@ -62,7 +84,6 @@ if parallel_min == 0
 else
     intersect_min = 0;
 end
-
 if parallel_max == 0
     a = perpvw_max / perpuv_max;
     b = perpuw_max / perpuv_max;
@@ -76,71 +97,95 @@ if parallel_max == 0
 else
     intersect_max = 0;
 end
-
+% Compute inverses of slopes
 if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
     inv_dir = 1/ray_direction(1);
 else
     inv_dir = 1/ray_direction(3);
 end
-
-if intersect_max == 1
+% Compute intersection times
+if intersect_max == 1 || collinear_max == 1
     if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
-        inv_dir = 1/ray_direction(1);
         t_max = (p_max(1) - ray_origin(1)) * inv_dir;
     else
-        inv_dir = 1/ray_direction(3);
         t_max = (p_max(2) - ray_origin(3)) * inv_dir;
     end
 end
-
-if intersect_min == 1
+if intersect_min == 1 || collinear_min == 1
     if ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
-        inv_dir = 1/ray_direction(1);
         t_min = (p_min(1) - ray_origin(1)) * inv_dir;
     else
-        inv_dir = 1/ray_direction(3);
         t_min = (p_min(2) - ray_origin(3)) * inv_dir;
      end
 end
-
-if intersect_max == 1 && intersect_min == 0 && ...
-        t < t_max && t_max < t_end && ...
-        ~approximatelyEqual(t,t_max,1e-12,1e-8)
+% Determine tStepPhi, tMaxPhi
+if intersect_max == 1 && intersect_min == 0 && collinear_min == 0 &&...
+        strictlyLess(t,t_max,1e-12,1e-8) && strictlyLess(t_max,t_end,1e-12,1e-8)
     tStepPhi = 1;
     tMaxPhi = t_max;
-elseif intersect_min == 1 && intersect_max == 0 && ...
-        t < t_min && t_min < t_end && ...
-        ~approximatelyEqual(t,t_min,1e-12,1e-8)
+elseif intersect_min == 1 && intersect_max == 0 && collinear_max == 0 && ...
+           strictlyLess(t,t_min,1e-12,1e-8) && ...
+           strictlyLess(t_min,t_end,1e-12,1e-8)
     tStepPhi = -1;
     tMaxPhi = t_min;
-elseif intersect_min == 1 && intersect_max == 1
+elseif (intersect_min == 1 && intersect_max == 1) || ...
+        (intersect_min == 1 && collinear_max == 1) || ...
+        (collinear_min == 1 && intersect_max == 1)
     % hit the min & max boundary simultaneously.
-    if  approximatelyEqual(t_min,t_max,1e-12,1e-8) && ...
-            t < t_min && t_min < t_end && ...
-            ~approximatelyEqual(t,t_min,1e-12,1e-8)
+   if  approximatelyEqual(t_min,t_max,1e-12,1e-8) && ...
+           strictlyLess(t,t_min,1e-12,1e-8) && ...
+            strictlyLess(t_min,t_end,1e-12,1e-8)
         tMaxPhi = t_max;
          if verbose
             fprintf("hit origin t\n")
+         end
+         pert_t = 0.1;
+         pert_x = sphere_center(1) + ray_direction(1) * pert_t;
+         pert_z = sphere_center(3) + ray_direction(3) * pert_t;
+         a = sphere_center(1) - pert_x;
+         b = sphere_center(2) - pert_z;
+         l = sqrt(a^2 + b^2);
+         sphere_center_xz = [sphere_center(1), sphere_center(3)];
+         p1 = sphere_center_xz - (sphere_max_radius/l) .* [a b];
+         i = 1;    
+        while i < length(P_max)
+            d1 = (P_max(i,1)-p1(1))^2 + (P_max(i,2)-p1(2))^2;
+            d2 = (P_max(i+1,1)-p1(1))^2 + (P_max(i+1,2)-p1(2))^2;
+            d3 = (P_max(i,1)-P_max(i+1,1))^2 + (P_max(i,2)-P_max(i+1,2))^2;
+            if strictlyLess(d1+d2,d3,1e-12,1e-8) || ...
+                approximatelyEqual(d1+d2,d3,1e-12,1e-8)
+                next_vox = i - 1 ;
+                i = length(P_max);
+            end
+            i = i + 1;
         end
-        if ~approximatelyEqual(ray_direction(3),0.0,1e-12,1e-8)
-            % change in phi is dependent on the slope of the line
-            tStepPhi = - num_azimuthal_sections/2;
+        step = abs(current_voxel_ID_phi - next_vox);
+        if strictlyLess(ray_direction(3),0.0,1e-12,1e-8)
+            tStepPhi = step;
+        elseif strictlyLess(0.0,ray_direction(3),1e-12,1e-8)
+            tStepPhi = -step;
         else
-            tStepPhi = num_azimuthal_sections/2;
+            if strictlyLess(ray_direction(1),0.0,1e-12,1e-8)
+                tStepPhi = step;
+            else
+                tStepPhi = -step;
+            end
         end
     % hit min bound
-    elseif t < t_min && t_min < t_end && ...
-            (t_min < t_max || approximatelyEqual(t,t_max,1e-12,1e-8)) && ...
-            ~approximatelyEqual(t,t_min,1e-12,1e-8)
+    elseif strictlyLess(t,t_min,1e-12,1e-8) && ...
+           strictlyLess(t_min,t_end,1e-12,1e-8) && ...
+            (strictlyLess(t_min,t_max,1e-12,1e-8) || ...
+            approximatelyEqual(t,t_max,1e-12,1e-8))
         tStepPhi = -1;
         tMaxPhi = t_min;
         if verbose
             fprintf("hit min bound\n")
         end
     % hit max bound
-    elseif t < t_max && t_max < t_end && ...
-            (t_max < t_min || approximatelyEqual(t,t_min,1e-12,1e-8)) && ...
-            ~approximatelyEqual(t,t_max,1e-12,1e-8)
+   elseif strictlyLess(t,t_max,1e-12,1e-8) && ...
+           strictlyLess(t_max,t_end,1e-12,1e-8) && ...
+            (strictlyLess(t_max,t_min,1e-12,1e-8) || ...
+            approximatelyEqual(t,t_min,1e-12,1e-8))
         tStepPhi = 1;
         tMaxPhi = t_max;
         if verbose
