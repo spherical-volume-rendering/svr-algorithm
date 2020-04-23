@@ -407,12 +407,12 @@ namespace svr {
             rad_params.tMaxR < azi_params.tMaxPhi) {
             return VoxelIntersectionType::Radial;
         }
-        if (ang_params.within_bounds && ((ang_params.tMaxTheta < rad_params.tMaxR
-                                          && rad_params.tMaxR < azi_params.tMaxPhi) || rad_params.exits_voxel_bounds)) {
+        if (ang_params.within_bounds && ((ang_params.tMaxTheta < rad_params.tMaxR || rad_params.exits_voxel_bounds)
+                                          && rad_params.tMaxR < azi_params.tMaxPhi)) {
             return VoxelIntersectionType::Angular;
         }
-        if (azi_params.within_bounds && ((azi_params.tMaxPhi < ang_params.tMaxTheta
-                                          && azi_params.tMaxPhi < rad_params.tMaxR) || rad_params.exits_voxel_bounds)) {
+        if (azi_params.within_bounds && ((azi_params.tMaxPhi < ang_params.tMaxTheta || rad_params.exits_voxel_bounds)
+                                          && azi_params.tMaxPhi < rad_params.tMaxR)) {
             return VoxelIntersectionType::Azimuthal;
         }
         if (rad_params.within_bounds && isKnEqual(rad_params.tMaxR, ang_params.tMaxTheta)
