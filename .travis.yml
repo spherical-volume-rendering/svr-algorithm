@@ -1,8 +1,0 @@
-language: cpp
-dist: bionic
-compiler: gcc
-
-script: 
-  - cmake CMakeLists.txt
-  - make
-  - ./travis_cmake_gcc_cpp11
