@@ -2,6 +2,8 @@
 ![Example ray tracing in spherical coordinates](images/polar_view_next_to_spherical_image.png)
 
 ## About
+[![spherical-volume-rendering](https://circleci.com/gh/spherical-volume-rendering/algorithm-team-collaboration.svg?style=shield)](https://app.circleci.com/pipelines/github/spherical-volume-rendering/algorithm-team-collaboration)
+
 This project extends the [yt](https://yt-project.org/) open-source data analysis and visualization package, providing an enhanced, integrated user interface for data exploration and enabling the visualization of physical data that comes from non-cartesian grids. Currently, yt implements a fast voxel traversal over a cartesian coordinate grid. The objective is to develop a fast voxel traversal over a spherical coordinate grid, based on ideas from Amanatides and Woo’s seminal paper on fast voxel traversal for ray tracing.
 
 ## Authors
