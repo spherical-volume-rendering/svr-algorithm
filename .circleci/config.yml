@@ -31,8 +31,11 @@ jobs:
           name: Install Google Benchmark III
           command: 'cd cpp/testing/benchmark && mkdir build && cd build && cmake ../ && make'
       - run: 
-          name: Build Tests
-          command: 'cd cpp/testing && cmake --build build'
+          name: Create Build Files
+          command: 'cd cpp/testing && cmake -H. -Bbuild'
+      - run: 
+          name: Create Binary Files
+          command: 'cd cpp/testing && cmake --build build' 
       - run:
           name: SVR Unit Testing
           command: 'cd cpp/testing && ./bin/SVR_tests'
