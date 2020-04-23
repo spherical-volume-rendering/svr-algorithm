@@ -35,7 +35,7 @@ jobs:
           command: 'cd benchmark && mkdir build && cd build && cmake ../ && make && cd .. && cd ..'
       - run: 
           name: Build Tests
-          command: 'mkdir build && cd build && cmake .. && make all'
+          command: cmake .. && make all'
       - run:
           name: SVR Unit Testing
           command: './SVR_tests'
