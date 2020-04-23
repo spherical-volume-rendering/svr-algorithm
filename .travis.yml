@@ -1,22 +1,8 @@
 language: cpp
-script: cmake .. && make all && ./SVR_tests
-compiler: clang
-before_install:
-  - test -n $CC  && unset CC
-  - test -n $CXX && unset CXX
+dist: bionic
+compiler: gcc
 
-matrix:
-  include:
-    - os: osx
-      osx_image: xcode10.1
-    
-    - os: osx
-      osx_image: xcode9.4
-
-addons:
-  apt:
-    sources:
-      - george-edison55-precise-backports
-    packages:
-      - cmake-data
-      - cmake
+script: 
+  - cmake CMakeLists.txt
+  - make
+  - ./travis_cmake_gcc_cpp11
