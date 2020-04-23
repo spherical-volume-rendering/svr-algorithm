@@ -365,9 +365,10 @@ function testOddAngularSections(testCase)
     
     [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
-    verifyEqual(testCase, rVoxels,     [1,2,3,3,2,1]);
-    verifyEqual(testCase, thetaVoxels, [1,1,1,0,0,0]);
-    verifyEqual(testCase, phiVoxels,   [2,2,1,0,0,0]);
+
+    verifyEqual(testCase, rVoxels,     [1,2,2,3,2,1]);
+    verifyEqual(testCase, thetaVoxels, [1,1,1,1,0,0]);
+    verifyEqual(testCase, phiVoxels,   [2,2,1,1,0,0]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
@@ -416,9 +417,7 @@ function testLargeRadialSections(testCase)
     verifyEqual(testCase, rVoxels,     [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,...
     39,40,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,...
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
-    verifyEqual(testCase, phiVoxels,   [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,...
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
@@ -442,7 +441,8 @@ function testLargeAngularSections(testCase)
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels,     [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [24,24,24,24,4,4,4,4]);
-    verifyEqual(testCase, phiVoxels,   [2,2,2,2,0,0,0,0]));
+    verifyEqual(testCase, phiVoxels,   [2,2,2,2,0,0,0,0]);
+
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
@@ -466,6 +466,7 @@ function testLargeAziSections(testCase)
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels,     [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,2,2,0,0,0,0]);
-    verifyEqual(testCase, phiVoxels,   [24,24,24,24,4,4,4,4]));
+    verifyEqual(testCase, phiVoxels,   [24,24,24,24,4,4,4,4]);
+
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
