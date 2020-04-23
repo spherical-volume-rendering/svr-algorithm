@@ -7,9 +7,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Set Python Version"
-          command: 'pyenv global 3.7.0'
-      - run:
           name: "Compile and Run Tests"
           command: 'cd cpp/cython && python cython_SVR_setup.py build_ext --inplace && python cython_SVR_tests.py'
       - run:
