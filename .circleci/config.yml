@@ -32,7 +32,7 @@ jobs:
           command: 'git clone https://github.com/google/googletest.git benchmark/googletest'
       - run: 
           name: Install Google Benchmark III
-          command: 'cd benchmark && mkdir build && cd build && cmake ../ && make && cd .. && cd ..'
+          command: 'cd benchmark && mkdir build && cd build && cmake ../ && make'
       - run: 
           name: Build Tests
           command: 'cmake .. && make all'
