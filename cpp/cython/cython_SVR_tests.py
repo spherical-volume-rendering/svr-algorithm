@@ -393,8 +393,5 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
         expected_phi_voxels = [24, 24, 24, 24, 4, 4, 4, 4]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
-
-
-
 if __name__ == '__main__':
     unittest.main()
