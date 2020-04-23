@@ -37,9 +37,9 @@ public:
 
   inline double operator[](const std::size_t index) const noexcept {
       switch(index) {
-        case 0: return this->x_;
-        case 1: return this->y_;
-        case 2: return this->z_;
+          case 0: return this->x_;
+          case 1: return this->y_;
+          case 2: return this->z_;
       }
       return std::numeric_limits<double>::quiet_NaN();
   }
@@ -176,12 +176,12 @@ struct UnitVec3 {
     inline const FreeVec3 &to_free() const noexcept { return inner_; }
 
     inline double operator[](const std::size_t index) const noexcept {
-      switch(index) {
-        case 0: return this->x();
-        case 1: return this->y();
-        case 2: return this->z();
-      }
-      return std::numeric_limits<double>::quiet_NaN();
+        switch(index) {
+           case 0: return this->x();
+           case 1: return this->y();
+           case 2: return this->z();
+        }
+        return std::numeric_limits<double>::quiet_NaN();
     }
 
 private:

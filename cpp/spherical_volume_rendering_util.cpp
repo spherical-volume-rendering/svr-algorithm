@@ -147,10 +147,10 @@ namespace svr {
     }
 
     // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
-    // the ray and a radial section. This follows closely the mathematics presented in:
+    // the ray and a radial section. The struct RadialHitData is used to provide already initialized data structures,
+    // as well as avoiding unnecessary duplicate calculations that have already been done in the initialization phase.
+    // This follows closely the mathematics presented in:
     // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
-    // The struct RadialHitData is used to provide already initialized data structures, as well as avoiding unnecessary
-    // duplicate calculations that have already been done in the initialization phase.
     RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
         const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
