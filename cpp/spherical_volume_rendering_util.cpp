@@ -199,7 +199,7 @@ namespace svr {
             radial_params.previous_transition_flag = isKnEqual(current_radius, r_new);
         } else if (data.times_gt_t.empty()) {
             // No intersection.
-            radial_params.tMaxR = std::numeric_limits<double>::infinity();
+            radial_params.tMaxR = std::numeric_limits<double>::max();
             radial_params.tStepR = 0;
             radial_params.previous_transition_flag = false;
         } else {
@@ -308,7 +308,7 @@ namespace svr {
             }
         }
         params.tStep = 0;
-        params.tMax = std::numeric_limits<double>::infinity();
+        params.tMax = std::numeric_limits<double>::max();
         params.within_bounds = false;
         return params;
     }
@@ -394,16 +394,16 @@ namespace svr {
     inline VoxelIntersectionType minimumIntersection(const RadialHitParameters &rad_params,
                                                      const AngularHitParameters &ang_params,
                                                      const AzimuthalHitParameters &azi_params) noexcept {
-        if (rad_params.within_bounds && rad_params.tMaxR < ang_params.tMaxTheta &&
-            rad_params.tMaxR < azi_params.tMaxPhi) {
+        if (rad_params.within_bounds && KnLessThan(rad_params.tMaxR, ang_params.tMaxTheta)
+                                     && KnLessThan(rad_params.tMaxR, azi_params.tMaxPhi)) {
             return VoxelIntersectionType::Radial;
         }
-        if (ang_params.within_bounds && ang_params.tMaxTheta < rad_params.tMaxR
-                                     && rad_params.tMaxR < azi_params.tMaxPhi) {
+        if (ang_params.within_bounds && KnLessThan(ang_params.tMaxTheta, rad_params.tMaxR)
+                                     && KnLessThan(ang_params.tMaxTheta, azi_params.tMaxPhi)) {
             return VoxelIntersectionType::Angular;
         }
-        if (azi_params.within_bounds && azi_params.tMaxPhi < ang_params.tMaxTheta
-                                     && azi_params.tMaxPhi < rad_params.tMaxR) {
+        if (azi_params.within_bounds && KnLessThan(azi_params.tMaxPhi, ang_params.tMaxTheta)
+                                     && KnLessThan(azi_params.tMaxPhi, rad_params.tMaxR)) {
             return VoxelIntersectionType::Azimuthal;
         }
         if (rad_params.within_bounds && isKnEqual(rad_params.tMaxR, ang_params.tMaxTheta)
