@@ -11,13 +11,14 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 - Ariel Kellison (ak2485 at cornell.edu)
 - Youhan Yuan (yy435 at cornell.edu)
 
-## Build Requirements
+## C++ Build Requirements
 - [CMake](https://cmake.org/)
 - C++11-standard-compliant compiler
-- [Cython](https://cython.org/) to use the cythonized version
 
 ### C++ Example
 ```
+#include "spherical_volume_rendering_util.h"
+
 const BoundVec3 min_bound(-20.0, -20.0, -20.0);
 const BoundVec3 max_bound(20.0, 20.0, 20.0);
 const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -38,12 +39,19 @@ const double t_end = 30.0;
 const auto voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
 ```
 
+## Cython Build Requirements
+- [Python3](https://www.python.org/)
+- [Cython](https://cython.org/)
+- [Numpy](https://numpy.org/)
+- [distutils](https://docs.python.org/3/library/distutils.html)
+
 ### Cython Example
 ```
 #   Compile code before use:
 #   python cython_SVR_setup.py build_ext --inplace
 
 import cython_SVR
+import numpy as np
 
 ray_origin =    np.array([-13.0, -13.0, -13.0])
 ray_direction = np.array([1.0, 1.0, 1.0])
