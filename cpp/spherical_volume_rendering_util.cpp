@@ -191,16 +191,17 @@ namespace svr {
                     .previous_transition_flag=false,
                     .within_bounds=false};
         }
+        const std::array<int, 2> step{-1, 1};
         const double intersection_time = data.times_gt_t[0];
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isKnEqual(r_new, current_radius);
+        const bool is_tangential_hit = data.times_gt_t.size() >= 2 &&
+                                    isKnEqual(data.intersection_times[0], data.intersection_times[1]);
         return {.tMaxR=intersection_time,
                 .within_bounds=KnLessThan(t, intersection_time) &&
                                KnLessThan(intersection_time, t_end),
                 .previous_transition_flag=is_radial_transition,
-                .tStepR=(data.times_gt_t.size() >= 2 &&
-                         isKnEqual(data.intersection_times[0], data.intersection_times[1])) ? 0 :
-                         (!is_radial_transition && KnLessThan(r_new, current_radius))       ? 1 : -1
+                .tStepR=is_tangential_hit ? 0 : step[(!is_radial_transition && KnLessThan(r_new, current_radius))]
                };
     }
 
