@@ -44,6 +44,7 @@ const auto voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end)
 #   python cython_SVR_setup.py build_ext --inplace
 
 import cython_SVR
+
 ray_origin =    np.array([-13.0, -13.0, -13.0])
 ray_direction = np.array([1.0, 1.0, 1.0])
 min_bound =     np.array([-20.0, -20.0, -20.0])
