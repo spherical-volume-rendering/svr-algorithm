@@ -16,7 +16,7 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 - C++11-standard-compliant compiler
 - [Cython](https://cython.org/) to use the cythonized version
 
-## Example
+### C++ Example
 ```
 const BoundVec3 min_bound(-20.0, -20.0, -20.0);
 const BoundVec3 max_bound(20.0, 20.0, 20.0);
@@ -36,6 +36,29 @@ const Ray ray(ray_origin, ray_direction);
 const double t_begin = 0.0;
 const double t_end = 30.0;
 const auto voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+```
+
+### Cython Example
+```
+#   Compile code before use:
+#   python cython_SVR_setup.py build_ext --inplace
+
+import cython_SVR
+ray_origin =    np.array([-13.0, -13.0, -13.0])
+ray_direction = np.array([1.0, 1.0, 1.0])
+min_bound =     np.array([-20.0, -20.0, -20.0])
+max_bound =     np.array([20.0, 20.0, 20.0])
+sphere_center = np.array([0.0, 0.0, 0.0])
+sphere_max_radius =     10.0
+num_radial_sections =    4
+num_angular_sections =   4
+num_azimuthal_sections = 4
+t_begin = 0.0
+t_end =  30.0
+voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, 
+                                          num_radial_sections, num_angular_sections, 
+                                          num_azimuthal_sections, sphere_center,
+                                          sphere_max_radius, t_begin, t_end)
 ```
 
 ### Project Links
