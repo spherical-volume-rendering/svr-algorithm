@@ -103,70 +103,70 @@ struct SphericalVoxelGrid {
 					 });
   }
 
-  constexpr inline std::size_t
+  inline std::size_t
   numRadialVoxels() const noexcept { return this->num_radial_voxels_; }
 
-  constexpr inline std::size_t
+  inline std::size_t
   numAngularVoxels() const noexcept { return this->num_angular_voxels_; }
 
-  constexpr inline std::size_t
+  inline std::size_t
   numAzimuthalVoxels() const noexcept { return this->num_azimuthal_voxels_; }
 
-  constexpr inline double
+  inline double
   invNumRadialVoxels() const noexcept { return this->inv_num_radial_voxels_; }
 
-  constexpr inline double
+  inline double
   invNumAngularVoxels() const noexcept { return this->inv_num_angular_voxels_; }
 
-  constexpr inline double
+  inline double
   invNumAzimuthalVoxels() const noexcept { return this->inv_num_azimuthal_voxels_; }
 
-  constexpr inline BoundVec3
+  inline BoundVec3
   minBound() const noexcept { return this->min_bound_; }
 
-  constexpr inline BoundVec3
+  inline BoundVec3
   maxBound() const noexcept { return this->max_bound_; }
 
-  constexpr inline double
+  inline double
   sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
-  constexpr inline BoundVec3
+  inline BoundVec3
   sphereCenter() const noexcept { return this->sphere_center_; }
 
-  constexpr inline double
+  inline double
   deltaRadius() const noexcept { return this->delta_radius_; }
 
-  constexpr inline double
+  inline double
   deltaTheta() const noexcept { return this->delta_theta_; }
 
-  constexpr inline double
+  inline double
   deltaPhi() const noexcept { return this->delta_phi_; }
 
-  constexpr inline double
+  inline double
   invDeltaRadius() const noexcept { return this->inv_delta_radius_; }
 
-  constexpr inline double
+  inline double
   invDeltaTheta() const noexcept { return this->inv_delta_theta_; }
 
-  constexpr inline double
+  inline double
   invDeltaPhi() const noexcept { return this->inv_delta_phi_; }
 
-  constexpr inline const LineSegment &
+  inline const LineSegment &
   pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
 
-  constexpr inline const std::vector<LineSegment> &
+  inline const std::vector<LineSegment> &
   pMaxAngular() const noexcept { return this->P_max_angular_; }
 
-  constexpr inline const LineSegment &
+  inline const LineSegment &
   pMaxAzimuthal(std::size_t i) const noexcept { return this->P_max_azimuthal_[i]; }
 
-  constexpr inline const std::vector<LineSegment> &
+  inline const std::vector<LineSegment> &
   pMaxAzimuthal() const noexcept { return this->P_max_azimuthal_; }
 
-  constexpr inline const std::vector<TrigonometricValues> &
+  inline const std::vector<TrigonometricValues> &
   angularTrigValues() const noexcept { return angular_trig_values_; }
 
-  constexpr inline const std::vector<TrigonometricValues> &
+  inline const std::vector<TrigonometricValues> &
   azimuthalTrigValues() const noexcept { return azimuthal_trig_values_; }
 
  private:

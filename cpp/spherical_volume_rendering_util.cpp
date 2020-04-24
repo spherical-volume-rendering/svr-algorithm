@@ -202,8 +202,7 @@ namespace svr {
                 .tStepR=step[1 * is_not_tangential_hit +
                              (is_not_tangential_hit && !is_radial_transition && KnLessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
-                .within_bounds=KnLessThan(t, intersection_time) &&
-                               KnLessThan(intersection_time, t_end)
+                .within_bounds=KnLessThan(t, intersection_time) && KnLessThan(intersection_time, t_end)
                 };
     }
 

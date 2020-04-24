@@ -172,7 +172,7 @@ struct UnitVec3 {
 
     inline double z() const noexcept { return this->to_free().z(); }
 
-    constexpr inline const FreeVec3 &to_free() const noexcept { return inner_; }
+    inline const FreeVec3 &to_free() const noexcept { return inner_; }
 
     inline double operator[](const std::size_t index) const noexcept {
         switch(index) {
