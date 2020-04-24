@@ -7,15 +7,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install python 3.7
-          command: 'apt-get update && apt-get install python3.7'
-      - run:
-          name: Install Cython 
-          command: 'sudo apt-get install build-essential && pip install Cython --install-option="--no-cython-compile"'
-      - run:
-          name: "Compile and Run Tests"
-          command: 'cd cpp/cython && python cython_SVR_setup.py build_ext --inplace && python cython_SVR_tests.py'
-      - run:
           name: Installing SUDO
           command: 'apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*'
       - run:
@@ -27,6 +18,15 @@ jobs:
       - run:
           name: Install GIT
           command: 'apt-get update && apt-get install -y git'
+      - run:
+          name: Install python 3.6
+          command: 'apt-get update && apt-get install python3.6'
+      - run:
+          name: Install Cython 
+          command: 'sudo apt-get install build-essential && pip install Cython --install-option="--no-cython-compile"'
+      - run:
+          name: "Compile and Run Tests"
+          command: 'cd cpp/cython && python cython_SVR_setup.py build_ext --inplace && python cython_SVR_tests.py'
       - run: 
           name: Install Google Tests
           command: ' cd cpp/testing && git clone https://github.com/google/googletest.git'
