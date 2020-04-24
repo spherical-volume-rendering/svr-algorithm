@@ -13,13 +13,13 @@
 //      [z]
 struct Vec3 {
 public:
-    inline Vec3(const double x, const double y, const double z) : x_(x), y_(y), z_(z) {}
+    constexpr inline Vec3(const double x, const double y, const double z) : x_(x), y_(y), z_(z) {}
 
-    inline double x() const noexcept { return this->x_; }
+    constexpr inline double x() const noexcept { return this->x_; }
 
-    inline double y() const noexcept { return this->y_; }
+    constexpr inline double y() const noexcept { return this->y_; }
 
-    inline double z() const noexcept { return this->z_; }
+    constexpr inline double z() const noexcept { return this->z_; }
 
     inline double &x() noexcept { return this->x_; }
 
@@ -31,17 +31,17 @@ public:
         return std::sqrt(this->x_ * this->x_ + this->y_ * this->y_ + this->z_ * this->z_);
     }
 
-    inline double squared_length() const noexcept {
+    constexpr inline double squared_length() const noexcept {
         return x_ * x_ + y_ * y_ + z_ * z_;
     }
 
-  inline double operator[](const std::size_t index) const noexcept {
-      switch(index) {
+    inline double operator[](const std::size_t index) const noexcept {
+        switch(index) {
           case 0: return this->x_;
           case 1: return this->y_;
           case 2: return this->z_;
-      }
-      return std::numeric_limits<double>::quiet_NaN();
+        }
+        return std::numeric_limits<double>::quiet_NaN();
   }
 
 private:
@@ -60,11 +60,11 @@ private:
 //                  Langr, J. "Modern C++ Programming with Test-Driven Development: Code Better, Sleep Better" [5.10]
 struct FreeVec3 : Vec3 {
 
-    inline explicit FreeVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
+    constexpr inline explicit FreeVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
 
-    inline explicit FreeVec3(double x, double y, double z) : Vec3(x, y, z) {}
+    constexpr inline explicit FreeVec3(double x, double y, double z) : Vec3(x, y, z) {}
 
-    inline double dot(const Vec3 &other) const noexcept {
+    constexpr inline double dot(const Vec3 &other) const noexcept {
         return this->x() * other.x() + this->y() * other.y() + this->z() * other.z();
     }
 
@@ -122,11 +122,11 @@ inline FreeVec3 operator/(FreeVec3 v, const double scalar) noexcept {
 // A 3-dimensional bounded vector has a fixed start and end point. It represents a fixed point
 // in space, relative to some frame of reference.
 struct BoundVec3 : Vec3 {
-    inline explicit BoundVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
+    constexpr inline explicit BoundVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
 
-    inline explicit BoundVec3(double x, double y, double z) : Vec3(x, y, z) {}
+    constexpr inline explicit BoundVec3(double x, double y, double z) : Vec3(x, y, z) {}
 
-    inline double dot(const Vec3 &other) const noexcept {
+    constexpr inline double dot(const Vec3 &other) const noexcept {
         return this->x() * other.x() + this->y() * other.y() + this->z() * other.z();
     }
 
@@ -172,7 +172,7 @@ struct UnitVec3 {
 
     inline double z() const noexcept { return this->to_free().z(); }
 
-    inline const FreeVec3 &to_free() const noexcept { return inner_; }
+    constexpr inline const FreeVec3 &to_free() const noexcept { return inner_; }
 
     inline double operator[](const std::size_t index) const noexcept {
         switch(index) {
