@@ -35,12 +35,8 @@ const FreeVec3 ray_direction(1.0, 1.0, 1.0);
 const Ray ray(ray_origin, ray_direction);
 const double t_begin = 0.0;
 const double t_end = 30.0;
-const auto spherical_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-``` 
-
-### Algorithm Team Links
-- [Fast Voxel Traversal Algorithm Overview](https://docs.google.com/document/d/1QvWw81A0T5vcMAt1WElDeSdBmsw0KJvJdYNr7XfRHfw/edit)
-- [Modern C++ implementation of "A Fast Voxel Traversal Algorithm"](https://github.com/cgyurgyik/fast-voxel-traversal-algorithm)
+const auto voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+```
 
 ### Project Links
 - [Initial Proposal](https://hackmd.io/VRyhXnAFQyaCytWCdKe_1Q)
