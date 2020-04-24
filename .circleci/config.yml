@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: "circleci/python:3.6.4"
+      - image: "debian:stretch"
     steps:
       - checkout
       - run:
@@ -39,3 +39,20 @@ jobs:
       - run:
           name: SVR Unit Testing
           command: 'cd cpp/testing && ./bin/SVR_tests'
+
+jobs:
+  build:
+    docker:
+      - image: "circleci/python:3.6.4"
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
+    steps:
+      - checkout
+      - run:
+          name: Installing PIP
+          command: |  # use pipenv to install dependencies
+            sudo pip install pipenv
+            pipenv install
+      - run:
+         name: Install Cython
+         command: 'apt-get install build-essential && pip install Cython --install-option="--no-cython-compile"'
