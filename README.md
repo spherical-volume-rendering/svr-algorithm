@@ -11,6 +11,33 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 - Ariel Kellison (ak2485 at cornell.edu)
 - Youhan Yuan (yy435 at cornell.edu)
 
+## Build Requirements
+- [CMake](https://cmake.org/)
+- C++11-standard-compliant compiler
+- [Cython](https://cython.org/) to use the cythonized version
+
+## Example
+```
+const BoundVec3 min_bound(-20.0, -20.0, -20.0);
+const BoundVec3 max_bound(20.0, 20.0, 20.0);
+const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+const double sphere_max_radius = 10.0;
+const std::size_t num_radial_sections = 4;
+const std::size_t num_angular_sections = 4;
+const std::size_t num_azimuthal_sections = 4;
+const svr::SphericalVoxelGrid grid(min_bound, max_bound, 
+                                   num_radial_sections, 
+                                   num_angular_sections,
+                                   num_azimuthal_sections, 
+                                   sphere_center, sphere_max_radius);
+const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
+const FreeVec3 ray_direction(1.0, 1.0, 1.0);
+const Ray ray(ray_origin, ray_direction);
+const double t_begin = 0.0;
+const double t_end = 30.0;
+const auto spherical_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+``` 
+
 ### Algorithm Team Links
 - [Fast Voxel Traversal Algorithm Overview](https://docs.google.com/document/d/1QvWw81A0T5vcMAt1WElDeSdBmsw0KJvJdYNr7XfRHfw/edit)
 - [Modern C++ implementation of "A Fast Voxel Traversal Algorithm"](https://github.com/cgyurgyik/fast-voxel-traversal-algorithm)
