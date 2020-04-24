@@ -10,6 +10,9 @@ jobs:
           name: Install python 3.7
           command: 'apt-get update && apt-get install python3.7'
       - run:
+          name: Install Cython 
+          command: 'sudo apt-get install build-essential && pip install Cython --install-option="--no-cython-compile"'
+      - run:
           name: "Compile and Run Tests"
           command: 'cd cpp/cython && python cython_SVR_setup.py build_ext --inplace && python cython_SVR_tests.py'
       - run:
