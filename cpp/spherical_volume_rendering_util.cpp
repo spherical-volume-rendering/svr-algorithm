@@ -5,6 +5,8 @@
 #include <limits>
 
 namespace svr {
+    // An array of step values used to avoid branch prediction in radialHit().
+    constexpr std::array<int, 3> step{0, -1, 1};
 
     // Epsilons used for floating point comparisons in Knuth's algorithm.
     const double ABS_EPSILON = 1e-12;
@@ -191,17 +193,16 @@ namespace svr {
                     .previous_transition_flag=false,
                     .within_bounds=false};
         }
-        const std::array<int, 3> step{0, -1, 1};
         const double intersection_time = data.times_gt_t[0];
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isKnEqual(r_new, current_radius);
         const bool is_not_tangential_hit = !(data.times_gt_t.size() >= 2 &&
-                                    isKnEqual(data.intersection_times[0], data.intersection_times[1]));
+                                             isKnEqual(data.intersection_times[0], data.intersection_times[1]));
         return {.tMaxR=intersection_time,
                 .within_bounds=KnLessThan(t, intersection_time) &&
                                KnLessThan(intersection_time, t_end),
                 .previous_transition_flag=is_radial_transition,
-                .tStepR=step[(1 * is_not_tangential_hit) +
+                .tStepR=step[1 * is_not_tangential_hit +
                              (is_not_tangential_hit && !is_radial_transition && KnLessThan(r_new, current_radius))]
                };
     }
