@@ -38,9 +38,6 @@ namespace svr {
 
         // Determines whether the current hit is within time bounds (t, t_end).
         bool within_bounds;
-
-        // Determines whether the current voxel hit has caused a step outside of the spherical voxel grid.
-        bool exits_voxel_bounds;
     };
 
     // The parameters returned by angularHit().
@@ -147,10 +144,10 @@ namespace svr {
     }
 
     // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
-    // the ray and a radial section. This follows closely the mathematics presented in:
+    // the ray and a radial section. The struct RadialHitData is used to provide already initialized data structures,
+    // as well as avoiding unnecessary duplicate calculations that have already been done in the initialization phase.
+    // This follows closely the mathematics presented in:
     // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
-    // The struct RadialHitData is used to provide already initialized data structures, as well as avoiding unnecessary
-    // duplicate calculations that have already been done in the initialization phase.
     RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
         const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
@@ -202,7 +199,7 @@ namespace svr {
             radial_params.previous_transition_flag = isKnEqual(current_radius, r_new);
         } else if (data.times_gt_t.empty()) {
             // No intersection.
-            radial_params.tMaxR = std::numeric_limits<double>::infinity();
+            radial_params.tMaxR = std::numeric_limits<double>::max();
             radial_params.tStepR = 0;
             radial_params.previous_transition_flag = false;
         } else {
@@ -219,8 +216,7 @@ namespace svr {
             radial_params.tStepR = (KnLessThan(r_new, current_radius) && !radial_difference_is_near_zero) ? 1 : -1;
             t_within_bounds = KnLessThan(t, radial_params.tMaxR) && KnLessThan(radial_params.tMaxR, t_end);
         }
-        radial_params.exits_voxel_bounds = (current_voxel_ID_r + radial_params.tStepR) == 0;
-        radial_params.within_bounds = t_within_bounds && !radial_params.exits_voxel_bounds;
+        radial_params.within_bounds = t_within_bounds && (current_voxel_ID_r + radial_params.tStepR) != 0;
         return radial_params;
     }
 
@@ -312,7 +308,7 @@ namespace svr {
             }
         }
         params.tStep = 0;
-        params.tMax = std::numeric_limits<double>::infinity();
+        params.tMax = std::numeric_limits<double>::max();
         params.within_bounds = false;
         return params;
     }
@@ -395,24 +391,19 @@ namespace svr {
     // For each case, the following must hold:
     // (1) t < tMax < t_end
     // (2) If its a radial hit, the next step must be within bounds.
-    //
-    // In cases 1, 3 we also need to change the requirements slightly for when
-    // the ray intersects a single shell, but still crosses an angular or azimuthal boundary:
-    // (1) tMax must be within bounds
-    // (2) Either tMax is a strict minimum OR the next step is a radial exit.
     inline VoxelIntersectionType minimumIntersection(const RadialHitParameters &rad_params,
                                                      const AngularHitParameters &ang_params,
                                                      const AzimuthalHitParameters &azi_params) noexcept {
-        if (rad_params.within_bounds && rad_params.tMaxR < ang_params.tMaxTheta &&
-            rad_params.tMaxR < azi_params.tMaxPhi) {
+        if (rad_params.within_bounds && KnLessThan(rad_params.tMaxR, ang_params.tMaxTheta)
+                                     && KnLessThan(rad_params.tMaxR, azi_params.tMaxPhi)) {
             return VoxelIntersectionType::Radial;
         }
-        if (ang_params.within_bounds && ((ang_params.tMaxTheta < rad_params.tMaxR
-                                          && rad_params.tMaxR < azi_params.tMaxPhi) || rad_params.exits_voxel_bounds)) {
+        if (ang_params.within_bounds && KnLessThan(ang_params.tMaxTheta, rad_params.tMaxR)
+                                     && KnLessThan(ang_params.tMaxTheta, azi_params.tMaxPhi)) {
             return VoxelIntersectionType::Angular;
         }
-        if (azi_params.within_bounds && ((azi_params.tMaxPhi < ang_params.tMaxTheta
-                                          && azi_params.tMaxPhi < rad_params.tMaxR) || rad_params.exits_voxel_bounds)) {
+        if (azi_params.within_bounds && KnLessThan(azi_params.tMaxPhi, ang_params.tMaxTheta)
+                                     && KnLessThan(azi_params.tMaxPhi, rad_params.tMaxR)) {
             return VoxelIntersectionType::Azimuthal;
         }
         if (rad_params.within_bounds && isKnEqual(rad_params.tMaxR, ang_params.tMaxTheta)

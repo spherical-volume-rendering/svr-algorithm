@@ -3,22 +3,22 @@ import sys
 
 # This script allows me to type inputs once and print a cpp Google Test and a Python unittest.
 
-cpp_title = "RayDirectionNegativeXPositiveYZ"
-python_title = "test_ray_dir_neg_X_positive_YZ"
+cpp_title = "TestLargeNumberOfAzimuthalSections"
+python_title = "test_large_number_of_azimuthal_sections"
 min_bound = np.array([-20.0, -20.0, -20.0])
 max_bound = np.array([20.0, 20.0, 20.0])
 sphere_center = np.array([0.0,0.0,0.0])
 sphere_max_radius = 10.0
 num_radial_sections = 4
 num_angular_sections = 4
-num_azimuthal_sections = 4
-ray_origin = np.array([13.0, -15.0, -15.0])
-ray_dir = np.array([-1.0, 1.0, 1.0])
+num_azimuthal_sections = 40
+ray_origin = np.array([-15.0, -15.0, -15.0])
+ray_dir = np.array([1.0, 1.0, 1.0])
 t_begin = 0.0
 t_end = 30.0
-expected_radial_voxels = str([1,2,3,3,4,4,3,2,1])[1:-1]
-expected_angular_voxels = str([3,3,3,2,2,1,1,1,1])[1:-1]
-expected_azimuthal_voxels = str([3,3,3,2,2,1,1,1,1])[1:-1]
+expected_radial_voxels = str([1,2,3,4,4,3,2,1])[1:-1]
+expected_angular_voxels = str([2,2,2,2,0,0,0,0])[1:-1]
+expected_azimuthal_voxels = str([24,24,24,24,4,4,4,4])[1:-1]
 
 print("TEST(SphericalCoordinateTraversal, {0}) {{".format(cpp_title))
 print("    const BoundVec3 min_bound({0}, {1}, {2});".format(min_bound[0], min_bound[1], min_bound[2]))
@@ -28,9 +28,9 @@ print("    const double sphere_max_radius = {0};".format(sphere_max_radius))
 print("    const std::size_t num_radial_sections = {0};".format(num_radial_sections))
 print("    const std::size_t num_angular_sections = {0};".format(num_angular_sections))
 print("    const std::size_t num_azimuthal_sections = {0};".format(num_azimuthal_sections))
-print("    const SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,")
-print("                                  num_angular_sections, num_azimuthal_sections,")
-print("                                  sphere_center, sphere_max_radius);")
+print("    const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,")
+print("                                      num_angular_sections, num_azimuthal_sections,")
+print("                                      sphere_center, sphere_max_radius);")
 print("    const BoundVec3 ray_origin({0}, {1}, {2});".format(ray_origin[0], ray_origin[1], ray_origin[2]))
 print("    const FreeVec3 ray_direction({0}, {1}, {2});".format(ray_dir[0], ray_dir[1], ray_dir[2]))
 print("    const Ray ray(ray_origin, ray_direction);")
@@ -57,9 +57,9 @@ print("    num_azimuthal_sections = {0}".format(num_azimuthal_sections))
 print("    t_begin = {0}".format(t_begin))
 print("    t_end = {0}".format(t_end))
 
-print("    voxels = CythonSVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,")
-print("                                             num_angular_sections, num_azimuthal_sections, sphere_center,")
-print("                                             sphere_max_radius, t_begin, t_end)")
+print("    voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,")
+print("                                              num_angular_sections, num_azimuthal_sections, sphere_center,")
+print("                                              sphere_max_radius, t_begin, t_end)")
 print("    expected_radial_voxels = [{0}]".format(expected_radial_voxels))
 print("    expected_theta_voxels = [{0}]".format(expected_angular_voxels))
 print("    expected_phi_voxels = [{0}]".format(expected_azimuthal_voxels))

@@ -209,7 +209,6 @@ namespace {
                     const FreeVec3 ray_direction(0.0, 0.0, 1.0);
                     const Ray ray(ray_origin, ray_direction);
                     const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-                    assert(!actual_voxels.empty());
                     ray_origin_y = (j == ray_count - 1) ? ray_origin_begin : ray_origin_y + ray_movement;
                 }
                 ray_origin_x += ray_movement;
