@@ -20,7 +20,7 @@ jobs:
           command: 'apt-get update && apt-get install -y git'
       - run:
           name: Install python 3.6
-          command: 'apt-get update && apt-get install python3.6'
+          command: 'apt-get install software-properties-common && add-apt-repository ppa:deadsnakes/ppa && apt-get update && apt-get install python3.6'
       - run:
           name: Install Cython 
           command: 'sudo apt-get install build-essential && pip install Cython --install-option="--no-cython-compile"'
@@ -29,7 +29,7 @@ jobs:
           command: 'cd cpp/cython && python cython_SVR_setup.py build_ext --inplace && python cython_SVR_tests.py'
       - run: 
           name: Install Google Tests
-          command: ' cd cpp/testing && git clone https://github.com/google/googletest.git'
+          command: 'cd cpp/testing && git clone https://github.com/google/googletest.git'
       - run: 
           name: Install Google Benchmark I
           command: 'cd cpp/testing && git clone https://github.com/google/benchmark.git'
