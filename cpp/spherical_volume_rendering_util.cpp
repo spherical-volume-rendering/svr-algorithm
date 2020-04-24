@@ -9,8 +9,8 @@ namespace svr {
     constexpr std::array<int, 3> step{0, -1, 1};
 
     // Epsilons used for floating point comparisons in Knuth's algorithm.
-    const double ABS_EPSILON = 1e-12;
-    const double REL_EPSILON = 1e-8;
+    constexpr double ABS_EPSILON = 1e-12;
+    constexpr double REL_EPSILON = 1e-8;
 
     // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
     enum VoxelIntersectionType {
