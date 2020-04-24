@@ -199,12 +199,12 @@ namespace svr {
         const bool is_not_tangential_hit = !(data.times_gt_t.size() >= 2 &&
                                              isKnEqual(data.intersection_times[0], data.intersection_times[1]));
         return {.tMaxR=intersection_time,
-                .within_bounds=KnLessThan(t, intersection_time) &&
-                               KnLessThan(intersection_time, t_end),
-                .previous_transition_flag=is_radial_transition,
                 .tStepR=step[1 * is_not_tangential_hit +
-                             (is_not_tangential_hit && !is_radial_transition && KnLessThan(r_new, current_radius))]
-               };
+                             (is_not_tangential_hit && !is_radial_transition && KnLessThan(r_new, current_radius))],
+                .previous_transition_flag=is_radial_transition,
+                .within_bounds=KnLessThan(t, intersection_time) &&
+                               KnLessThan(intersection_time, t_end)
+                };
     }
 
     // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
