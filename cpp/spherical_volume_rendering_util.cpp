@@ -5,10 +5,12 @@
 #include <limits>
 
 namespace svr {
+    // An array of step values used to avoid branch prediction in radialHit().
+    constexpr std::array<int, 3> step{0, -1, 1};
 
     // Epsilons used for floating point comparisons in Knuth's algorithm.
-    const double ABS_EPSILON = 1e-12;
-    const double REL_EPSILON = 1e-8;
+    constexpr double ABS_EPSILON = 1e-12;
+    constexpr double REL_EPSILON = 1e-8;
 
     // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
     enum VoxelIntersectionType {
@@ -183,41 +185,26 @@ namespace svr {
         data.times_gt_t.clear();
         std::copy_if(data.intersection_times.cbegin(), data.intersection_times.cend(),
                      std::back_inserter(data.times_gt_t), [t](double i) { return i > t; });
-        RadialHitParameters radial_params;
-        bool t_within_bounds = false;
-        if (data.times_gt_t.size() >= 2 && isKnEqual(data.intersection_times[0], data.intersection_times[1])) {
-            // Ray is tangent to the circle, i.e. two intersection times are equal.
-            radial_params.tMaxR = data.times_gt_t[0];
-            const BoundVec3 p = ray.pointAtParameter(radial_params.tMaxR);
-            const double p_x_new = p.x() - grid.sphereCenter().x();
-            const double p_y_new = p.y() - grid.sphereCenter().y();
-            const double p_z_new = p.z() - grid.sphereCenter().z();
-            const double r_new = std::sqrt(p_x_new * p_x_new + p_y_new * p_y_new + p_z_new * p_z_new);
 
-            radial_params.tStepR = 0;
-            t_within_bounds = KnLessThan(t, radial_params.tMaxR) && KnLessThan(radial_params.tMaxR, t_end);
-            radial_params.previous_transition_flag = isKnEqual(current_radius, r_new);
-        } else if (data.times_gt_t.empty()) {
+        if (data.times_gt_t.empty()) {
             // No intersection.
-            radial_params.tMaxR = std::numeric_limits<double>::max();
-            radial_params.tStepR = 0;
-            radial_params.previous_transition_flag = false;
-        } else {
-            // Radial intersection.
-            radial_params.tMaxR = data.times_gt_t[0];
-            const BoundVec3 p = ray.pointAtParameter(radial_params.tMaxR);
-            const double p_x_new = p.x() - grid.sphereCenter().x();
-            const double p_y_new = p.y() - grid.sphereCenter().y();
-            const double p_z_new = p.z() - grid.sphereCenter().z();
-            const double r_new = std::sqrt(p_x_new * p_x_new + p_y_new * p_y_new + p_z_new * p_z_new);
-
-            const bool radial_difference_is_near_zero = isKnEqual(r_new, current_radius);
-            radial_params.previous_transition_flag = radial_difference_is_near_zero;
-            radial_params.tStepR = (KnLessThan(r_new, current_radius) && !radial_difference_is_near_zero) ? 1 : -1;
-            t_within_bounds = KnLessThan(t, radial_params.tMaxR) && KnLessThan(radial_params.tMaxR, t_end);
+            return {.tMaxR=std::numeric_limits<double>::max(),
+                    .tStepR=0,
+                    .previous_transition_flag=false,
+                    .within_bounds=false};
         }
-        radial_params.within_bounds = t_within_bounds && (current_voxel_ID_r + radial_params.tStepR) != 0;
-        return radial_params;
+        const double intersection_time = data.times_gt_t[0];
+        const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
+        const bool is_radial_transition = isKnEqual(r_new, current_radius);
+        const bool is_not_tangential_hit = !(data.times_gt_t.size() >= 2 &&
+                                             isKnEqual(data.intersection_times[0], data.intersection_times[1]));
+        return {.tMaxR=intersection_time,
+                .within_bounds=KnLessThan(t, intersection_time) &&
+                               KnLessThan(intersection_time, t_end),
+                .previous_transition_flag=is_radial_transition,
+                .tStepR=step[1 * is_not_tangential_hit +
+                             (is_not_tangential_hit && !is_radial_transition && KnLessThan(r_new, current_radius))]
+               };
     }
 
     // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
