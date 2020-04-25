@@ -80,14 +80,15 @@ namespace svr {
     // are used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
     struct RadialHitData {
         inline RadialHitData(double t_v, double t_ray_sphere_vector_dot) :
-                v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot) {
-            times_gt_t.reserve(4);
-            previous_transition_flag = false;
-        }
+        v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot),
+        previous_transition_flag(false) { times_gt_t.reserve(4); }
 
+        // Pre-calculated data to be used when calculating a radial hit.
         double v, ray_sphere_vector_dot;
+        // Pre-initialized structures to be used when calculating a radial hit.
         std::array<double, 4> intersection_times;
         std::vector<double> times_gt_t;
+        // The currentt state of the
         bool previous_transition_flag;
     };
 
@@ -98,15 +99,21 @@ namespace svr {
     // voxel boundary.
     struct RaySegment {
         inline RaySegment(const Ray &ray, double t_end) : P2(ray.pointAtParameter(t_end)) {}
-        // Updates the P1 point with the new time t. Similarly, updates the
-        // new segment free vector v.
-        inline void updateAtTime(double t, const Ray& ray) noexcept {
+
+        // Updates the point P1 with the new time traversal time t. Similarly, updates the
+        // segment denoted by P2 - P1.
+        inline void updateAtTime(double t, const Ray &ray) noexcept {
             P1 = ray.pointAtParameter(t);
             ray_segment = P2 - P1;
         }
 
+        // The begin point of the ray segment.
         BoundVec3 P1 = BoundVec3(0.0, 0.0, 0.0);
+
+        // The end point of the ray segment.
         BoundVec3 P2 = BoundVec3(0.0, 0.0, 0.0);
+
+        // P2 - P1.
         FreeVec3 ray_segment = FreeVec3(0.0, 0.0, 0.0);
     };
 
@@ -557,8 +564,10 @@ namespace svr {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
             radial_hit_data.previous_transition_flag = radial_params.previous_transition_flag;
             ray_segment.updateAtTime(t, ray);
-            const auto angular_params = angularHit(ray, grid, ray_segment, collinear_times, current_voxel_ID_theta, t, t_end);
-            const auto azimuthal_params = azimuthalHit(ray, grid, ray_segment, collinear_times, current_voxel_ID_phi, t, t_end);
+            const auto angular_params = angularHit(ray, grid, ray_segment, collinear_times,
+                                                   current_voxel_ID_theta, t, t_end);
+            const auto azimuthal_params = azimuthalHit(ray, grid, ray_segment, collinear_times,
+                                                       current_voxel_ID_phi, t, t_end);
             const auto voxel_intersection = minimumIntersection(radial_params, angular_params, azimuthal_params);
             switch (voxel_intersection) {
                 case Radial: {
