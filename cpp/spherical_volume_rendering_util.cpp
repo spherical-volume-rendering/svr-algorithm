@@ -88,7 +88,8 @@ namespace svr {
         // Pre-initialized structures to be used when calculating a radial hit.
         std::array<double, 4> intersection_times;
         std::vector<double> times_gt_t;
-        // The currentt state of the
+        // The current state of the previous_transition_flag. This is saved here so that it can be passed
+        // into the radial hit function with each traversal.
         bool previous_transition_flag;
     };
 
@@ -224,8 +225,8 @@ namespace svr {
         const bool is_not_tangential_hit = !(rdata.times_gt_t.size() >= 2 &&
                                              isKnEqual(rdata.intersection_times[0], rdata.intersection_times[1]));
         return {.tMaxR=intersection_time,
-                .tStepR=step[1 * is_not_tangential_hit +
-                             (is_not_tangential_hit && !is_radial_transition && KnLessThan(r_new, current_radius))],
+                .tStepR=step[1 * is_not_tangential_hit + (is_not_tangential_hit &&          // { 0, -1, 1 }
+                             !is_radial_transition && KnLessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
                 .within_bounds=KnLessThan(t, intersection_time) && KnLessThan(intersection_time, t_end)
         };
