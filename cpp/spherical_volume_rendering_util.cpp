@@ -93,28 +93,21 @@ namespace svr {
 
     // Pre-calculated information for the generalized plane hit function, which generalizes azimuthal and angular
     // hits. Since the ray segment is dependent solely on time, this is unnecessary to calculate twice for each
-    // plane hit function. Here, v is the difference between ray_segment_end and ray_segment_begin.
+    // plane hit function. Here, ray_segment is the difference between P2 and P1.
     // The collinear times are the two times possible for t, dependent on if the ray is collinear to the given
     // voxel boundary.
-    struct GeneralizedPlaneHitData {
-        inline GeneralizedPlaneHitData(const Ray &ray, const SphericalVoxelGrid &grid, double t, double t_end) {
-            collinear_times = {0.0, ray.timeOfIntersectionAt(grid.sphereCenter())};
-            ray_segment_begin = ray.pointAtParameter(t);
-            ray_segment_end = ray.pointAtParameter(t_end);
-            v = ray_segment_end - ray_segment_begin;
-        }
-
-        // Updates the ray_segment_begin point with the new time t. Similarly, updates the
+    struct RaySegment {
+        inline RaySegment(const Ray &ray, double t_end) : P2(ray.pointAtParameter(t_end)) {}
+        // Updates the P1 point with the new time t. Similarly, updates the
         // new segment free vector v.
-        inline void updateRaySegmentPoints(const Ray& ray, double t) noexcept {
-            ray_segment_begin = ray.pointAtParameter(t);
-            v = ray_segment_end - ray_segment_begin;
+        inline void updateAtTime(double t, const Ray& ray) noexcept {
+            P1 = ray.pointAtParameter(t);
+            ray_segment = P2 - P1;
         }
 
-        std::array<double, 2> collinear_times;
-        BoundVec3 ray_segment_begin = BoundVec3(0.0, 0.0, 0.0);
-        BoundVec3 ray_segment_end = BoundVec3(0.0, 0.0, 0.0);
-        FreeVec3 v = FreeVec3(0.0, 0.0, 0.0);
+        BoundVec3 P1 = BoundVec3(0.0, 0.0, 0.0);
+        BoundVec3 P2 = BoundVec3(0.0, 0.0, 0.0);
+        FreeVec3 ray_segment = FreeVec3(0.0, 0.0, 0.0);
     };
 
     // Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
@@ -240,7 +233,7 @@ namespace svr {
     GenHitParameters
     generalizedPlaneHit(const svr::SphericalVoxelGrid &grid, const Ray &ray, double perp_uv_min, double perp_uv_max,
                         double perp_uw_min, double perp_uw_max, double perp_vw_min, double perp_vw_max,
-                        const GeneralizedPlaneHitData &data, double t, double t_end,
+                        const RaySegment &rs_data, const std::array<double, 2> &collinear_times, double t, double t_end,
                         double ray_plane_direction, double sphere_plane_center,
                         const std::vector<svr::LineSegment> &P_max, int current_voxel_ID) noexcept {
         const bool is_parallel_min = isKnEqual(perp_uv_min, 0.0);
@@ -248,7 +241,7 @@ namespace svr {
         const bool is_parallel_max = isKnEqual(perp_uv_max, 0.0);
         const bool is_collinear_max = is_parallel_max && isKnEqual(perp_uw_max, 0.0) && isKnEqual(perp_vw_max, 0.0);
         double a, b;
-        double t_min = data.collinear_times[is_collinear_min];
+        double t_min = collinear_times[is_collinear_min];
         bool is_intersect_min = false;
         if (!is_parallel_min) {
             const double inv_perp_uv_min = 1.0 / perp_uv_min;
@@ -256,12 +249,12 @@ namespace svr {
             b = perp_uw_min * inv_perp_uv_min;
             if (!((KnLessThan(a, 0.0) || KnLessThan(1.0, a)) || KnLessThan(b, 0.0) || KnLessThan(1.0, b))) {
                 is_intersect_min = true;
-                t_min = ray.timeOfIntersectionAt(Vec3(data.ray_segment_begin.x() + data.v.x() * b,
-                                                      data.ray_segment_begin.y() + data.v.y() * b,
-                                                      data.ray_segment_begin.z() + data.v.z() * b));
+                t_min = ray.timeOfIntersectionAt(Vec3(rs_data.P1.x() + rs_data.ray_segment.x() * b,
+                                                      rs_data.P1.y() + rs_data.ray_segment.y() * b,
+                                                      rs_data.P1.z() + rs_data.ray_segment.z() * b));
             }
         }
-        double t_max = data.collinear_times[is_collinear_max];
+        double t_max = collinear_times[is_collinear_max];
         bool is_intersect_max = false;
         if (!is_parallel_max) {
             const double inv_perp_uv_max = 1.0 / perp_uv_max;
@@ -269,9 +262,9 @@ namespace svr {
             b = perp_uw_max * inv_perp_uv_max;
             if (!((KnLessThan(a, 0.0) || KnLessThan(1.0, a)) || KnLessThan(b, 0.0) || KnLessThan(1.0, b))) {
                 is_intersect_max = true;
-                t_max = ray.timeOfIntersectionAt(Vec3(data.ray_segment_begin.x() + data.v.x() * b,
-                                                      data.ray_segment_begin.y() + data.v.y() * b,
-                                                      data.ray_segment_begin.z() + data.v.z() * b));
+                t_max = ray.timeOfIntersectionAt(Vec3(rs_data.P1.x() + rs_data.ray_segment.x() * b,
+                                                      rs_data.P1.y() + rs_data.ray_segment.y() * b,
+                                                      rs_data.P1.z() + rs_data.ray_segment.z() * b));
             }
         }
         GenHitParameters params;
@@ -331,7 +324,7 @@ namespace svr {
     // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
     // the ray and an angular section. The angular sections live in the XY plane.
     AngularHitParameters angularHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
-                                    const GeneralizedPlaneHitData &data,
+                                    const RaySegment &rs_data, const std::array<double, 2> &collinear_times,
                                     int current_voxel_ID_theta, double t, double t_end) noexcept {
         // Calculate the voxel boundary vectors.
         const FreeVec3 p_one(grid.pMaxAngular(current_voxel_ID_theta).P1,
@@ -340,25 +333,26 @@ namespace svr {
                              grid.pMaxAngular(current_voxel_ID_theta + 1).P2, 0.0);
         const BoundVec3 u_min = grid.sphereCenter() - p_one;
         const BoundVec3 u_max = grid.sphereCenter() - p_two;
-        const FreeVec3 w_min = p_one - FreeVec3(data.ray_segment_begin);
-        const FreeVec3 w_max = p_two - FreeVec3(data.ray_segment_begin);
-        const double perp_uv_min = u_min.x() * data.v.y() - u_min.y() * data.v.x();
-        const double perp_uv_max = u_max.x() * data.v.y() - u_max.y() * data.v.x();
+        const FreeVec3 w_min = p_one - FreeVec3(rs_data.P1);
+        const FreeVec3 w_max = p_two - FreeVec3(rs_data.P1);
+        const double perp_uv_min = u_min.x() * rs_data.ray_segment.y() - u_min.y() * rs_data.ray_segment.x();
+        const double perp_uv_max = u_max.x() * rs_data.ray_segment.y() - u_max.y() * rs_data.ray_segment.x();
         const double perp_uw_min = u_min.x() * w_min.y() - u_min.y() * w_min.x();
         const double perp_uw_max = u_max.x() * w_max.y() - u_max.y() * w_max.x();
-        const double perp_vw_min = data.v.x() * w_min.y() - data.v.y() * w_min.x();
-        const double perp_vw_max = data.v.x() * w_max.y() - data.v.y() * w_max.x();
+        const double perp_vw_min = rs_data.ray_segment.x() * w_min.y() - rs_data.ray_segment.y() * w_min.x();
+        const double perp_vw_max = rs_data.ray_segment.x() * w_max.y() - rs_data.ray_segment.y() * w_max.x();
         const GenHitParameters params = generalizedPlaneHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,
-                                                            perp_uw_max, perp_vw_min, perp_vw_max, data, t, t_end,
-                                                            ray.direction().y(), grid.sphereCenter().y(),
-                                                            grid.pMaxAngular(), current_voxel_ID_theta);
+                                                            perp_uw_max, perp_vw_min, perp_vw_max, rs_data,
+                                                            collinear_times, t, t_end, ray.direction().y(),
+                                                            grid.sphereCenter().y(), grid.pMaxAngular(),
+                                                            current_voxel_ID_theta);
         return {.tMaxTheta=params.tMax, .tStepTheta=params.tStep, .within_bounds=params.within_bounds};
     }
 
     // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is considered an intersection with
     // the ray and an azimuthal section. The azimuthal sections live in the XZ plane.
     AzimuthalHitParameters azimuthalHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
-                                        const GeneralizedPlaneHitData &data,
+                                        const RaySegment &rs_data, const std::array<double, 2> &collinear_times,
                                         int current_voxel_ID_phi, double t, double t_end) noexcept {
         // Calculate the voxel boundary vectors.
         const FreeVec3 p_one(grid.pMaxAzimuthal(current_voxel_ID_phi).P1, 0.0,
@@ -367,18 +361,19 @@ namespace svr {
                              grid.pMaxAzimuthal(current_voxel_ID_phi + 1).P2);
         const BoundVec3 u_min = grid.sphereCenter() - p_one;
         const BoundVec3 u_max = grid.sphereCenter() - p_two;
-        const FreeVec3 w_min = p_one - FreeVec3(data.ray_segment_begin);
-        const FreeVec3 w_max = p_two - FreeVec3(data.ray_segment_begin);
-        const double perp_uv_min = u_min.x() * data.v.z() - u_min.z() * data.v.x();
-        const double perp_uv_max = u_max.x() * data.v.z() - u_max.z() * data.v.x();
+        const FreeVec3 w_min = p_one - FreeVec3(rs_data.P1);
+        const FreeVec3 w_max = p_two - FreeVec3(rs_data.P1);
+        const double perp_uv_min = u_min.x() * rs_data.ray_segment.z() - u_min.z() * rs_data.ray_segment.x();
+        const double perp_uv_max = u_max.x() * rs_data.ray_segment.z() - u_max.z() * rs_data.ray_segment.x();
         const double perp_uw_min = u_min.x() * w_min.z() - u_min.z() * w_min.x();
         const double perp_uw_max = u_max.x() * w_max.z() - u_max.z() * w_max.x();
-        const double perp_vw_min = data.v.x() * w_min.z() - data.v.z() * w_min.x();
-        const double perp_vw_max = data.v.x() * w_max.z() - data.v.z() * w_max.x();
+        const double perp_vw_min = rs_data.ray_segment.x() * w_min.z() - rs_data.ray_segment.z() * w_min.x();
+        const double perp_vw_max = rs_data.ray_segment.x() * w_max.z() - rs_data.ray_segment.z() * w_max.x();
         const GenHitParameters params = generalizedPlaneHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,
-                                                            perp_uw_max, perp_vw_min, perp_vw_max, data, t, t_end,
-                                                            ray.direction().z(), grid.sphereCenter().z(),
-                                                            grid.pMaxAzimuthal(), current_voxel_ID_phi);
+                                                            perp_uw_max, perp_vw_min, perp_vw_max, rs_data,
+                                                            collinear_times, t, t_end, ray.direction().z(),
+                                                            grid.sphereCenter().z(), grid.pMaxAzimuthal(),
+                                                            current_voxel_ID_phi);
         return {.tMaxPhi=params.tMax, .tStepPhi=params.tStep, .within_bounds=params.within_bounds};
     }
 
@@ -552,13 +547,18 @@ namespace svr {
         double t = ray_origin_is_outside_grid ? ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z)) : t_begin;
         t_end = std::min(t_grid_exit, t_end);
 
+        // Initialize the time in case of collinear min or collinear max for generalized plane hits.
+        std::array<double, 2> collinear_times = {0.0, ray.timeOfIntersectionAt(grid.sphereCenter())};
+
         RadialHitData radial_hit_data(v, ray_sphere_vector_dot);
-        GeneralizedPlaneHitData plane_hit_data(ray, grid, t, t_end);
+        RaySegment ray_segment(ray, t_end);
+
         while (true) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
             radial_hit_data.previous_transition_flag = radial_params.previous_transition_flag;
-            const auto angular_params = angularHit(ray, grid, plane_hit_data, current_voxel_ID_theta, t, t_end);
-            const auto azimuthal_params = azimuthalHit(ray, grid, plane_hit_data, current_voxel_ID_phi, t, t_end);
+            ray_segment.updateAtTime(t, ray);
+            const auto angular_params = angularHit(ray, grid, ray_segment, collinear_times, current_voxel_ID_theta, t, t_end);
+            const auto azimuthal_params = azimuthalHit(ray, grid, ray_segment, collinear_times, current_voxel_ID_phi, t, t_end);
             const auto voxel_intersection = minimumIntersection(radial_params, angular_params, azimuthal_params);
             switch (voxel_intersection) {
                 case Radial: {
@@ -613,7 +613,6 @@ namespace svr {
                     return voxels;
                 }
             }
-            plane_hit_data.updateRaySegmentPoints(ray, t);c
             voxels.push_back({.radial_voxel=current_voxel_ID_r,
                               .angular_voxel=current_voxel_ID_theta,
                               .azimuthal_voxel=current_voxel_ID_phi});
