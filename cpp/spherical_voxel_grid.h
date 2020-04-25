@@ -94,7 +94,7 @@ struct SphericalVoxelGrid {
 	  std::transform(angular_trig_values_.cbegin(), angular_trig_values_.cend(), P_max_angular_.begin(),
 					 [&](const TrigonometricValues &ang_tv) -> LineSegment {
 					   return {.P1=sphere_max_radius * ang_tv.cosine + sphere_center.x(),
-						       .P2= sphere_max_radius * ang_tv.sine + sphere_center.y()};
+						       .P2=sphere_max_radius * ang_tv.sine + sphere_center.y()};
 					 });
 	  std::transform(azimuthal_trig_values_.cbegin(), azimuthal_trig_values_.cend(), P_max_azimuthal_.begin(),
 					 [&](const TrigonometricValues &azi_tv) -> LineSegment {
