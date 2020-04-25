@@ -88,6 +88,7 @@ namespace svr {
         // Pre-initialized structures to be used when calculating a radial hit.
         std::array<double, 4> intersection_times;
         std::vector<double> times_gt_t;
+
         // The current state of the previous_transition_flag. This is saved here so that it can be passed
         // into the radial hit function with each traversal.
         bool previous_transition_flag;
