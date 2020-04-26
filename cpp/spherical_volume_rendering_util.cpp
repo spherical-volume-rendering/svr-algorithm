@@ -83,10 +83,10 @@ namespace svr {
     // is used to determine the type of radial hit.
     struct RadialHitData {
         inline RadialHitData(double t_v, double t_ray_sphere_vector_dot) :
-        v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot) {}
+                ray_sphere_vector_dot(t_ray_sphere_vector_dot), v(t_v) {}
 
         // Pre-calculated data to be used when calculating a radial hit.
-        double v, ray_sphere_vector_dot;
+        double ray_sphere_vector_dot, v;
 
         // Pre-initialized structure to be used when calculating a radial hit.
         std::array<double, 4> intersection_times;
