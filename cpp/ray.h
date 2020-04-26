@@ -14,7 +14,7 @@ enum NonZeroDirectionIndex {
 // direction of the ray. To avoid checking for a non-zero direction upon each function call, these parameters are
 // initialized upon construction.
 struct Ray final {
-    Ray(const BoundVec3 &origin, const FreeVec3 &direction)
+    inline Ray(const BoundVec3 &origin, const FreeVec3 &direction)
             : origin_(origin), direction_(direction), unit_direction_(direction),
               inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z())),
               NZD_index_(std::abs(direction.x()) > 0.0 ? X_DIRECTION :
