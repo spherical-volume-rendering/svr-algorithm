@@ -88,7 +88,7 @@ namespace svr {
         // Pre-calculated data to be used when calculating a radial hit.
         double v, ray_sphere_vector_dot;
 
-        // Pre-initialized structures to be used when calculating a radial hit.
+        // Pre-initialized structure to be used when calculating a radial hit.
         std::array<double, 4> intersection_times;
 
         // The current state of the previous_transition_flag. This is saved here so that it can be passed
