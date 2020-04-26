@@ -45,13 +45,13 @@ struct Ray final {
       return (p[NZD_index_] - this->NZD_origin_) * this->NZD_inverse_direction_;
     }
 
-    inline BoundVec3 origin() const noexcept { return this->origin_; }
+    inline const BoundVec3 &origin() const noexcept { return this->origin_; }
 
-    inline FreeVec3 direction() const noexcept { return this->direction_; }
+    inline const FreeVec3 &direction() const noexcept { return this->direction_; }
 
-    inline FreeVec3 invDirection() const noexcept { return this->inverse_direction_; }
+    inline const FreeVec3 &invDirection() const noexcept { return this->inverse_direction_; }
 
-    inline UnitVec3 unitDirection() const noexcept { return this->unit_direction_; }
+    inline const UnitVec3 &unitDirection() const noexcept { return this->unit_direction_; }
 
 private:
     // The origin of the ray.
