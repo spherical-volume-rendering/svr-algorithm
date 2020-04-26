@@ -361,8 +361,9 @@ namespace svr {
         return {.tMaxTheta=params.tMax, .tStepTheta=params.tStep, .within_bounds=params.within_bounds};
     }
 
-    // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is considered an intersection with
-    // the ray and an azimuthal section. The azimuthal sections live in the XZ plane.
+    // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is
+    // considered an intersection with the ray and an azimuthal section.
+    // The azimuthal sections live in the XZ plane.
     AzimuthalHitParameters azimuthalHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                         const RaySegment &rs_data, const std::array<double, 2> &collinear_times,
                                         int current_voxel_ID_phi, double t, double t_end) noexcept {
