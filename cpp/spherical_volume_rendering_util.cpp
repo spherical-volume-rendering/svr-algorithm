@@ -235,7 +235,7 @@ namespace svr {
         }
         const double r_new = (ray.pointAtParameter(*intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isKnEqual(r_new, current_radius);
-        const bool is_not_tangential_hit = found_time_greater_than_t && !(isKnEqual(rdata.intersection_times[0],
+        const bool is_not_tangential_hit = !(found_time_greater_than_t && isKnEqual(rdata.intersection_times[0],
                                                                                     rdata.intersection_times[1]));
         return {.tMaxR=*intersection_time,
                 .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&          // { 0, -1, 1 }
