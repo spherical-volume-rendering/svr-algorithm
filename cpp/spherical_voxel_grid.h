@@ -5,6 +5,7 @@
 #include <vector>
 
 namespace svr {
+    constexpr double tau = 2 * M_PI;
 
 // Represents a line segment. This is used to represent the points of intersections between
 // the lines corresponding to voxel boundaries and a given radial voxel.
@@ -40,11 +41,9 @@ struct SphericalVoxelGrid {
 	  sphere_center_(sphere_center),
 	  sphere_max_radius_(sphere_max_radius),
 	  delta_radius_(sphere_max_radius / num_radial_voxels),
-	  delta_theta_(2 * M_PI / num_angular_voxels),
-	  delta_phi_(2 * M_PI / num_azimuthal_voxels),
-	  inv_delta_radius_(1.0 / delta_radius_),
-	  inv_delta_theta_(1.0 / delta_theta_),
-	  inv_delta_phi_(1.0 / delta_phi_) {
+	  delta_theta_(tau / num_angular_voxels),
+	  delta_phi_(tau / num_azimuthal_voxels),
+	  inv_delta_radius_(1.0 / delta_radius_) {
 
 	  P_max_angular_.resize(num_angular_voxels + 1);
 	  P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
@@ -115,19 +114,11 @@ struct SphericalVoxelGrid {
 
   inline double deltaRadius() const noexcept { return this->delta_radius_; }
 
-  inline double deltaTheta() const noexcept { return this->delta_theta_; }
-
-  inline double deltaPhi() const noexcept { return this->delta_phi_; }
-
   inline double invDeltaRadius() const noexcept { return this->inv_delta_radius_; }
-
-  inline double invDeltaTheta() const noexcept { return this->inv_delta_theta_; }
-
-  inline double invDeltaPhi() const noexcept { return this->inv_delta_phi_; }
 
   inline const LineSegment &pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
 
-  inline const std::vector<LineSegment> & pMaxAngular() const noexcept { return this->P_max_angular_; }
+  inline const std::vector<LineSegment> &pMaxAngular() const noexcept { return this->P_max_angular_; }
 
   inline const LineSegment &pMaxAzimuthal(std::size_t i) const noexcept { return this->P_max_azimuthal_[i]; }
 
@@ -160,7 +151,7 @@ struct SphericalVoxelGrid {
   const double delta_theta_, delta_phi_;
 
   // Inverse of the above delta values.
-  const double inv_delta_radius_, inv_delta_theta_, inv_delta_phi_;
+  const double inv_delta_radius_;
 
   // The maximum radius line segments for angular voxels.
   std::vector<LineSegment> P_max_angular_;
