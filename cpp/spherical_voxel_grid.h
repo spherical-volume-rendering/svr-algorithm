@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace svr {
-    constexpr double tau = 2 * M_PI;
+    constexpr double TAU = 2 * M_PI;
 
 // Represents a line segment. This is used to represent the points of intersections between
 // the lines corresponding to voxel boundaries and a given radial voxel.
@@ -41,8 +41,8 @@ struct SphericalVoxelGrid {
 	  sphere_center_(sphere_center),
 	  sphere_max_radius_(sphere_max_radius),
 	  delta_radius_(sphere_max_radius / num_radial_voxels),
-	  delta_theta_(tau / num_angular_voxels),
-	  delta_phi_(tau / num_azimuthal_voxels),
+	  delta_theta_(TAU / num_angular_voxels),
+	  delta_phi_(TAU / num_azimuthal_voxels),
 	  inv_delta_radius_(1.0 / delta_radius_) {
 
 	  P_max_angular_.resize(num_angular_voxels + 1);
