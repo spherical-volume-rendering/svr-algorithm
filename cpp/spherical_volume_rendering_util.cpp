@@ -85,6 +85,7 @@ namespace svr {
 
         // Pre-calculated data to be used when calculating a radial hit.
         double v, ray_sphere_vector_dot;
+
         // Pre-initialized structures to be used when calculating a radial hit.
         std::array<double, 4> intersection_times;
         std::vector<double> times_gt_t;
@@ -100,12 +101,12 @@ namespace svr {
     // The collinear times are the two times possible for t, dependent on if the ray is collinear to the given
     // voxel boundary.
     struct RaySegment {
-        inline RaySegment(const Ray &ray, double t_end) : P2(ray.pointAtParameter(t_end)), ray(ray) {}
+        inline RaySegment(const Ray &ray, double t_end) : P2(ray.pointAtParameter(t_end)), ray(&ray) {}
 
         // Updates the point P1 with the new time traversal time t. Similarly, updates the
         // segment denoted by P2 - P1.
         inline void updateRaySegmentAtTime(double t) noexcept {
-            P1 = ray.pointAtParameter(t);
+            P1 = ray->pointAtParameter(t);
             ray_segment = P2 - P1;
         }
 
@@ -118,7 +119,7 @@ namespace svr {
         // P2 - P1.
         FreeVec3 ray_segment = FreeVec3(0.0, 0.0, 0.0);
 
-        Ray ray;
+        const Ray *ray;
     };
 
     // Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
