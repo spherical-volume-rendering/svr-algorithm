@@ -109,7 +109,6 @@ namespace svr {
         inline void updateRaySegmentAtTime(double t) noexcept {
             P1 = ray->pointAtParameter(t);
             ray_segment = P2 - P1;
-
         }
 
         // Calculates the updated ray segment intersection point given an intersect parameter.
