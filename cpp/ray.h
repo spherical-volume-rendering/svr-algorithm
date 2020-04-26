@@ -3,13 +3,6 @@
 
 #include "vec3.h"
 
-// The indices for Vec3. For example, Vec3[0] returns the x-direction.
-enum DirectionIndex {
-  X_DIRECTION = 0,
-  Y_DIRECTION = 1,
-  Z_DIRECTION = 2
-};
-
 // Encapsulates the functionality of a ray. This consists of two components, the origin of the ray, and the
 // direction of the ray. To avoid checking for a non-zero direction upon each function call, these parameters are
 // initialized upon construction.

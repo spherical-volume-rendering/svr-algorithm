@@ -7,6 +7,13 @@
 #include <limits>
 #include <array>
 
+// The indices for Vec3. For example, Vec3[0] returns the x-direction.
+enum DirectionIndex {
+    X_DIRECTION = 0,
+    Y_DIRECTION = 1,
+    Z_DIRECTION = 2
+};
+
 // Represents a Euclidean vector in 3-dimensional space.
 // Assumes vectors take the form of:
 //      [x]
