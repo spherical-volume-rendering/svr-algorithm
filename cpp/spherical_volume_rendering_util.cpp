@@ -80,10 +80,10 @@ namespace svr {
 
     // The necessary information to calculate a radial hit. ray_sphere_vector_dot and v are calculated in the
     // initialization phase, so unnecessary to re-calculate again for radial hit. intersection_times
-    // is used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
+    // is used to determine the type of radial hit.
     struct RadialHitData {
         inline RadialHitData(double t_v, double t_ray_sphere_vector_dot) :
-        v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot), previous_transition_flag(false) {}
+        v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot) {}
 
         // Pre-calculated data to be used when calculating a radial hit.
         double v, ray_sphere_vector_dot;
@@ -93,7 +93,7 @@ namespace svr {
 
         // The current state of the previous_transition_flag. This is saved here so that it can be passed
         // into the radial hit function with each traversal.
-        bool previous_transition_flag;
+        bool transition_flag;
     };
 
     // Pre-calculated information for the generalized plane hit function, which generalizes azimuthal and angular
@@ -187,7 +187,7 @@ namespace svr {
         const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
         double r_a = std::max(current_radius - grid.deltaRadius(), grid.deltaRadius());
         double r_b;
-        if (!rdata.previous_transition_flag) {
+        if (!rdata.transition_flag) {
             // To find the next radius, we need to check the previous_transition_flag:
             // In the case that the ray has sequential hits with equal radii, e.g.
             // the innermost radial disc, this ensures that the proper radii are being checked.
@@ -568,7 +568,7 @@ namespace svr {
 
         while (true) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
-            radial_hit_data.previous_transition_flag = radial_params.previous_transition_flag;
+            radial_hit_data.transition_flag = radial_params.previous_transition_flag;
             ray_segment.updateRaySegmentAtTime(t);
             const auto angular_params = angularHit(ray, grid, ray_segment, collinear_times,
                                                    current_voxel_ID_theta, t, t_end);
