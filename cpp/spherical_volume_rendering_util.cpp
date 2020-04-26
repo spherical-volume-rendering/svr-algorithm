@@ -8,9 +8,11 @@ namespace svr {
     // An array of step values used to avoid branch prediction in radialHit().
     constexpr std::array<int, 3> STEP{0, -1, 1};
 
+    // Represents an invalid time.
+    constexpr double INVALID_TIME = -1.0;
+
     // Epsilons used for floating point comparisons in Knuth's algorithm.
     constexpr double ABS_EPSILON = 1e-12;
-    constexpr double REL_EPSILON = 1e-8;
 
     // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
     enum VoxelIntersectionType {
@@ -76,19 +78,17 @@ namespace svr {
     };
 
     // The necessary information to calculate a radial hit. ray_sphere_vector_dot and v are calculated in the
-    // initialization phase, so unnecessary to re-calculate again for radial hit. intersection_times and times_gt_t
-    // are used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
+    // initialization phase, so unnecessary to re-calculate again for radial hit. intersection_times
+    // is used to determine the type of radial hit. Upon initialization, the previous transition flag is set to false.
     struct RadialHitData {
         inline RadialHitData(double t_v, double t_ray_sphere_vector_dot) :
-        v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot),
-        previous_transition_flag(false) { times_gt_t.reserve(4); }
+        v(t_v), ray_sphere_vector_dot(t_ray_sphere_vector_dot), previous_transition_flag(false) {}
 
         // Pre-calculated data to be used when calculating a radial hit.
         double v, ray_sphere_vector_dot;
 
         // Pre-initialized structures to be used when calculating a radial hit.
         std::array<double, 4> intersection_times;
-        std::vector<double> times_gt_t;
 
         // The current state of the previous_transition_flag. This is saved here so that it can be passed
         // into the radial hit function with each traversal.
@@ -132,20 +132,14 @@ namespace svr {
     //        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
     //        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
     inline bool isKnEqual(double a, double b) noexcept {
-        const double diff = std::abs(a - b);
-        if (diff <= ABS_EPSILON) { return true; }
-        return diff <= std::max(std::abs(a), std::abs(b)) * REL_EPSILON;
+        return std::abs(a - b) <= ABS_EPSILON;
     }
 
     // Overloaded version that checks for Knuth equality with vector cartesian coordinates.
     inline bool isKnEqual(const Vec3 &a, const Vec3 &b) noexcept {
-        const double diff_x = std::abs(a.x() - b.x());
-        const double diff_y = std::abs(a.y() - b.y());
-        const double diff_z = std::abs(a.z() - b.z());
-        if (diff_x <= ABS_EPSILON && diff_y <= ABS_EPSILON && diff_z <= ABS_EPSILON) { return true; }
-        return diff_x <= std::max(std::abs(a.x()), std::abs(b.x())) * REL_EPSILON &&
-               diff_y <= std::max(std::abs(a.y()), std::abs(b.y())) * REL_EPSILON &&
-               diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * REL_EPSILON;
+        return std::abs(a.x() - b.x()) <= ABS_EPSILON &&
+               std::abs(a.y() - b.y()) <= ABS_EPSILON &&
+               std::abs(a.z() - b.z()) <= ABS_EPSILON;
     }
 
     // Uses the Knuth algorithm in KnEqual() to ensure that a is strictly less than b.
@@ -203,8 +197,8 @@ namespace svr {
 
         rdata.intersection_times[0] = ray.timeOfIntersectionAt(rdata.v - d_a);
         rdata.intersection_times[1] = ray.timeOfIntersectionAt(rdata.v + d_a);
-        rdata.intersection_times[2] = 0.0;
-        rdata.intersection_times[3] = 0.0;
+        rdata.intersection_times[2] = INVALID_TIME;
+        rdata.intersection_times[3] = INVALID_TIME;
 
         const double discriminant_b = r_b * r_b - ray_sphere_dot_minus_v_squared;
         if (discriminant_b >= 0.0) {
@@ -212,27 +206,26 @@ namespace svr {
             rdata.intersection_times[2] = ray.timeOfIntersectionAt(rdata.v - d_b);
             rdata.intersection_times[3] = ray.timeOfIntersectionAt(rdata.v + d_b);
         }
-        rdata.times_gt_t.clear();
-        std::copy_if(rdata.intersection_times.cbegin(), rdata.intersection_times.cend(),
-                     std::back_inserter(rdata.times_gt_t), [t](double i) { return i > t; });
 
-        if (rdata.times_gt_t.empty()) {
+        const auto intersection_time = std::find_if(rdata.intersection_times.cbegin(),
+                                                    rdata.intersection_times.cend(),
+                                                    [t](double i)->double{ return i > t;});
+
+        if (intersection_time == rdata.intersection_times.cend()) {
             // No intersection.
             return {.tMaxR=std::numeric_limits<double>::max(),
                     .tStepR=0,
                     .previous_transition_flag=false,
                     .within_bounds=false};
         }
-        const double intersection_time = rdata.times_gt_t[0];
-        const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
+        const double r_new = (ray.pointAtParameter(*intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isKnEqual(r_new, current_radius);
-        const bool is_not_tangential_hit = !(rdata.times_gt_t.size() >= 2 &&
-                                             isKnEqual(rdata.intersection_times[0], rdata.intersection_times[1]));
-        return {.tMaxR=intersection_time,
+        const bool is_not_tangential_hit = !(isKnEqual(rdata.intersection_times[0], rdata.intersection_times[1]));
+        return {.tMaxR=*intersection_time,
                 .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&          // { 0, -1, 1 }
                              !is_radial_transition && KnLessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
-                .within_bounds=KnLessThan(t, intersection_time) && KnLessThan(intersection_time, t_end)
+                .within_bounds=KnLessThan(t, *intersection_time) && KnLessThan(*intersection_time, t_end)
         };
     }
 
@@ -561,7 +554,7 @@ namespace svr {
         t_end = std::min(t_grid_exit, t_end);
 
         // Initialize the time in case of collinear min or collinear max for generalized plane hits.
-        std::array<double, 2> collinear_times = {0.0, ray.timeOfIntersectionAt(grid.sphereCenter())};
+        std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
         RadialHitData radial_hit_data(v, ray_sphere_vector_dot);
         RaySegment ray_segment(&ray, t_end);
