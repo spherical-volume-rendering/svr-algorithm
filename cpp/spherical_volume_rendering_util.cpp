@@ -101,7 +101,7 @@ namespace svr {
     // The collinear times are the two times possible for t, dependent on if the ray is collinear to the given
     // voxel boundary.
     struct RaySegment {
-        inline RaySegment(const Ray &ray, double t_end) : P2(ray.pointAtParameter(t_end)), ray(&ray) {}
+        inline RaySegment(const Ray *ray, double t_end) : P2(ray->pointAtParameter(t_end)), ray(ray) {}
 
         // Updates the point P1 with the new time traversal time t. Similarly, updates the
         // segment denoted by P2 - P1.
@@ -563,7 +563,7 @@ namespace svr {
         std::array<double, 2> collinear_times = {0.0, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
         RadialHitData radial_hit_data(v, ray_sphere_vector_dot);
-        RaySegment ray_segment(ray, t_end);
+        RaySegment ray_segment(&ray, t_end);
 
         while (true) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
