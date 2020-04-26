@@ -4,7 +4,7 @@
 #include "vec3.h"
 
 // The indices for Vec3. For example, Vec3[0] returns the x-direction.
-enum NonZeroDirectionIndex {
+enum DirectionIndex {
   X_DIRECTION = 0,
   Y_DIRECTION = 1,
   Z_DIRECTION = 2
@@ -50,7 +50,7 @@ struct Ray final {
 
     inline const UnitVec3 &unitDirection() const noexcept { return this->unit_direction_; }
 
-    inline NonZeroDirectionIndex NonZeroDirectionIndex() const noexcept { return this->NZD_index_; }
+    inline DirectionIndex NonZeroDirectionIndex() const noexcept { return this->NZD_index_; }
 
 private:
     // The origin of the ray.
@@ -66,7 +66,7 @@ private:
     const FreeVec3 inverse_direction_;
 
     // Index of a non-zero direction.
-    const enum NonZeroDirectionIndex NZD_index_;
+    const enum DirectionIndex NZD_index_;
 };
 
 #endif //SPHERICAL_VOLUME_RENDERING_RAY_H
