@@ -226,8 +226,7 @@ namespace svr {
                                                     rdata.intersection_times.cend(),
                                                     [t](double i)->double{ return i > t;});
 
-        const bool found_time_greater_than_t = intersection_time != rdata.intersection_times.cend();
-        if (!found_time_greater_than_t) {
+        if (intersection_time == rdata.intersection_times.cend()) {
             return {.tMaxR=std::numeric_limits<double>::max(),
                     .tStepR=0,
                     .previous_transition_flag=false,
@@ -235,8 +234,7 @@ namespace svr {
         }
         const double r_new = (ray.pointAtParameter(*intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isKnEqual(r_new, current_radius);
-        const bool is_not_tangential_hit = !(found_time_greater_than_t && isKnEqual(rdata.intersection_times[0],
-                                                                                    rdata.intersection_times[1]));
+        const bool is_not_tangential_hit = !(isKnEqual(rdata.intersection_times[0], rdata.intersection_times[1]));
         return {.tMaxR=*intersection_time,
                 .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&          // { 0, -1, 1 }
                              !is_radial_transition && KnLessThan(r_new, current_radius))],
