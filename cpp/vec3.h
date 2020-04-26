@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
-#include <limits>
 #include <array>
 
 // The indices for Vec3. For example, Vec3[0] returns the x-direction.
