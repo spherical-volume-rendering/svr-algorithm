@@ -109,6 +109,15 @@ namespace svr {
         inline void updateRaySegmentAtTime(double t) noexcept {
             P1 = ray->pointAtParameter(t);
             ray_segment = P2 - P1;
+
+        }
+
+        // Calculates the updated ray segment intersection point given an intersect parameter.
+        // More information on this use case can be found at:
+        // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
+        inline double raySegmentIntersectionTimeAt(double intersect_param) const noexcept {
+            const auto idx = ray->NonZeroDirectionIndex();
+            return (P1[idx] + ray_segment[idx] * intersect_param - ray->origin()[idx]) * ray->invDirection()[idx];
         }
 
         // The begin point of the ray segment.
@@ -261,9 +270,7 @@ namespace svr {
             b = perp_uw_min * inv_perp_uv_min;
             if (!((KnLessThan(a, 0.0) || KnLessThan(1.0, a)) || KnLessThan(b, 0.0) || KnLessThan(1.0, b))) {
                 is_intersect_min = true;
-                t_min = ray.timeOfIntersectionAt(Vec3(rs_data.P1.x() + rs_data.ray_segment.x() * b,
-                                                      rs_data.P1.y() + rs_data.ray_segment.y() * b,
-                                                      rs_data.P1.z() + rs_data.ray_segment.z() * b));
+                t_min = rs_data.raySegmentIntersectionTimeAt(b);
             }
         }
         double t_max = collinear_times[is_collinear_max];
@@ -274,9 +281,7 @@ namespace svr {
             b = perp_uw_max * inv_perp_uv_max;
             if (!((KnLessThan(a, 0.0) || KnLessThan(1.0, a)) || KnLessThan(b, 0.0) || KnLessThan(1.0, b))) {
                 is_intersect_max = true;
-                t_max = ray.timeOfIntersectionAt(Vec3(rs_data.P1.x() + rs_data.ray_segment.x() * b,
-                                                      rs_data.P1.y() + rs_data.ray_segment.y() * b,
-                                                      rs_data.P1.z() + rs_data.ray_segment.z() * b));
+                t_max = rs_data.raySegmentIntersectionTimeAt(b);
             }
         }
         GenHitParameters params;

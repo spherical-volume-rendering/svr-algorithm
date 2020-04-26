@@ -18,10 +18,7 @@ struct Ray final {
             : origin_(origin), direction_(direction), unit_direction_(direction),
               inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(), 1.0 / direction.z())),
               NZD_index_(std::abs(direction.x()) > 0.0 ? X_DIRECTION :
-                         std::abs(direction.y()) > 0.0 ? Y_DIRECTION : Z_DIRECTION),
-              NZD_origin_(origin[NZD_index_]),
-              NZD_inverse_direction_(inverse_direction_[NZD_index_]),
-              NZD_unit_direction_(unit_direction_[NZD_index_]) {}
+                         std::abs(direction.y()) > 0.0 ? Y_DIRECTION : Z_DIRECTION) {}
 
     // Represents the function p(t) = origin + t * direction,
     // where p is a 3-dimensional position, and t is a scalar.
@@ -37,12 +34,12 @@ struct Ray final {
     // Since Point p = ray.origin() + ray.direction() * (v +/- discriminant),
     // We can simply provide the difference or addition of v and the discriminant.
     inline double timeOfIntersectionAt(double discriminant_v) const noexcept {
-      return this->NZD_unit_direction_ * discriminant_v * this->NZD_inverse_direction_;
+      return this->unit_direction_[NZD_index_] * discriminant_v * this->inverse_direction_[NZD_index_];
     }
 
     // Similar to above implementation, but uses a given vector p.
     inline double timeOfIntersectionAt(const Vec3 &p) const noexcept {
-      return (p[NZD_index_] - this->NZD_origin_) * this->NZD_inverse_direction_;
+      return (p[NZD_index_] - this->origin_[NZD_index_]) * this->inverse_direction_[NZD_index_];
     }
 
     inline const BoundVec3 &origin() const noexcept { return this->origin_; }
@@ -52,6 +49,8 @@ struct Ray final {
     inline const FreeVec3 &invDirection() const noexcept { return this->inverse_direction_; }
 
     inline const UnitVec3 &unitDirection() const noexcept { return this->unit_direction_; }
+
+    inline NonZeroDirectionIndex NonZeroDirectionIndex() const noexcept { return this->NZD_index_; }
 
 private:
     // The origin of the ray.
@@ -67,10 +66,7 @@ private:
     const FreeVec3 inverse_direction_;
 
     // Index of a non-zero direction.
-    const NonZeroDirectionIndex NZD_index_;
-
-    // The non-zero direction values to avoid using the [] operator with each function call.
-    const double NZD_origin_, NZD_inverse_direction_, NZD_unit_direction_;
+    const enum NonZeroDirectionIndex NZD_index_;
 };
 
 #endif //SPHERICAL_VOLUME_RENDERING_RAY_H
