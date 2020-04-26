@@ -128,7 +128,7 @@ namespace svr {
         angularTrigValues() const noexcept { return angular_trig_values_; }
 
         inline const std::vector<TrigonometricValues> &
-                azimuthalTrigValues() const noexcept { return azimuthal_trig_values_; }
+        azimuthalTrigValues() const noexcept { return azimuthal_trig_values_; }
 
     private:
         // The minimum bound vector of the voxel grid.
