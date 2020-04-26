@@ -100,11 +100,11 @@ namespace svr {
     // The collinear times are the two times possible for t, dependent on if the ray is collinear to the given
     // voxel boundary.
     struct RaySegment {
-        inline RaySegment(const Ray &ray, double t_end) : P2(ray.pointAtParameter(t_end)) {}
+        inline RaySegment(const Ray &ray, double t_end) : P2(ray.pointAtParameter(t_end)), ray(ray) {}
 
         // Updates the point P1 with the new time traversal time t. Similarly, updates the
         // segment denoted by P2 - P1.
-        inline void updateAtTime(double t, const Ray &ray) noexcept {
+        inline void updateRaySegmentAtTime(double t) noexcept {
             P1 = ray.pointAtParameter(t);
             ray_segment = P2 - P1;
         }
@@ -117,6 +117,8 @@ namespace svr {
 
         // P2 - P1.
         FreeVec3 ray_segment = FreeVec3(0.0, 0.0, 0.0);
+
+        Ray ray;
     };
 
     // Determines equality between two floating point numbers in two steps. First, it uses the absolute epsilon, then it
@@ -565,7 +567,7 @@ namespace svr {
         while (true) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
             radial_hit_data.previous_transition_flag = radial_params.previous_transition_flag;
-            ray_segment.updateAtTime(t, ray);
+            ray_segment.updateRaySegmentAtTime(t);
             const auto angular_params = angularHit(ray, grid, ray_segment, collinear_times,
                                                    current_voxel_ID_theta, t, t_end);
             const auto azimuthal_params = azimuthalHit(ray, grid, ray_segment, collinear_times,
