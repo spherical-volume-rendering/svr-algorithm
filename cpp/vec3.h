@@ -21,6 +21,7 @@ enum DirectionIndex {
 struct Vec3 {
 public:
     constexpr inline Vec3(const double x, const double y, const double z) : e_{x,y,z} {}
+    constexpr inline Vec3() : e_{0.0, 0.0, 0.0} {}
 
     constexpr inline double x() const noexcept { return this->e_[0]; }
 
@@ -58,6 +59,8 @@ private:
 struct FreeVec3 : Vec3 {
 
     constexpr inline explicit FreeVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
+
+    constexpr inline FreeVec3() : Vec3() {}
 
     constexpr inline explicit FreeVec3(double x, double y, double z) : Vec3(x, y, z) {}
 
@@ -120,6 +123,8 @@ inline FreeVec3 operator/(FreeVec3 v, const double scalar) noexcept {
 // in space, relative to some frame of reference.
 struct BoundVec3 : Vec3 {
     constexpr inline explicit BoundVec3(const Vec3 &vec3) : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
+
+    constexpr inline BoundVec3() : Vec3() {}
 
     constexpr inline explicit BoundVec3(double x, double y, double z) : Vec3(x, y, z) {}
 
