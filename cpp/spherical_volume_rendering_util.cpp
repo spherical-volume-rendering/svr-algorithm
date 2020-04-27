@@ -290,15 +290,15 @@ namespace svr {
             }
         }
         GenHitParameters params;
-        if (is_intersect_max && !is_intersect_min && !is_collinear_min && lessThan(t_max, t_end) &&
-            lessThan(t, t_max)) {
+        const bool t_max_within_bounds = lessThan(t, t_max) && lessThan(t_max, t_end);
+        if (is_intersect_max && !is_intersect_min && !is_collinear_min &&  t_max_within_bounds) {
             params.tStep = 1;
             params.tMax = t_max;
             params.within_bounds = true;
             return params;
         }
-        if (is_intersect_min && !is_intersect_max && !is_collinear_max && lessThan(t_min, t_end) &&
-            lessThan(t, t_min)) {
+        const bool t_min_within_bounds = lessThan(t, t_min) && lessThan(t_min, t_end);
+        if (is_intersect_min && !is_intersect_max && !is_collinear_max && t_min_within_bounds) {
             params.tStep = -1;
             params.tMax = t_min;
             params.within_bounds = true;
@@ -307,7 +307,6 @@ namespace svr {
         if ((is_intersect_min && is_intersect_max) ||
             (is_intersect_min && is_collinear_max) ||
             (is_intersect_max && is_collinear_min)) {
-            const bool t_min_within_bounds = lessThan(t, t_min) && lessThan(t_min, t_end);
             if (t_min_within_bounds && isEqual(t_min, t_max)) {
                 params.tMax = t_max;
                 const double perturbed_t = 0.1;
@@ -329,7 +328,6 @@ namespace svr {
                 params.within_bounds = true;
                 return params;
             }
-            const bool t_max_within_bounds = lessThan(t, t_max) && lessThan(t_max, t_end);
             if (t_max_within_bounds && (lessThan(t_max, t_min) || isEqual(t, t_min))) {
                 params.tStep = 1;
                 params.tMax = t_max;
