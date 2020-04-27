@@ -198,9 +198,8 @@ namespace svr {
     // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
     RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &rh_data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
-        const std::size_t idx = current_voxel_ID_r;
-        const double current_radius = grid.deltaRadii(idx);
-        const double next_radius = grid.deltaRadii(idx + 1);
+        const double current_radius = grid.deltaRadii(current_voxel_ID_r);
+        const double next_radius = grid.deltaRadii(current_voxel_ID_r + 1);
         double r_a = std::max(next_radius, grid.deltaRadius());
 
         // To find the next radius, we need to check the previous_transition_flag:
