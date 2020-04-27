@@ -4,7 +4,14 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
-#include <limits>
+#include <array>
+
+// The indices for Vec3. For example, Vec3[0] returns the x-direction.
+enum DirectionIndex {
+    X_DIRECTION = 0,
+    Y_DIRECTION = 1,
+    Z_DIRECTION = 2
+};
 
 // Represents a Euclidean vector in 3-dimensional space.
 // Assumes vectors take the form of:
@@ -13,44 +20,34 @@
 //      [z]
 struct Vec3 {
 public:
-    constexpr inline Vec3(const double x, const double y, const double z) : x_(x), y_(y), z_(z) {}
+    constexpr inline Vec3(const double x, const double y, const double z) : e_{x,y,z} {}
 
-    constexpr inline double x() const noexcept { return this->x_; }
+    constexpr inline double x() const noexcept { return this->e_[0]; }
 
-    constexpr inline double y() const noexcept { return this->y_; }
+    constexpr inline double y() const noexcept { return this->e_[1]; }
 
-    constexpr inline double z() const noexcept { return this->z_; }
+    constexpr inline double z() const noexcept { return this->e_[2]; }
 
-    inline double &x() noexcept { return this->x_; }
+    inline double &x() noexcept { return this->e_[0]; }
 
-    inline double &y() noexcept { return this->y_; }
+    inline double &y() noexcept { return this->e_[1]; }
 
-    inline double &z() noexcept { return this->z_; }
+    inline double &z() noexcept { return this->e_[2]; }
 
     inline double length() const noexcept {
-        return std::sqrt(this->x_ * this->x_ + this->y_ * this->y_ + this->z_ * this->z_);
+        return std::sqrt(this->e_[0] * this->e_[0]  + this->e_[1]  * this->e_[1]  + this->e_[2]  * this->e_[2]);
     }
 
     constexpr inline double squared_length() const noexcept {
-        return x_ * x_ + y_ * y_ + z_ * z_;
+        return e_[0] * e_[0] + e_[1] * e_[1] + e_[2] * e_[2];
     }
 
     inline double operator[](const std::size_t index) const noexcept {
-        switch(index) {
-          case 0: return this->x_;
-          case 1: return this->y_;
-          case 2: return this->z_;
-        }
-        return std::numeric_limits<double>::quiet_NaN();
+        return e_[index];
   }
 
 private:
-    // Represents the x-dimension value of the vector.
-    double x_;
-    // Represents the y-dimension value of the vector.
-    double y_;
-    // Represents the z-dimension value of the vector.
-    double z_;
+    std::array<double, 3> e_;
 };
 
 // A 3-dimensional free vector, which has no initial point. It has two main criteria:
@@ -175,12 +172,7 @@ struct UnitVec3 {
     inline const FreeVec3 &to_free() const noexcept { return inner_; }
 
     inline double operator[](const std::size_t index) const noexcept {
-        switch(index) {
-           case 0: return this->x();
-           case 1: return this->y();
-           case 2: return this->z();
-        }
-        return std::numeric_limits<double>::quiet_NaN();
+        return this->to_free()[index];
     }
 
 private:
