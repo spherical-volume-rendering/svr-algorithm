@@ -198,21 +198,20 @@ namespace svr {
     // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
     RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &rh_data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
-        // todo: We can reduce the number of calculations here by pre-initializing these values in
-        //       SphericalVoxelGrid.
-        const double current_radius = grid.sphereMaxRadius() - grid.deltaRadius() * (current_voxel_ID_r - 1);
-        double r_a = std::max(current_radius - grid.deltaRadius(), grid.deltaRadius());
-        double r_b;
-        if (!rh_data.transitionFlag()) {
-            // To find the next radius, we need to check the previous_transition_flag:
-            // In the case that the ray has sequential hits with equal radii, e.g.
-            // the innermost radial disc, this ensures that the proper radii are being checked.
-            r_b = std::min(current_radius + grid.deltaRadius(), grid.sphereMaxRadius());
-        } else { r_b = std::min(current_radius, grid.sphereMaxRadius()); }
+        const std::size_t idx = current_voxel_ID_r;
+        const double current_radius = grid.deltaRadii(idx);
+        const double next_radius = grid.deltaRadii(idx + 1);
+        double r_a = std::max(next_radius, grid.deltaRadius());
+
+        // To find the next radius, we need to check the previous_transition_flag:
+        // In the case that the ray has sequential hits with equal radii, e.g.
+        // the innermost radial disc, this ensures that the proper radii are being checked.
+        const double r_b = !rh_data.transitionFlag() ? std::min(next_radius, grid.sphereMaxRadius())
+                                                     : std::min(current_radius, grid.sphereMaxRadius());
         // Find the intersection times for the ray and the previous and next radial discs.
         double discriminant_a = r_a * r_a - rh_data.rsvdMinusVSquared();
         if (discriminant_a < 0.0) {
-            r_a += grid.deltaRadius();
+            r_a = next_radius;
             discriminant_a = r_a * r_a - rh_data.rsvdMinusVSquared();
         }
         const double d_a = std::sqrt(discriminant_a);
