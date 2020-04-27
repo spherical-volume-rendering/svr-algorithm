@@ -171,7 +171,7 @@ namespace svr {
             const double d1d2 = (px_p1_diff * px_p1_diff) + (py_p1_diff * py_p1_diff) +
                                 (n_px_p1_diff * n_px_p1_diff) + (n_py_p1_diff * n_py_p1_diff);
             const double d3 = (px_diff * px_diff) + (py_diff * py_diff);
-            if (lessThan(d1d2, d3) || isEqual(d1d2, d3)) { return i; }
+            if (d1d2 < d3 || isEqual(d1d2, d3)) { return i; }
             ++i;
         }
         return -1;
@@ -228,7 +228,7 @@ namespace svr {
         const bool is_radial_transition = isEqual(r_new, current_radius);
         const bool is_not_tangential_hit = !(isEqual(rdata.intersection_times[0], rdata.intersection_times[1]));
         return {.tMaxR=*intersection_time,
-                .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&          // { 0, -1, 1 }
+                .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&
                              !is_radial_transition && lessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
                 .within_bounds=lessThan(t, *intersection_time) && lessThan(*intersection_time, t_end)
