@@ -175,20 +175,21 @@ namespace svr {
     // voxel boundaries range from [0, N], returns -1 in the case where the point does not lie within the boundaries.
     inline int calculateVoxelID(const std::vector<svr::LineSegment> &plane, double p1, double p2) noexcept {
         std::size_t i = 0;
-        while (i < plane.size() - 1) {
-            const double px_diff = plane[i].P1 - plane[i + 1].P1;
-            const double py_diff = plane[i].P2 - plane[i + 1].P2;
-            const double px_p1_diff = plane[i].P1 - p1;
-            const double py_p1_diff = plane[i].P2 - p2;
-            const double n_px_p1_diff = plane[i + 1].P1 - p1;
-            const double n_py_p1_diff = plane[i + 1].P2 - p2;
-            const double d1d2 = (px_p1_diff * px_p1_diff) + (py_p1_diff * py_p1_diff) +
-                                (n_px_p1_diff * n_px_p1_diff) + (n_py_p1_diff * n_py_p1_diff);
-            const double d3 = (px_diff * px_diff) + (py_diff * py_diff);
-            if (d1d2 < d3 || isEqual(d1d2, d3)) { return i; }
+        std::adjacent_find(plane.cbegin(), plane.cend(),
+                           [&i, p1, p2](const LineSegment &LS1, const LineSegment &LS2)->bool{
+            const double X_diff = LS1.P1 - LS2.P1;
+            const double Y_diff = LS1.P2 - LS2.P2;
+            const double X_p1_diff = LS1.P1 - p1;
+            const double X_p2_diff = LS1.P2 - p2;
+            const double Y_p1_diff = LS2.P1 - p1;
+            const double Y_p2_diff = LS2.P2 - p2;
+            const double d1d2 = (X_p1_diff * X_p1_diff) + (X_p2_diff * X_p2_diff) +
+                                (Y_p1_diff * Y_p1_diff) + (Y_p2_diff * Y_p2_diff);
+            const double d3 = (X_diff * X_diff) + (Y_diff * Y_diff);
             ++i;
-        }
-        return -1;
+            return d1d2 < d3 || isEqual(d1d2, d3);
+        });
+        return i - 1;
     }
 
     // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
