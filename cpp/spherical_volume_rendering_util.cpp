@@ -478,12 +478,16 @@ namespace svr {
         // Determine ray location at t_begin.
         const BoundVec3 point_at_t_begin = ray.pointAtParameter(t_begin);
         const FreeVec3 ray_sphere_vector = grid.sphereCenter() - point_at_t_begin;
-        double entry_radius = grid.deltaRadius(); // The radius at which the ray first enters the sphere.
 
-        const double rsvd = ray_sphere_vector.dot(ray_sphere_vector);
-        while (rsvd > (entry_radius * entry_radius) && entry_radius < grid.sphereMaxRadius()) {
-            entry_radius += grid.deltaRadius();
-        }
+        std::size_t idx = grid.numRadialVoxels() + 1;
+        const double rsvd = ray_sphere_vector.dot(ray_sphere_vector); // Ray Sphere Vector Dot product
+        const auto it = std::find_if(grid.deltaRadii().crbegin(),
+                                     grid.deltaRadii().crend(),
+                                     [rsvd, &idx](double dR)->bool{
+            --idx;
+            return rsvd <= dR * dR;
+        });
+        const double entry_radius = (it != grid.deltaRadii().crend()) ? *it : grid.sphereMaxRadius();
 
         // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
         // This will determine if the ray intersects the sphere.
@@ -504,13 +508,14 @@ namespace svr {
             // Case 2: Tangent hit.
             return {};
         }
-        int current_voxel_ID_r = 1 + (grid.sphereMaxRadius() - entry_radius) * grid.invDeltaRadius();
+        int current_voxel_ID_r = idx + 1;
+
         std::vector<svr::LineSegment> P_angular(grid.numAngularVoxels() + 1);
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius);
 
         double a, b, c;
-        const bool ray_origin_is_outside_grid = isEqual(entry_radius, grid.sphereMaxRadius());
+        const bool ray_origin_is_outside_grid = current_voxel_ID_r == 1;
         if (isEqual(ray.origin(), grid.sphereCenter())) {
             // If the ray starts at the sphere's center, we need to perturb slightly along
             // the path to determine the correct angular and azimuthal voxel.
@@ -558,13 +563,16 @@ namespace svr {
                           .angular_voxel=current_voxel_ID_theta,
                           .azimuthal_voxel=current_voxel_ID_phi});
 
-        // Find the maximum time the ray will be in the grid.
-        const double max_discriminant =
-                grid.sphereMaxRadius() * grid.sphereMaxRadius() - rsvd_minus_v_squared;
-        const double max_d = std::sqrt(max_discriminant);
-        const double t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
-        // Find the correct time to begin the traversal phase.
-        double t = ray_origin_is_outside_grid ? ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z)) : t_begin;
+        double t, t_grid_exit;
+        if (ray_origin_is_outside_grid) {
+            t = ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z));
+            t_grid_exit = std::max(t_begin_t1, t_begin_t2);
+        } else {
+            t = t_begin;
+            const double max_discriminant = grid.sphereMaxRadius() * grid.sphereMaxRadius() - rsvd_minus_v_squared;
+            const double max_d = std::sqrt(max_discriminant);
+            t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
+        }
         t_end = std::min(t_grid_exit, t_end);
 
         // Initialize the time in case of collinear min or collinear max for generalized plane hits.

@@ -42,11 +42,10 @@ namespace svr {
                 sphere_max_radius_(sphere_max_radius),
                 delta_radius_(sphere_max_radius / num_radial_voxels),
                 delta_theta_(TAU / num_angular_voxels),
-                delta_phi_(TAU / num_azimuthal_voxels),
-                inv_delta_radius_(1.0 / delta_radius_) {
+                delta_phi_(TAU / num_azimuthal_voxels) {
 
             delta_radii_.resize(num_radial_voxels + 1);
-            double current_delta_radius = delta_radius_ * (num_radial_voxels + 1);
+            double current_delta_radius = delta_radius_ * (num_radial_voxels + 1.0);
             std::generate(delta_radii_.begin(), delta_radii_.end(),
                           [&]() -> double {
                               const double old_delta_radius = current_delta_radius;
@@ -122,9 +121,9 @@ namespace svr {
 
         inline double deltaRadius() const noexcept { return this->delta_radius_; }
 
-        inline double invDeltaRadius() const noexcept { return this->inv_delta_radius_; }
-
         inline double deltaRadii(std::size_t i) const noexcept { return this->delta_radii_[i]; }
+
+        inline const std::vector<double> &deltaRadii() const noexcept { return this->delta_radii_; }
 
         inline const LineSegment &pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
 
@@ -161,9 +160,6 @@ namespace svr {
 
         // 2 * PI divided by X, where X is the number of angular and number of azimuthal sections respectively.
         const double delta_theta_, delta_phi_;
-
-        // Inverse of the above delta values.
-        const double inv_delta_radius_;
 
         // The delta radii ranging from 0...num_radial_voxels.
         std::vector<double> delta_radii_;
