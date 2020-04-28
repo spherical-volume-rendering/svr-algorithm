@@ -168,27 +168,37 @@ namespace svr {
         return a < b && !isEqual(a, b);
     }
 
+    // Maintains a count until BinaryPredicate p is met for two consecutive elements.
+    template<class ForwardIt, class BinaryPredicate>
+    inline std::size_t index_adjacent_find(ForwardIt first, ForwardIt last, BinaryPredicate p) noexcept {
+        std::size_t count = 0;
+        ForwardIt next = first;
+        ++next;
+        for (; next != last; ++next, ++first) {
+            if (p(*first, *next)) return count;
+            count++;
+        }
+        return count;
+    }
+
     // A point will lie between two angular voxel boundaries iff the angle between it and the angular boundary
     // intersection points along the circle of max radius is obtuse. Equality represents the case when the point lies
     // on an angular boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane
     // (XY for angular, XZ for azimuthal), this can be generalized to a single function.
     inline int calculateVoxelID(const std::vector<svr::LineSegment> &plane, double p1, double p2) noexcept {
-        std::size_t i = 0;
-        std::adjacent_find(plane.cbegin(), plane.cend(),
-                           [&i, p1, p2](const LineSegment &LS1, const LineSegment &LS2)->bool{
-            const double X_diff = LS1.P1 - LS2.P1;
-            const double Y_diff = LS1.P2 - LS2.P2;
-            const double X_p1_diff = LS1.P1 - p1;
-            const double X_p2_diff = LS1.P2 - p2;
-            const double Y_p1_diff = LS2.P1 - p1;
-            const double Y_p2_diff = LS2.P2 - p2;
-            const double d1d2 = (X_p1_diff * X_p1_diff) + (X_p2_diff * X_p2_diff) +
-                                (Y_p1_diff * Y_p1_diff) + (Y_p2_diff * Y_p2_diff);
-            const double d3 = (X_diff * X_diff) + (Y_diff * Y_diff);
-            ++i;
-            return d1d2 < d3 || isEqual(d1d2, d3);
-        });
-        return i - 1;
+        return index_adjacent_find(plane.cbegin(), plane.cend(),
+                                   [p1, p2](const LineSegment &LS1, const LineSegment &LS2) -> bool {
+                                       const double X_diff = LS1.P1 - LS2.P1;
+                                       const double Y_diff = LS1.P2 - LS2.P2;
+                                       const double X_p1_diff = LS1.P1 - p1;
+                                       const double X_p2_diff = LS1.P2 - p2;
+                                       const double Y_p1_diff = LS2.P1 - p1;
+                                       const double Y_p2_diff = LS2.P2 - p2;
+                                       const double d1d2 = (X_p1_diff * X_p1_diff) + (X_p2_diff * X_p2_diff) +
+                                                           (Y_p1_diff * Y_p1_diff) + (Y_p2_diff * Y_p2_diff);
+                                       const double d3 = (X_diff * X_diff) + (Y_diff * Y_diff);
+                                       return d1d2 < d3 || isEqual(d1d2, d3);
+                                   });
     }
 
     // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
