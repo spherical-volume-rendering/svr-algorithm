@@ -576,7 +576,7 @@ namespace svr {
         t_end = std::min(t_grid_exit, t_end);
 
         // Initialize the time in case of collinear min or collinear max for generalized plane hits.
-        std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
+        const std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
         RadialHitData radial_hit_data(v, rsvd_minus_v_squared);
         RaySegment ray_segment(&ray, t_end);
