@@ -171,8 +171,7 @@ namespace svr {
     // A point will lie between two angular voxel boundaries iff the angle between it and the angular boundary
     // intersection points along the circle of max radius is obtuse. Equality represents the case when the point lies
     // on an angular boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane
-    // (XY for angular, XZ for azimuthal), this can be generalized to a single function. Since angular and azimuthal
-    // voxel boundaries range from [0, N], returns -1 in the case where the point does not lie within the boundaries.
+    // (XY for angular, XZ for azimuthal), this can be generalized to a single function.
     inline int calculateVoxelID(const std::vector<svr::LineSegment> &plane, double p1, double p2) noexcept {
         std::size_t i = 0;
         std::adjacent_find(plane.cbegin(), plane.cend(),
