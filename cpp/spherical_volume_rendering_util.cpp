@@ -199,7 +199,7 @@ namespace svr {
     RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &rh_data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
         const double current_radius = grid.deltaRadii(current_voxel_ID_r);
-        const double next_radius = grid.deltaRadii(current_voxel_ID_r + 1);
+        const double next_radius = current_radius - grid.deltaRadius();
         double r_a = std::max(next_radius, grid.deltaRadius());
 
         // To find the next radius, we need to check the previous_transition_flag:
