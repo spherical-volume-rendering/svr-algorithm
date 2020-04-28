@@ -198,19 +198,20 @@ namespace svr {
     // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
     RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &rh_data,
                                   int current_voxel_ID_r, double t, double t_end) noexcept {
-        const double current_radius = grid.deltaRadii(current_voxel_ID_r);
+        const double current_radius = grid.deltaRadii(current_voxel_ID_r - 1);
         const double next_radius = current_radius - grid.deltaRadius();
+        const double previous_radius = current_radius + grid.deltaRadius();
         double r_a = std::max(next_radius, grid.deltaRadius());
 
         // To find the next radius, we need to check the previous_transition_flag:
         // In the case that the ray has sequential hits with equal radii, e.g.
         // the innermost radial disc, this ensures that the proper radii are being checked.
-        const double r_b = !rh_data.transitionFlag() ? std::min(next_radius, grid.sphereMaxRadius())
+        const double r_b = !rh_data.transitionFlag() ? std::min(previous_radius, grid.sphereMaxRadius())
                                                      : std::min(current_radius, grid.sphereMaxRadius());
         // Find the intersection times for the ray and the previous and next radial discs.
         double discriminant_a = r_a * r_a - rh_data.rsvdMinusVSquared();
         if (discriminant_a < 0.0) {
-            r_a = next_radius;
+            r_a += grid.deltaRadius();
             discriminant_a = r_a * r_a - rh_data.rsvdMinusVSquared();
         }
         const double d_a = std::sqrt(discriminant_a);
@@ -479,7 +480,7 @@ namespace svr {
         const BoundVec3 point_at_t_begin = ray.pointAtParameter(t_begin);
         const FreeVec3 ray_sphere_vector = grid.sphereCenter() - point_at_t_begin;
 
-        std::size_t idx = grid.numRadialVoxels() + 1;
+        std::size_t idx = grid.numRadialVoxels();
         const double rsvd = ray_sphere_vector.dot(ray_sphere_vector); // Ray Sphere Vector Dot product
         const auto it = std::find_if(grid.deltaRadii().crbegin(),
                                      grid.deltaRadii().crend(),
@@ -501,10 +502,10 @@ namespace svr {
 
         // Calculate the time of entrance and exit of the ray.
         // Need to use a non-zero direction to determine this.
-        const double t_begin_t1 = ray.timeOfIntersectionAt(v - d);
-        const double t_begin_t2 = ray.timeOfIntersectionAt(v + d);
+        const double t1 = ray.timeOfIntersectionAt(v - d);
+        const double t2 = ray.timeOfIntersectionAt(v + d);
 
-        if ((t_begin_t1 < t_begin && t_begin_t2 < t_begin) || isEqual(t_begin_t1, t_begin_t2)) {
+        if ((t1 < t_begin && t2 < t_begin) || isEqual(t1, t2)) {
             // Case 1: No intersection.
             // Case 2: Tangent hit.
             return {};
@@ -524,7 +525,7 @@ namespace svr {
             b = grid.sphereCenter().y() - (point_at_t_begin.y() + ray.direction().y() * perturbed_t);
             c = grid.sphereCenter().z() - (point_at_t_begin.z() + ray.direction().z() * perturbed_t);
         } else if (ray_origin_is_outside_grid) {
-            const BoundVec3 pa = ray.pointAtParameter(t_begin_t1);
+            const BoundVec3 pa = ray.pointAtParameter(t1);
             a = grid.sphereCenter().x() - pa.x();
             b = grid.sphereCenter().y() - pa.y();
             c = grid.sphereCenter().z() - pa.z();
@@ -566,11 +567,10 @@ namespace svr {
         double t, t_grid_exit;
         if (ray_origin_is_outside_grid) {
             t = ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z));
-            t_grid_exit = std::max(t_begin_t1, t_begin_t2);
+            t_grid_exit = std::max(t1, t2);
         } else {
             t = t_begin;
-            const double max_discriminant = grid.sphereMaxRadius() * grid.sphereMaxRadius() - rsvd_minus_v_squared;
-            const double max_d = std::sqrt(max_discriminant);
+            const double max_d = std::sqrt(grid.sphereMaxRadius() * grid.sphereMaxRadius() - rsvd_minus_v_squared);
             t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
         }
         t_end = std::min(t_grid_exit, t_end);

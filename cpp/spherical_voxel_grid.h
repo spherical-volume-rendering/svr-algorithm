@@ -44,8 +44,8 @@ namespace svr {
                 delta_theta_(TAU / num_angular_voxels),
                 delta_phi_(TAU / num_azimuthal_voxels) {
 
-            delta_radii_.resize(num_radial_voxels + 1);
-            double current_delta_radius = delta_radius_ * (num_radial_voxels + 1.0);
+            delta_radii_.resize(num_radial_voxels);
+            double current_delta_radius = delta_radius_ * num_radial_voxels;
             std::generate(delta_radii_.begin(), delta_radii_.end(),
                           [&]() -> double {
                               const double old_delta_radius = current_delta_radius;
