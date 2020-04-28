@@ -52,6 +52,9 @@ namespace svr {
                               current_delta_radius -= delta_radius_;
                               return old_delta_radius;
                           });
+            delta_radii_sq_.resize(num_radial_voxels);
+            std::transform(delta_radii_.cbegin(), delta_radii_.cend(), delta_radii_sq_.begin(),
+                           [](double dR) -> double { return dR * dR; });
 
             P_max_angular_.resize(num_angular_voxels + 1);
             P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
@@ -123,7 +126,11 @@ namespace svr {
 
         inline double deltaRadii(std::size_t i) const noexcept { return this->delta_radii_[i]; }
 
+        inline double deltaRadiiSquared(std::size_t i) const noexcept { return this->delta_radii_sq_[i]; }
+
         inline const std::vector<double> &deltaRadii() const noexcept { return this->delta_radii_; }
+
+        inline const std::vector<double> &deltaRadiiSquared() const noexcept { return this->delta_radii_sq_; }
 
         inline const LineSegment &pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
 
@@ -163,6 +170,9 @@ namespace svr {
 
         // The delta radii ranging from 0...num_radial_voxels.
         std::vector<double> delta_radii_;
+
+        // The delta radii squared ranging from 0...num_radial_voxels.
+        std::vector<double> delta_radii_sq_;
 
         // The maximum radius line segments for angular voxels.
         std::vector<LineSegment> P_max_angular_;

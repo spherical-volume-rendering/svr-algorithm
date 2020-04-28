@@ -492,20 +492,21 @@ namespace svr {
 
         std::size_t idx = grid.numRadialVoxels();
         const double rsvd = ray_sphere_vector.dot(ray_sphere_vector); // Ray Sphere Vector Dot product
-        const auto it = std::find_if(grid.deltaRadii().crbegin(),
-                                     grid.deltaRadii().crend(),
-                                     [rsvd, &idx](double dR)->bool{
+        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin(),
+                                     grid.deltaRadiiSquared().crend(),
+                                     [rsvd, &idx](double dR_squared)-> bool {
             --idx;
-            return rsvd <= dR * dR;
+            return rsvd <= dR_squared;
         });
-        const bool ray_origin_is_outside_grid = (it == grid.deltaRadii().crend());
-        const double entry_radius = !ray_origin_is_outside_grid ? *it : grid.sphereMaxRadius();
+        const bool ray_origin_is_outside_grid = (it == grid.deltaRadiiSquared().crend());
+        const double entry_radius_squared = !ray_origin_is_outside_grid ? *it : grid.deltaRadiiSquared()[0];
+        const double entry_radius = grid.deltaRadii()[idx];
 
         // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
         // This will determine if the ray intersects the sphere.
         const double v = ray_sphere_vector.dot(ray.unitDirection().to_free());
         const double rsvd_minus_v_squared = rsvd - v * v;
-        const double discriminant = (entry_radius * entry_radius) - rsvd_minus_v_squared;
+        const double discriminant = entry_radius_squared - rsvd_minus_v_squared;
 
         if (discriminant <= 0.0) { return {}; }
         const double d = std::sqrt(discriminant);
@@ -580,7 +581,7 @@ namespace svr {
             t_grid_exit = std::max(t1, t2);
         } else {
             t = t_begin;
-            const double max_d = std::sqrt(grid.sphereMaxRadius() * grid.sphereMaxRadius() - rsvd_minus_v_squared);
+            const double max_d = std::sqrt(grid.deltaRadiiSquared()[0] - rsvd_minus_v_squared);
             t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
         }
         t_end = std::min(t_grid_exit, t_end);
