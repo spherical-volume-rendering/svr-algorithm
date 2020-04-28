@@ -487,7 +487,8 @@ namespace svr {
             --idx;
             return rsvd <= dR * dR;
         });
-        const double entry_radius = (it != grid.deltaRadii().crend()) ? *it : grid.sphereMaxRadius();
+        const bool ray_origin_is_outside_grid = (it == grid.deltaRadii().crend());
+        const double entry_radius = !ray_origin_is_outside_grid ? *it : grid.sphereMaxRadius();
 
         // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
         // This will determine if the ray intersects the sphere.
@@ -515,7 +516,6 @@ namespace svr {
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius);
 
         double a, b, c;
-        const bool ray_origin_is_outside_grid = entry_radius == grid.sphereMaxRadius();
         if (isEqual(ray.origin(), grid.sphereCenter())) {
             // If the ray starts at the sphere's center, we need to perturb slightly along
             // the path to determine the correct angular and azimuthal voxel.
