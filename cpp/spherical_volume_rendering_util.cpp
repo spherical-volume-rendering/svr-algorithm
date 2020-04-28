@@ -79,16 +79,14 @@ namespace svr {
 
     // A lot of calculations are conducted in the initialization phase already. To mitigate these from occurring again,
     // This structure allows the calculations to be saved for use during radialHit().
-    // transition_flag_ is used with each iteration of the traversal.
+    // transition_flag_ is used with each iteration of the traversal to determine if we've made a transition
+    // in sign for radial steps.
     struct RadialHitData {
     public:
-        inline RadialHitData(double v, double rsvd, double rsvd_minus_v_squared) :
-                ray_sphere_vector_dot_product_(rsvd), v_(v),
-                rsvd_minus_v_squared_(rsvd_minus_v_squared){}
+        inline RadialHitData(double v, double rsvd_minus_v_squared) :
+        v_(v), rsvd_minus_v_squared_(rsvd_minus_v_squared) {}
 
         inline double v() const noexcept { return v_; }
-
-        inline double rsvd() const noexcept { return ray_sphere_vector_dot_product_; }
 
         inline double rsvdMinusVSquared() const noexcept { return rsvd_minus_v_squared_;}
 
@@ -97,7 +95,7 @@ namespace svr {
         inline void updateTransitionFlag(bool b) noexcept { transition_flag_ = b; }
     private:
         // Pre-calculated data to be used when calculating a radial hit.
-        const double ray_sphere_vector_dot_product_, v_, rsvd_minus_v_squared_;
+        const double v_, rsvd_minus_v_squared_;
 
         // The current state of the previous_transition_flag. This is saved here so that it can be passed
         // into the radial hit function with each traversal.
@@ -578,7 +576,7 @@ namespace svr {
         // Initialize the time in case of collinear min or collinear max for generalized plane hits.
         std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
-        RadialHitData radial_hit_data(v, rsvd, rsvd_minus_v_squared);
+        RadialHitData radial_hit_data(v, rsvd_minus_v_squared);
         RaySegment ray_segment(&ray, t_end);
 
         while (true) {
