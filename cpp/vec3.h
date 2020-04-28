@@ -21,6 +21,7 @@ enum DirectionIndex {
 struct Vec3 {
 public:
     constexpr inline Vec3(const double x, const double y, const double z) : e_{x,y,z} {}
+
     constexpr inline Vec3() : e_{0.0, 0.0, 0.0} {}
 
     constexpr inline double x() const noexcept { return this->e_[0]; }
