@@ -79,8 +79,6 @@ namespace svr {
 
     // A lot of calculations are conducted in the initialization phase already. To mitigate these from occurring again,
     // This structure allows the calculations to be saved for use during radialHit().
-    // transition_flag_ is used with each iteration of the traversal to determine if we've made a transition
-    // in sign for radial steps.
     struct RadialHitData {
     public:
         inline RadialHitData(double v, double rsvd_minus_v_squared) :
@@ -93,12 +91,13 @@ namespace svr {
         inline bool transitionFlag() const noexcept { return transition_flag_; }
 
         inline void updateTransitionFlag(bool b) noexcept { transition_flag_ = b; }
+
     private:
         // Pre-calculated data to be used when calculating a radial hit.
         const double v_, rsvd_minus_v_squared_;
 
-        // The current state of the previous_transition_flag. This is saved here so that it can be passed
-        // into the radial hit function with each traversal.
+        // The current state of the previous_transition_flag. It marks if we've made a transition
+        // in sign for radial steps, i.e. + => - or - => +.
         bool transition_flag_;
     };
 
@@ -127,8 +126,11 @@ namespace svr {
         }
 
         inline const BoundVec3 &P1() const noexcept { return P1_; }
+
         inline const BoundVec3 &P2() const noexcept { return P2_; }
+
         inline const FreeVec3 &raySegment() const noexcept { return ray_segment_; }
+
     private:
         // The associated ray for which the segment (P1, P2) refers to.
         const Ray *ray_;
@@ -513,7 +515,7 @@ namespace svr {
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius);
 
         double a, b, c;
-        const bool ray_origin_is_outside_grid = current_voxel_ID_r == 1;
+        const bool ray_origin_is_outside_grid = entry_radius == grid.sphereMaxRadius();
         if (isEqual(ray.origin(), grid.sphereCenter())) {
             // If the ray starts at the sphere's center, we need to perturb slightly along
             // the path to determine the correct angular and azimuthal voxel.
