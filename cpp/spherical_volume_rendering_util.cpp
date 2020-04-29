@@ -307,13 +307,13 @@ namespace svr {
         }
 
         GenHitParameters params;
-        if (is_intersect_max && !is_intersect_min && !is_collinear_min && t_max_within_bounds) {
+        if (t_max_within_bounds && is_intersect_max && !is_intersect_min && !is_collinear_min) {
             params.tStep = 1;
             params.tMax = t_max;
             params.within_bounds = true;
             return params;
         }
-        if (is_intersect_min && !is_intersect_max && !is_collinear_max && t_min_within_bounds) {
+        if (t_min_within_bounds && is_intersect_min && !is_intersect_max && !is_collinear_max) {
             params.tStep = -1;
             params.tMax = t_min;
             params.within_bounds = true;
