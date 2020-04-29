@@ -206,41 +206,36 @@ namespace svr {
     // as well as avoiding unnecessary duplicate calculations that have already been done in the initialization phase.
     // This follows closely the mathematics presented in:
     // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
-    RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &rh_data,
-                                  int current_voxel_ID_r, double t, double t_end) noexcept {
-        const double current_radius = grid.deltaRadii(current_voxel_ID_r - 1);
-        const double next_radius = current_radius - grid.deltaRadius();
-        const double previous_radius = current_radius + grid.deltaRadius();
-        double r_a = std::max(next_radius, grid.deltaRadius());
+    inline RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &rh_data,
+                                         int current_voxel_ID_r, double t, double t_end) noexcept {
+        const std::size_t voxel_idx = current_voxel_ID_r - 1;
+        const double current_radius = grid.deltaRadii(voxel_idx);
+
+
+        // Find the intersection times for the ray and the previous radial disc.
+        const std::size_t previous_idx = std::min(voxel_idx + 1, grid.numRadialVoxels() - 1);
+        double r_a = grid.deltaRadiiSquared( previous_idx -
+                                             (grid.deltaRadiiSquared(previous_idx) < rh_data.rsvdMinusVSquared()) );
+        const double d_a = std::sqrt(r_a - rh_data.rsvdMinusVSquared());
+
+        std::array<double, 4> intersection_times;
+        intersection_times[0] = ray.timeOfIntersectionAt(rh_data.v() - d_a);
+        intersection_times[1] = ray.timeOfIntersectionAt(rh_data.v() + d_a);
 
         // To find the next radius, we need to check the previous_transition_flag:
         // In the case that the ray has sequential hits with equal radii, e.g.
         // the innermost radial disc, this ensures that the proper radii are being checked.
-        const double r_b = !rh_data.transitionFlag() ? std::min(previous_radius, grid.sphereMaxRadius())
-                                                     : std::min(current_radius, grid.sphereMaxRadius());
-        // Find the intersection times for the ray and the previous and next radial discs.
-        double discriminant_a = r_a * r_a - rh_data.rsvdMinusVSquared();
-        if (discriminant_a < 0.0) {
-            r_a += grid.deltaRadius();
-            discriminant_a = r_a * r_a - rh_data.rsvdMinusVSquared();
-        }
-        const double d_a = std::sqrt(discriminant_a);
-        std::array<double, 4> intersection_times;
-
-        intersection_times[0] = ray.timeOfIntersectionAt(rh_data.v() - d_a);
-        intersection_times[1] = ray.timeOfIntersectionAt(rh_data.v() + d_a);
-
-        const double discriminant_b = r_b * r_b - rh_data.rsvdMinusVSquared();
-        if (discriminant_b >= 0.0) {
-            const double d_b = std::sqrt(discriminant_b);
+        const double transition_radii[] = {grid.deltaRadiiSquared( std::min(voxel_idx - 1, std::size_t{0}) ),
+                                           grid.deltaRadiiSquared( voxel_idx ) };
+        const double r_b = transition_radii[rh_data.transitionFlag()];
+        if (r_b >= rh_data.rsvdMinusVSquared()) {
+            const double d_b = std::sqrt(r_b - rh_data.rsvdMinusVSquared());
             intersection_times[2] = ray.timeOfIntersectionAt(rh_data.v() - d_b);
             intersection_times[3] = ray.timeOfIntersectionAt(rh_data.v() + d_b);
         }
-
         const auto intersection_time_it = std::find_if(intersection_times.cbegin(),
                                                        intersection_times.cend(),
                                                     [t](double i)->double{ return i > t;});
-
         if (intersection_time_it == intersection_times.cend()) {
             return {.tMaxR=std::numeric_limits<double>::max(),
                     .tStepR=0,
@@ -492,7 +487,7 @@ namespace svr {
 
         std::size_t idx = grid.numRadialVoxels();
         const double rsvd = ray_sphere_vector.dot(ray_sphere_vector); // Ray Sphere Vector Dot product
-        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin(),
+        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1,
                                      grid.deltaRadiiSquared().crend(),
                                      [rsvd, &idx](double dR_squared)-> bool {
             --idx;
