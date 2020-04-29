@@ -299,15 +299,22 @@ namespace svr {
                 t_max = RS.raySegmentIntersectionTimeAt(b);
             }
         }
-        GenHitParameters params;
         const bool t_max_within_bounds = lessThan(t, t_max) && lessThan(t_max, t_end);
-        if (is_intersect_max && !is_intersect_min && !is_collinear_min &&  t_max_within_bounds) {
+        const bool t_min_within_bounds = lessThan(t, t_min) && lessThan(t_min, t_end);
+        if (!t_max_within_bounds && !t_min_within_bounds) {
+            return {.tStep = 0,
+                    .tMax = std::numeric_limits<double>::max(),
+                    .within_bounds = false
+            };
+        }
+
+        GenHitParameters params;
+        if (is_intersect_max && !is_intersect_min && !is_collinear_min && t_max_within_bounds) {
             params.tStep = 1;
             params.tMax = t_max;
             params.within_bounds = true;
             return params;
         }
-        const bool t_min_within_bounds = lessThan(t, t_min) && lessThan(t_min, t_end);
         if (is_intersect_min && !is_intersect_max && !is_collinear_max && t_min_within_bounds) {
             params.tStep = -1;
             params.tMax = t_min;
