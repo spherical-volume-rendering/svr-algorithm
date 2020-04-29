@@ -357,9 +357,9 @@ namespace svr {
 
     // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
     // the ray and an angular section. The angular sections live in the XY plane.
-    AngularHitParameters angularHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
-                                    const RaySegment &RS, const std::array<double, 2> &collinear_times,
-                                    int current_voxel_ID_theta, double t, double t_end) noexcept {
+    inline AngularHitParameters angularHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
+                                           const RaySegment &RS, const std::array<double, 2> &collinear_times,
+                                           int current_voxel_ID_theta, double t, double t_end) noexcept {
         // Calculate the voxel boundary vectors.
         const FreeVec3 p_one(grid.pMaxAngular(current_voxel_ID_theta).P1,
                              grid.pMaxAngular(current_voxel_ID_theta).P2, 0.0);
@@ -386,9 +386,9 @@ namespace svr {
     // Determines whether an azimuthal hit occurs for the given ray. An azimuthal hit is
     // considered an intersection with the ray and an azimuthal section.
     // The azimuthal sections live in the XZ plane.
-    AzimuthalHitParameters azimuthalHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
-                                        const RaySegment &RS, const std::array<double, 2> &collinear_times,
-                                        int current_voxel_ID_phi, double t, double t_end) noexcept {
+    inline AzimuthalHitParameters azimuthalHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
+                                               const RaySegment &RS, const std::array<double, 2> &collinear_times,
+                                               int current_voxel_ID_phi, double t, double t_end) noexcept {
         // Calculate the voxel boundary vectors.
         const FreeVec3 p_one(grid.pMaxAzimuthal(current_voxel_ID_phi).P1, 0.0,
                              grid.pMaxAzimuthal(current_voxel_ID_phi).P2);
