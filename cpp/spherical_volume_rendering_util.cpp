@@ -240,10 +240,8 @@ namespace svr {
                                                     [t](double i)->double{ return i > t;});
         const double intersection_time = *intersection_time_it;
 
-        bool within_time_bounds;
         if (intersection_time_it == intersection_times.cend() ||
-            !( within_time_bounds = lessThan(t, intersection_time) && lessThan(intersection_time, t_end) )
-            ) {
+            !(lessThan(t, intersection_time) && lessThan(intersection_time, t_end))) {
             return {.tMaxR=std::numeric_limits<double>::max(),
                     .tStepR=0,
                     .previous_transition_flag=false,
@@ -256,7 +254,7 @@ namespace svr {
                 .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&
                              !is_radial_transition && lessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
-                .within_bounds=within_time_bounds
+                .within_bounds=true
         };
     }
 
