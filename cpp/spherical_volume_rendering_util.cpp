@@ -217,8 +217,8 @@ namespace svr {
 
         // Find the intersection times for the ray and the previous radial disc.
         const std::size_t previous_idx = std::min(voxel_idx + 1, grid.numRadialVoxels() - 1);
-        double r_a = grid.deltaRadiiSquared( previous_idx -
-                                             (grid.deltaRadiiSquared(previous_idx) < rh_data.rsvdMinusVSquared()) );
+        const double r_a = grid.deltaRadiiSquared(previous_idx -
+                                                  (grid.deltaRadiiSquared(previous_idx) < rh_data.rsvdMinusVSquared()));
         const double d_a = std::sqrt(r_a - rh_data.rsvdMinusVSquared());
 
         std::array<double, 4> intersection_times;
