@@ -238,15 +238,14 @@ namespace svr {
         const auto intersection_time_it = std::find_if(intersection_times.cbegin(),
                                                        intersection_times.cend(),
                                                     [t](double i)->double{ return i > t;});
-        const double intersection_time = *intersection_time_it;
 
-        if (intersection_time_it == intersection_times.cend() ||
-            !(lessThan(t, intersection_time) && lessThan(intersection_time, t_end))) {
+        if (intersection_time_it == intersection_times.cend()) {
             return {.tMaxR=std::numeric_limits<double>::max(),
                     .tStepR=0,
                     .previous_transition_flag=false,
-                    .within_bounds=false};
+                    .within_bounds=false };
         }
+        const double intersection_time = *intersection_time_it;
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isEqual(r_new, current_radius);
         const bool is_not_tangential_hit = !(isEqual(intersection_times[0], intersection_times[1]));
@@ -254,8 +253,7 @@ namespace svr {
                 .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&
                              !is_radial_transition && lessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
-                .within_bounds=true
-        };
+                .within_bounds= lessThan(t, intersection_time) && lessThan(intersection_time, t_end) };
     }
 
     // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
