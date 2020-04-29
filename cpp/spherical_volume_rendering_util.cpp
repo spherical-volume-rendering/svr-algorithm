@@ -121,8 +121,7 @@ namespace svr {
         // More information on this use case can be found at:
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
         inline double raySegmentIntersectionTimeAt(double intersect_param) const noexcept {
-            const auto idx = ray_->NonZeroDirectionIndex();
-            return (P1_[idx] + ray_segment_[idx] * intersect_param - ray_->origin()[idx]) * ray_->invDirection()[idx];
+            return (P1_[NZDI_] + ray_segment_[NZDI_] * intersect_param - ray_->origin()[NZDI_]) * ray_->invDirection()[NZDI_];
         }
 
         inline const BoundVec3 &P1() const noexcept { return P1_; }
@@ -134,6 +133,9 @@ namespace svr {
     private:
         // The associated ray for which the segment (P1, P2) refers to.
         const Ray *ray_;
+
+        // The non-zero direction index of the ray.
+        const DirectionIndex NZDI_ = ray_->NonZeroDirectionIndex();
 
         // The begin point of the ray segment.
         BoundVec3 P1_;
@@ -210,7 +212,6 @@ namespace svr {
                                          int current_voxel_ID_r, double t, double t_end) noexcept {
         const std::size_t voxel_idx = current_voxel_ID_r - 1;
         const double current_radius = grid.deltaRadii(voxel_idx);
-
 
         // Find the intersection times for the ray and the previous radial disc.
         const std::size_t previous_idx = std::min(voxel_idx + 1, grid.numRadialVoxels() - 1);
