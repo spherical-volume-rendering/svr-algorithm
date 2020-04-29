@@ -121,7 +121,8 @@ namespace svr {
         // More information on this use case can be found at:
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
         inline double raySegmentIntersectionTimeAt(double intersect_param) const noexcept {
-            return (P1_[NZDI_] + ray_segment_[NZDI_] * intersect_param - ray_->origin()[NZDI_]) * ray_->invDirection()[NZDI_];
+            return (P1_[NZDI_] + ray_segment_[NZDI_] * intersect_param - ray_->origin()[NZDI_])
+                   * ray_->invDirection()[NZDI_];
         }
 
         inline const BoundVec3 &P1() const noexcept { return P1_; }
@@ -237,13 +238,17 @@ namespace svr {
         const auto intersection_time_it = std::find_if(intersection_times.cbegin(),
                                                        intersection_times.cend(),
                                                     [t](double i)->double{ return i > t;});
-        if (intersection_time_it == intersection_times.cend()) {
+        const double intersection_time = *intersection_time_it;
+
+        bool within_time_bounds;
+        if (intersection_time_it == intersection_times.cend() ||
+            !( within_time_bounds = lessThan(t, intersection_time) && lessThan(intersection_time, t_end) )
+            ) {
             return {.tMaxR=std::numeric_limits<double>::max(),
                     .tStepR=0,
                     .previous_transition_flag=false,
                     .within_bounds=false};
         }
-        const double intersection_time = *intersection_time_it;
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isEqual(r_new, current_radius);
         const bool is_not_tangential_hit = !(isEqual(intersection_times[0], intersection_times[1]));
@@ -251,7 +256,7 @@ namespace svr {
                 .tStepR=STEP[1 * is_not_tangential_hit + (is_not_tangential_hit &&
                              !is_radial_transition && lessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
-                .within_bounds=lessThan(t, intersection_time) && lessThan(intersection_time, t_end)
+                .within_bounds=within_time_bounds
         };
     }
 
