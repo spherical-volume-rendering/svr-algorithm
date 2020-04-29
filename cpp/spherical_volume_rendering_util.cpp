@@ -296,33 +296,30 @@ namespace svr {
                 t_max = RS.raySegmentIntersectionTimeAt(b);
             }
         }
+
         const bool t_max_within_bounds = lessThan(t, t_max) && lessThan(t_max, t_end);
         const bool t_min_within_bounds = lessThan(t, t_min) && lessThan(t_min, t_end);
         if (!t_max_within_bounds && !t_min_within_bounds) {
-            return {.tStep = 0,
-                    .tMax = std::numeric_limits<double>::max(),
-                    .within_bounds = false
-            };
+            return { .tMax = std::numeric_limits<double>::max(),
+                     .tStep = 0,
+                     .within_bounds = false };
         }
 
-        GenHitParameters params;
+
         if (t_max_within_bounds && is_intersect_max && !is_intersect_min && !is_collinear_min) {
-            params.tStep = 1;
-            params.tMax = t_max;
-            params.within_bounds = true;
-            return params;
+            return { .tMax = t_max,
+                     .tStep = 1,
+                     .within_bounds = true };
         }
         if (t_min_within_bounds && is_intersect_min && !is_intersect_max && !is_collinear_max) {
-            params.tStep = -1;
-            params.tMax = t_min;
-            params.within_bounds = true;
-            return params;
+            return { .tMax = t_min,
+                     .tStep = -1,
+                     .within_bounds = true };
         }
         if ((is_intersect_min && is_intersect_max) ||
             (is_intersect_min && is_collinear_max) ||
             (is_intersect_max && is_collinear_min)) {
             if (t_min_within_bounds && isEqual(t_min, t_max)) {
-                params.tMax = t_max;
                 const double perturbed_t = 0.1;
                 a = -ray.direction().x() * perturbed_t;
                 b = -ray_plane_direction * perturbed_t;
@@ -330,29 +327,25 @@ namespace svr {
                 const double p1 = grid.sphereCenter().x() - max_radius_over_plane_length * a;
                 const double p2 = sphere_plane_center - max_radius_over_plane_length * b;
                 const int next_step = std::abs(current_voxel_ID - calculateVoxelID(P_max, p1, p2));
-
-                params.tStep = (lessThan(ray_plane_direction, 0.0) || lessThan(ray.direction().x(), 0.0)) ?
-                               next_step : -next_step;
-                params.within_bounds = true;
-                return params;
+                return { .tMax = t_max,
+                        .tStep = (lessThan(ray_plane_direction, 0.0) || lessThan(ray.direction().x(), 0.0)) ?
+                                 next_step : -next_step,
+                        .within_bounds = true };
             }
             if (t_min_within_bounds && (lessThan(t_min, t_max) || isEqual(t, t_max))) {
-                params.tStep = -1;
-                params.tMax = t_min;
-                params.within_bounds = true;
-                return params;
+                return { .tMax = t_min,
+                         .tStep = -1,
+                         .within_bounds = true };
             }
             if (t_max_within_bounds && (lessThan(t_max, t_min) || isEqual(t, t_min))) {
-                params.tStep = 1;
-                params.tMax = t_max;
-                params.within_bounds = true;
-                return params;
+                return { .tMax = t_max,
+                         .tStep = 1,
+                         .within_bounds = true };
             }
         }
-        params.tStep = 0;
-        params.tMax = std::numeric_limits<double>::max();
-        params.within_bounds = false;
-        return params;
+        return { .tMax = std::numeric_limits<double>::max(),
+                 .tStep = 0,
+                 .within_bounds = false };
     }
 
     // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
