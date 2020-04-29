@@ -209,8 +209,9 @@ namespace svr {
     // as well as avoiding unnecessary duplicate calculations that have already been done in the initialization phase.
     // This follows closely the mathematics presented in:
     // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
-    inline RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid, RadialHitData &rh_data,
-                                         int current_voxel_ID_r, double t, double t_end) noexcept {
+    inline RadialHitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
+                                         const RadialHitData &rh_data, int current_voxel_ID_r,
+                                         double t, double t_end) noexcept {
         const std::size_t voxel_idx = current_voxel_ID_r - 1;
         const double current_radius = grid.deltaRadii(voxel_idx);
 
