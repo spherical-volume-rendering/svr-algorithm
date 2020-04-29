@@ -365,7 +365,6 @@ function testOddAngularSections(testCase)
     
     [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
-
     verifyEqual(testCase, rVoxels,     [1,2,2,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [1,1,1,1,0,0]);
     verifyEqual(testCase, phiVoxels,   [2,2,1,1,0,0]);
@@ -418,6 +417,8 @@ function testLargeRadialSections(testCase)
     39,40,40,39,38,37,36,35,34,33,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,...
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+    verifyEqual(testCase, phiVoxels,   [2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,...
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
@@ -442,7 +443,6 @@ function testLargeAngularSections(testCase)
     verifyEqual(testCase, rVoxels,     [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [24,24,24,24,4,4,4,4]);
     verifyEqual(testCase, phiVoxels,   [2,2,2,2,0,0,0,0]);
-
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
@@ -467,6 +467,53 @@ function testLargeAziSections(testCase)
     verifyEqual(testCase, rVoxels,     [1,2,3,4,4,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [2,2,2,2,0,0,0,0]);
     verifyEqual(testCase, phiVoxels,   [24,24,24,24,4,4,4,4]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
+end
 
+% Ray begins within the sphere and end outside the grid
+function testBeginsWithinSphere(testCase)
+    min_bound = [-20, -20.0, -20.0];
+    max_bound = [20.0, 20.0, 20.0];
+    ray_origin = [-15.0, 15.0, 15.0];
+    ray_direction = [1.6, -1.2, -1.3];
+    sphere_center = [0.0, 0.0, 0.0];
+    sphere_max_radius = 10.0;
+    
+    num_radial_sections = 4;
+    num_angular_sections = 4;
+    num_azimuthal_sections = 4;
+    t_begin = 8.7;
+    t_end = 30.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
+    verifyEqual(testCase, rVoxels,     [3,4,4,3,3,3,2,1]);
+    verifyEqual(testCase, thetaVoxels, [0,0,3,3,3,3,3,3]);
+    verifyEqual(testCase, phiVoxels,   [0,0,0,0,0,3,3,3]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
+end
+
+% Ray ends within the sphere and begin outside the grid
+function testEndsWithinSphere(testCase)
+    min_bound = [-20, -20.0, -20.0];
+    max_bound = [20.0, 20.0, 20.0];
+    ray_origin = [13.0, -15.0, 16.0];
+    ray_direction = [-1.5, 1.2, -1.5];
+    sphere_center = [0.0, 0.0, 0.0];
+    sphere_max_radius = 10.0;
+    
+    num_radial_sections = 4;
+    num_angular_sections = 4;
+    num_azimuthal_sections = 4;
+    t_begin = 0.0;
+    t_end = 10.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
+    verifyEqual(testCase, rVoxels,     [1,2,2,3]); 
+    verifyEqual(testCase, thetaVoxels, [3,3,2,2]);
+    verifyEqual(testCase, phiVoxels,   [0,0,1,1]); 
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
