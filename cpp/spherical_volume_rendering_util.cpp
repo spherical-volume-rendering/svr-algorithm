@@ -486,7 +486,8 @@ namespace svr {
             return rsvd <= dR_squared;
         });
         const bool ray_origin_is_outside_grid = (it == grid.deltaRadiiSquared().crend());
-        const double entry_radius_squared = !ray_origin_is_outside_grid ? *it : grid.deltaRadiiSquared()[0];
+        const double max_radius_squared = grid.deltaRadiiSquared()[0];
+        const double entry_radius_squared = !ray_origin_is_outside_grid ? *it : max_radius_squared;
         const double entry_radius = grid.deltaRadii()[idx];
         printf("entry_radius: %f {%lu}", entry_radius, idx);
 
@@ -516,37 +517,32 @@ namespace svr {
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius);
 
-        FreeVec3 P_sphere(grid.sphereCenter().x(), grid.sphereCenter().y(), grid.sphereCenter().z());
-        if (isEqual(point_at_t_begin, grid.sphereCenter())) {
-            // If the ray starts at the sphere's center, we need to perturb slightly along
-            // the path to determine the correct angular and azimuthal voxel.
-            P_sphere -= FreeVec3(ray.pointAtParameter(t_begin + 0.1));
-        } else if (ray_origin_is_outside_grid) {
-            P_sphere -= FreeVec3(ray.pointAtParameter(t1));
-        } else {
-            P_sphere = ray_sphere_vector;
-        }
+        const FreeVec3 P_sphere = ray_origin_is_outside_grid ?
+                                  grid.sphereCenter() - ray.pointAtParameter(std::min(t1,t2)) :
+                                  isEqual(point_at_t_begin, grid.sphereCenter()) ?          // Need to perturb slightly.
+                                  grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :
+                                  ray_sphere_vector;
 
         double p_x, p_y, p_z;
-        const double ang_plane_length = std::sqrt(P_sphere.x() * P_sphere.x() + P_sphere.y() * P_sphere.y());
-        if (isEqual(ang_plane_length, 0.0)) {
+        const double angular_len = P_sphere.x() * P_sphere.x() + P_sphere.y() * P_sphere.y();
+        if (isEqual(angular_len, 0.0)) {
             p_x = grid.sphereCenter().x() + entry_radius;
             p_y = grid.sphereCenter().y();
         } else {
-            const double r_over_ang_plane_length = entry_radius / ang_plane_length;
-            p_x = grid.sphereCenter().x() - P_sphere.x() * r_over_ang_plane_length;
-            p_y = grid.sphereCenter().y() - P_sphere.y() * r_over_ang_plane_length;
+            const double angr = entry_radius / std::sqrt(angular_len);
+            p_x = grid.sphereCenter().x() - P_sphere.x() * angr;
+            p_y = grid.sphereCenter().y() - P_sphere.y() * angr;
         }
         int current_voxel_ID_theta = calculateVoxelID(P_angular, p_x, p_y);
 
-        const double azi_plane_length = std::sqrt(P_sphere.x() * P_sphere.x() + P_sphere.z() * P_sphere.z());
-        if (isEqual(azi_plane_length, 0.0)) {
+        const double azimuthal_len = P_sphere.x() * P_sphere.x() + P_sphere.z() * P_sphere.z();
+        if (isEqual(azimuthal_len, 0.0)) {
             p_x = grid.sphereCenter().x() + entry_radius;
             p_z = grid.sphereCenter().z();
         } else {
-            const double r_over_azi_plane_length = entry_radius / azi_plane_length;
-            p_x = grid.sphereCenter().x() - P_sphere.x() * r_over_azi_plane_length;
-            p_z = grid.sphereCenter().z() - P_sphere.z() * r_over_azi_plane_length;
+            const double azir = entry_radius / std::sqrt(azimuthal_len);
+            p_x = grid.sphereCenter().x() - P_sphere.x() * azir;
+            p_z = grid.sphereCenter().z() - P_sphere.z() * azir;
         }
         int current_voxel_ID_phi = calculateVoxelID(P_azimuthal, p_x, p_z);
 
@@ -562,7 +558,7 @@ namespace svr {
             t_grid_exit = std::max(t1, t2);
         } else {
             t = t_begin;
-            const double max_d = std::sqrt(grid.deltaRadiiSquared()[0] - rsvd_minus_v_squared);
+            const double max_d = std::sqrt(max_radius_squared - rsvd_minus_v_squared);
             t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
         }
         t_end = std::min(t_grid_exit, t_end);
