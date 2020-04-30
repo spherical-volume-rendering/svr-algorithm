@@ -508,7 +508,7 @@ function testBeginsWithinSphere(testCase)
     num_azimuthal_sections = 4;
     t_begin = 9.0;
     t_end = 30.0;
-    verbose = true;
+    verbose = false;
     
     [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
