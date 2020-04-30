@@ -173,7 +173,7 @@ namespace svr {
 
     // Maintains a count until BinaryPredicate p is met for two consecutive elements.
     template<class ForwardIt, class BinaryPredicate>
-    inline std::size_t index_adjacent_find(ForwardIt first, ForwardIt last, BinaryPredicate p) noexcept {
+    inline std::size_t index_adjacent_find_until(ForwardIt first, ForwardIt last, BinaryPredicate p) noexcept {
         std::size_t count = 0;
         ForwardIt next = first;
         ++next;
@@ -189,7 +189,7 @@ namespace svr {
     // on an angular boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane
     // (XY for angular, XZ for azimuthal), this can be generalized to a single function.
     inline int calculateVoxelID(const std::vector<svr::LineSegment> &plane, double p1, double p2) noexcept {
-        return index_adjacent_find(plane.cbegin(), plane.cend(),
+        return index_adjacent_find_until(plane.cbegin(), plane.cend(),
                                    [p1, p2](const LineSegment &LS1, const LineSegment &LS2) -> bool {
                                        const double X_diff = LS1.P1 - LS2.P1;
                                        const double Y_diff = LS1.P2 - LS2.P2;
@@ -488,6 +488,7 @@ namespace svr {
         const bool ray_origin_is_outside_grid = (it == grid.deltaRadiiSquared().crend());
         const double entry_radius_squared = !ray_origin_is_outside_grid ? *it : grid.deltaRadiiSquared()[0];
         const double entry_radius = grid.deltaRadii()[idx];
+        printf("entry_radius: %f {%lu}", entry_radius, idx);
 
         // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
         // This will determine if the ray intersects the sphere.
@@ -502,8 +503,9 @@ namespace svr {
         // Need to use a non-zero direction to determine this.
         const double t1 = ray.timeOfIntersectionAt(v - d);
         const double t2 = ray.timeOfIntersectionAt(v + d);
+        printf("\n t1: %f, t2: %f \n", t1, t2);
 
-        if ((t1 < t_begin && t2 < t_begin) || isEqual(t1, t2)) {
+        if (((t1 < t_begin && t2 < t_begin) && ray_origin_is_outside_grid) || isEqual(t1, t2)) {
             // Case 1: No intersection.
             // Case 2: Tangent hit.
             return {};
@@ -514,45 +516,37 @@ namespace svr {
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius);
 
-        double a, b, c;
-        if (isEqual(ray.origin(), grid.sphereCenter())) {
+        FreeVec3 P_sphere(grid.sphereCenter().x(), grid.sphereCenter().y(), grid.sphereCenter().z());
+        if (isEqual(point_at_t_begin, grid.sphereCenter())) {
             // If the ray starts at the sphere's center, we need to perturb slightly along
             // the path to determine the correct angular and azimuthal voxel.
-            const double perturbed_t = 0.1;
-            a = grid.sphereCenter().x() - (point_at_t_begin.x() + ray.direction().x() * perturbed_t);
-            b = grid.sphereCenter().y() - (point_at_t_begin.y() + ray.direction().y() * perturbed_t);
-            c = grid.sphereCenter().z() - (point_at_t_begin.z() + ray.direction().z() * perturbed_t);
+            P_sphere -= FreeVec3(ray.pointAtParameter(t_begin + 0.1));
         } else if (ray_origin_is_outside_grid) {
-            const BoundVec3 pa = ray.pointAtParameter(t1);
-            a = grid.sphereCenter().x() - pa.x();
-            b = grid.sphereCenter().y() - pa.y();
-            c = grid.sphereCenter().z() - pa.z();
+            P_sphere -= FreeVec3(ray.pointAtParameter(t1));
         } else {
-            a = grid.sphereCenter().x() - ray.origin().x();
-            b = grid.sphereCenter().y() - ray.origin().y();
-            c = grid.sphereCenter().z() - ray.origin().z();
+            P_sphere = ray_sphere_vector;
         }
 
         double p_x, p_y, p_z;
-        const double ang_plane_length = std::sqrt(a * a + b * b);
+        const double ang_plane_length = std::sqrt(P_sphere.x() * P_sphere.x() + P_sphere.y() * P_sphere.y());
         if (isEqual(ang_plane_length, 0.0)) {
             p_x = grid.sphereCenter().x() + entry_radius;
             p_y = grid.sphereCenter().y();
         } else {
             const double r_over_ang_plane_length = entry_radius / ang_plane_length;
-            p_x = grid.sphereCenter().x() - a * r_over_ang_plane_length;
-            p_y = grid.sphereCenter().y() - b * r_over_ang_plane_length;
+            p_x = grid.sphereCenter().x() - P_sphere.x() * r_over_ang_plane_length;
+            p_y = grid.sphereCenter().y() - P_sphere.y() * r_over_ang_plane_length;
         }
         int current_voxel_ID_theta = calculateVoxelID(P_angular, p_x, p_y);
 
-        const double azi_plane_length = std::sqrt(a * a + c * c);
+        const double azi_plane_length = std::sqrt(P_sphere.x() * P_sphere.x() + P_sphere.z() * P_sphere.z());
         if (isEqual(azi_plane_length, 0.0)) {
             p_x = grid.sphereCenter().x() + entry_radius;
             p_z = grid.sphereCenter().z();
         } else {
             const double r_over_azi_plane_length = entry_radius / azi_plane_length;
-            p_x = grid.sphereCenter().x() - a * r_over_azi_plane_length;
-            p_z = grid.sphereCenter().z() - c * r_over_azi_plane_length;
+            p_x = grid.sphereCenter().x() - P_sphere.x() * r_over_azi_plane_length;
+            p_z = grid.sphereCenter().z() - P_sphere.z() * r_over_azi_plane_length;
         }
         int current_voxel_ID_phi = calculateVoxelID(P_azimuthal, p_x, p_z);
 
