@@ -35,7 +35,7 @@ namespace {
         EXPECT_THAT(phi_voxels, testing::ContainerEq(expected_phi_voxels));
     }
 
-    TEST(SphericalCoordinateTraversal, TestRayBeginsWithinSphere) {
+    TEST(SphericalCoordinateTraversal, RayBeginsWithinSphere) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -58,7 +58,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TestRayEndsWithinSphere) {
+    TEST(SphericalCoordinateTraversal, RayEndsWithinSphere) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -378,7 +378,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TestOddNumberAngularSections) {
+    TEST(SphericalCoordinateTraversal, OddNumberAngularSections) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -401,7 +401,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TestOddNumberAzimuthalSections) {
+    TEST(SphericalCoordinateTraversal, OddNumberAzimuthalSections) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -424,7 +424,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TestLargeNumberOfRadialSections) {
+    TEST(SphericalCoordinateTraversal, LargeNumberOfRadialSections) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -460,7 +460,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TestLargeNumberOfAngularSections) {
+    TEST(SphericalCoordinateTraversal, LargeNumberOfAngularSections) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -483,7 +483,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TestLargeNumberOfAzimuthalSections) {
+    TEST(SphericalCoordinateTraversal, LargeNumberOfAzimuthalSections) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -506,7 +506,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TestTimeBeginsIsNotZero) {
+    TEST(SphericalCoordinateTraversal, TimeBeginsIsNotZero) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
