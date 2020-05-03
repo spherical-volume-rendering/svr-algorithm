@@ -443,7 +443,14 @@ namespace svr {
     // and floating point calculations.
     inline void initializeVoxelBoundarySegments(std::vector<svr::LineSegment> &P_angular,
                                                 std::vector<svr::LineSegment> &P_azimuthal,
+                                                bool ray_origin_is_outside_grid,
                                                 const svr::SphericalVoxelGrid &grid, double current_radius) noexcept {
+        if (ray_origin_is_outside_grid) {
+            P_angular = grid.pMaxAngular();
+            P_azimuthal = grid.pMaxAzimuthal();
+            return;
+        }
+
         if (grid.numAngularVoxels() == grid.numAzimuthalVoxels()) {
             std::transform(grid.angularTrigValues().cbegin(), grid.angularTrigValues().cend(),
                            P_angular.begin(), P_azimuthal.begin(),
@@ -511,10 +518,7 @@ namespace svr {
 
         std::vector<svr::LineSegment> P_angular(grid.numAngularVoxels() + 1);
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
-        if (ray_origin_is_outside_grid) {
-            P_angular = grid.pMaxAngular();
-            P_azimuthal = grid.pMaxAzimuthal();
-        } else { initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius); }
+        initializeVoxelBoundarySegments(P_angular, P_azimuthal, ray_origin_is_outside_grid, grid, entry_radius);
 
         const FreeVec3 P_sphere = ray_origin_is_outside_grid ?
                                   grid.sphereCenter() - ray.pointAtParameter(std::min(t1,t2)) :
