@@ -236,10 +236,8 @@ namespace svr {
             intersection_times[2] = ray.timeOfIntersectionAt(rh_data.v() - d_b);
             intersection_times[3] = ray.timeOfIntersectionAt(rh_data.v() + d_b);
         }
-        const auto intersection_time_it = std::find_if(intersection_times.cbegin(),
-                                                       intersection_times.cend(),
-                                                    [t](double i)->double{ return i > t;});
-
+        const auto intersection_time_it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
+                                                       [t](double i)->double{ return i > t; });
         if (intersection_time_it == intersection_times.cend()) {
             return {.tMaxR=std::numeric_limits<double>::max(),
                     .tStepR=0,
@@ -489,7 +487,6 @@ namespace svr {
         const double max_radius_squared = grid.deltaRadiiSquared()[0];
         const double entry_radius_squared = !ray_origin_is_outside_grid ? *it : max_radius_squared;
         const double entry_radius = grid.deltaRadii()[idx];
-        printf("entry_radius: %f {%lu}", entry_radius, idx);
 
         // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
         // This will determine if the ray intersects the sphere.
@@ -504,7 +501,6 @@ namespace svr {
         // Need to use a non-zero direction to determine this.
         const double t1 = ray.timeOfIntersectionAt(v - d);
         const double t2 = ray.timeOfIntersectionAt(v + d);
-        printf("\n t1: %f, t2: %f \n", t1, t2);
 
         if (((t1 < t_begin && t2 < t_begin) && ray_origin_is_outside_grid) || isEqual(t1, t2)) {
             // Case 1: No intersection.
@@ -515,7 +511,10 @@ namespace svr {
 
         std::vector<svr::LineSegment> P_angular(grid.numAngularVoxels() + 1);
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
-        initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius);
+        if (ray_origin_is_outside_grid) {
+            P_angular = grid.pMaxAngular();
+            P_azimuthal = grid.pMaxAzimuthal();
+        } else { initializeVoxelBoundarySegments(P_angular, P_azimuthal, grid, entry_radius); }
 
         const FreeVec3 P_sphere = ray_origin_is_outside_grid ?
                                   grid.sphereCenter() - ray.pointAtParameter(std::min(t1,t2)) :
