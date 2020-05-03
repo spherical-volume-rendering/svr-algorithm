@@ -522,7 +522,7 @@ namespace svr {
 
         const FreeVec3 P_sphere = ray_origin_is_outside_grid ?
                                   grid.sphereCenter() - ray.pointAtParameter(std::min(t1,t2)) :
-                                  isEqual(point_at_t_begin, grid.sphereCenter()) ?          // Need to perturb slightly.
+                                  isEqual(point_at_t_begin, grid.sphereCenter()) ? // Need to perturb slightly.
                                   grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :
                                   ray_sphere_vector;
 
