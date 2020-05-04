@@ -195,6 +195,12 @@ namespace {
         }
     }
 
+    static void Orthographic_512SquaredRays_64CubedVoxels(benchmark::State &state) {
+        for (auto _ : state) {
+            orthographicTraverseXSquaredRaysinYCubedVoxels(512, 64);
+        }
+    }
+
     static void Orthographic_128SquaredRays_128CubedVoxels(benchmark::State &state) {
         for (auto _ : state) {
             orthographicTraverseXSquaredRaysinYCubedVoxels(128, 128);
@@ -204,6 +210,12 @@ namespace {
     static void Orthographic_256SquaredRays_128CubedVoxels(benchmark::State &state) {
         for (auto _ : state) {
             orthographicTraverseXSquaredRaysinYCubedVoxels(256, 128);
+        }
+    }
+
+    static void Orthographic_512SquaredRays_128CubedVoxels(benchmark::State &state) {
+        for (auto _ : state) {
+            orthographicTraverseXSquaredRaysinYCubedVoxels(512, 128);
         }
     }
 
@@ -217,8 +229,10 @@ namespace {
     BENCHMARK(MultipleRayNoIntersection)->Unit(benchmark::kMillisecond);
     BENCHMARK(Orthographic_128SquaredRays_64CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(1);
     BENCHMARK(Orthographic_256SquaredRays_64CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(1);
+    BENCHMARK(Orthographic_512SquaredRays_64CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(1);
     BENCHMARK(Orthographic_128SquaredRays_128CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(1);
     BENCHMARK(Orthographic_256SquaredRays_128CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(1);
+    BENCHMARK(Orthographic_512SquaredRays_128CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(1);
 
 } // namespace
 
