@@ -96,9 +96,9 @@ namespace {
         const double t_end = 30.0;
 
         const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
-        const std::vector<int> expected_radial_voxels = {3,2,1};
-        const std::vector<int> expected_theta_voxels = {3,3,3};
-        const std::vector<int> expected_phi_voxels = {3,3,3};
+        const std::vector<int> expected_radial_voxels = {4,3,2,1};
+        const std::vector<int> expected_theta_voxels = {3,3,3,3};
+        const std::vector<int> expected_phi_voxels = {0,0,0,0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 

@@ -488,14 +488,16 @@ namespace svr {
         // Determine ray location at t_begin.
         const BoundVec3 point_at_t_begin = ray.pointAtParameter(t_begin);
         const FreeVec3 ray_sphere_vector = grid.sphereCenter() - point_at_t_begin;
+        const FreeVec3 ray_sphere_vector_tzero = t_begin == 0.0 ? ray_sphere_vector :
+                                                                  grid.sphereCenter() - ray.pointAtParameter(0.0);
 
         std::size_t idx = grid.numRadialVoxels();
-        const double rsvd = ray_sphere_vector.dot(ray_sphere_vector); // Ray Sphere Vector Dot product
+        const double rsvd_begin = ray_sphere_vector.dot(ray_sphere_vector);
         const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1,
                                      grid.deltaRadiiSquared().crend(),
-                                     [rsvd, &idx](double dR_squared)-> bool {
+                                     [rsvd_begin, &idx](double dR_squared)-> bool {
             --idx;
-            return rsvd <= dR_squared;
+            return rsvd_begin <= dR_squared;
         });
         const bool ray_origin_is_outside_grid = (it == grid.deltaRadiiSquared().crend());
         const double max_radius_squared = grid.deltaRadiiSquared()[0];
@@ -504,7 +506,8 @@ namespace svr {
 
         // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
         // This will determine if the ray intersects the sphere.
-        const double v = ray_sphere_vector.dot(ray.unitDirection().to_free());
+        const double rsvd = ray_sphere_vector_tzero.dot(ray_sphere_vector_tzero); // Ray Sphere Vector Dot product
+        const double v = ray_sphere_vector_tzero.dot(ray.unitDirection().to_free());
         const double rsvd_minus_v_squared = rsvd - v * v;
         const double discriminant = entry_radius_squared - rsvd_minus_v_squared;
 
@@ -516,7 +519,7 @@ namespace svr {
         const double t1 = ray.timeOfIntersectionAt(v - d);
         const double t2 = ray.timeOfIntersectionAt(v + d);
 
-        if (((t1 < t_begin && t2 < t_begin) && ray_origin_is_outside_grid) || isEqual(t1, t2)) {
+        if ((t1 < t_begin && t2 < t_begin) || isEqual(t1, t2)) {
             // Case 1: No intersection.
             // Case 2: Tangent hit.
             return {};
@@ -562,16 +565,15 @@ namespace svr {
                           .angular_voxel=current_voxel_ID_theta,
                           .azimuthal_voxel=current_voxel_ID_phi});
 
-        double t, t_grid_exit;
+        double t = INVALID_TIME;
         if (ray_origin_is_outside_grid) {
             t = ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z));
-            t_grid_exit = std::max(t1, t2);
+            t_end = std::min(t_end, std::max(t1, t2));
         } else {
             t = t_begin;
             const double max_d = std::sqrt(max_radius_squared - rsvd_minus_v_squared);
-            t_grid_exit = std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d));
+            t_end = std::min(t_end, std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d)));
         }
-        t_end = std::min(t_grid_exit, t_end);
 
         // Initialize the time in case of collinear min or collinear max for generalized plane hits.
         const std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
