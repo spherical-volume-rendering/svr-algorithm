@@ -16,9 +16,10 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 |--------	|----------	|---------------	|-----------------	|------------------	|
 | 128^2  	| 64^3     	| 233           	| 233             	| 1.0              	|
 | 256^2  	| 64^3     	| 928           	| 926             	| 4.5              	|
+| 512^2  	| 64^3    	| 3717          	| 3713            	| 24.1            	|
 | 128^2  	| 128^3    	| 463           	| 462             	| 2.2              	|
 | 256^2  	| 128^3    	| 1838          	| 1833            	| 12.0             	|
-
+| 512^2  	| 128^3    	| 7346          	| 7324            	| 16.9            	|
 
 <sup>\*Run on (4 X 1600 MHz CPUs). </sup>
 <sup>CPU Caches: L1 Data 32 KiB (x2), L1 Instruction 32 KiB (x2), L2 Unified 256 KiB (x2), L3 Unified 3072 KiB (x1)</sup>
