@@ -113,7 +113,7 @@ namespace svr {
 
         // Updates the point P1 with the new time traversal time t. Similarly, updates the
         // segment denoted by P2 - P1.
-        inline void updateRaySegmentAtTime(double t) noexcept {
+        inline void updateAtTime(double t) noexcept {
             P1_ = ray_->pointAtParameter(t);
             ray_segment_ = P2_ - P1_;
         }
@@ -121,7 +121,7 @@ namespace svr {
         // Calculates the updated ray segment intersection point given an intersect parameter.
         // More information on this use case can be found at:
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
-        inline double raySegmentIntersectionTimeAt(double intersect_param) const noexcept {
+        inline double intersectionTimeAt(double intersect_param) const noexcept {
             return (P1_[NZDI_] + ray_segment_[NZDI_] * intersect_param - ray_->origin()[NZDI_])
                    * ray_->invDirection()[NZDI_];
         }
@@ -287,7 +287,7 @@ namespace svr {
             b = perp_uw_min * inv_perp_uv_min;
             if (!((lessThan(a, 0.0) || lessThan(1.0, a)) || lessThan(b, 0.0) || lessThan(1.0, b))) {
                 is_intersect_min = true;
-                t_min = RS.raySegmentIntersectionTimeAt(b);
+                t_min = RS.intersectionTimeAt(b);
             }
         }
         double t_max = collinear_times[is_collinear_max];
@@ -298,7 +298,7 @@ namespace svr {
             b = perp_uw_max * inv_perp_uv_max;
             if (!((lessThan(a, 0.0) || lessThan(1.0, a)) || lessThan(b, 0.0) || lessThan(1.0, b))) {
                 is_intersect_max = true;
-                t_max = RS.raySegmentIntersectionTimeAt(b);
+                t_max = RS.intersectionTimeAt(b);
             }
         }
 
@@ -582,7 +582,7 @@ namespace svr {
         while (true) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
             radial_hit_data.updateTransitionFlag(radial_params.previous_transition_flag);
-            ray_segment.updateRaySegmentAtTime(t);
+            ray_segment.updateAtTime(t);
             const auto angular_params = angularHit(ray, grid, ray_segment, collinear_times,
                                                    current_voxel_ID_theta, t, t_end);
             const auto azimuthal_params = azimuthalHit(ray, grid, ray_segment, collinear_times,
