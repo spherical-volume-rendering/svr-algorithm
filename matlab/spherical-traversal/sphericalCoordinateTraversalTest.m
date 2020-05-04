@@ -498,7 +498,7 @@ end
 function testBeginsWithinSphere(testCase)
     min_bound = [-20, -20.0, -20.0];
     max_bound = [20.0, 20.0, 20.0];
-    ray_origin = [-10.0, 10.0, 10.0];
+    ray_origin = [-3.0, 4.0, 5.0];
     ray_direction = [1.0, -1.0, -1.0];
     sphere_center = [0.0, 0.0, 0.0];
     sphere_max_radius = 10.0;
@@ -506,15 +506,15 @@ function testBeginsWithinSphere(testCase)
     num_radial_sections = 4;
     num_angular_sections = 4;
     num_azimuthal_sections = 4;
-    t_begin = 9.0;
+    t_begin = 0.0;
     t_end = 30.0;
     verbose = true;
     
     [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
-    verifyEqual(testCase, rVoxels,     [1]);
-    verifyEqual(testCase, thetaVoxels, [3]);
-    verifyEqual(testCase, phiVoxels,   [3]);
+    verifyEqual(testCase, rVoxels,     [2,3,4,4,4,4,3,2,1]);
+    verifyEqual(testCase, thetaVoxels, [1,1,1,0,3,3,3,3,3]);
+    verifyEqual(testCase, phiVoxels,   [1,1,1,0,0,3,3,3,3]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
@@ -539,5 +539,77 @@ function testEndsWithinSphere(testCase)
     verifyEqual(testCase, rVoxels,     [1,2,2,3]); 
     verifyEqual(testCase, thetaVoxels, [3,3,2,2]);
     verifyEqual(testCase, phiVoxels,   [0,0,1,1]); 
+    tRelError = (tTest-tTraversal)/(tTest^2)
+end
+
+% Ray begins in outermost radius and ends within the sphere
+function testBeginsOuterMostRadiusAndEndsWithinSphere(testCase)
+    min_bound = [-20, -20.0, -20.0];
+    max_bound = [20.0, 20.0, 20.0];
+    ray_origin = [-4.0, -4.0, -6.0];
+    ray_direction = [1.3, 1.0, 1.0];
+    sphere_center = [0.0, 0.0, 0.0];
+    sphere_max_radius = 10.0;
+    
+    num_radial_sections = 4;
+    num_angular_sections = 4;
+    num_azimuthal_sections = 4;
+    t_begin = 0.0;
+    t_end = 4.3;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
+    verifyEqual(testCase, rVoxels,     [1,2,3,3,4,4]); 
+    verifyEqual(testCase, thetaVoxels, [2,2,2,3,3,0]);
+    verifyEqual(testCase, phiVoxels,   [2,2,2,3,3,3]); 
+    tRelError = (tTest-tTraversal)/(tTest^2)
+end
+
+% Ray begins not in outermost radius and ends within sphere
+function testBeginsNotOuterMostRadiusAndEndsWithinSphere(testCase)
+    min_bound = [-20, -20.0, -20.0];
+    max_bound = [20.0, 20.0, 20.0];
+    ray_origin = [-1.0, -1.0, -1.0];
+    ray_direction = [1.0, 2.0, 1.0];
+    sphere_center = [0.0, 0.0, 0.0];
+    sphere_max_radius = 10.0;
+    
+    num_radial_sections = 4;
+    num_angular_sections = 4;
+    num_azimuthal_sections = 4;
+    t_begin = 0.0;
+    t_end = 2.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
+    verifyEqual(testCase, rVoxels,     [4,4,4,3]); 
+    verifyEqual(testCase, thetaVoxels, [2,1,0,0]);
+    verifyEqual(testCase, phiVoxels,   [2,2,0,0]); 
+    tRelError = (tTest-tTraversal)/(tTest^2)
+end
+
+% Ray begins at sphere origin
+function testBeginsAtSphereOrigin(testCase)
+    min_bound = [-20, -20.0, -20.0];
+    max_bound = [20.0, 20.0, 20.0];
+    ray_origin = [0.0, 0.0, 0.0];
+    ray_direction = [-1.5, 1.2, -1.5];
+    sphere_center = [0.0, 0.0, 0.0];
+    sphere_max_radius = 10.0;
+    
+    num_radial_sections = 4;
+    num_angular_sections = 4;
+    num_azimuthal_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
+    verifyEqual(testCase, rVoxels,     [4,3,2,1]);
+    verifyEqual(testCase, thetaVoxels, [1,1,1,1]);
+    verifyEqual(testCase, phiVoxels,   [2,2,2,2]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
