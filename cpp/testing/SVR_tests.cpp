@@ -79,7 +79,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, RayBeginsWithinSphereAndBeginTimeIsNotZero) {
+    TEST(SphericalCoordinateTraversal, RayBeginsWithinSphereAndTimeBeginIsNotZero) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -471,7 +471,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, LargeNumberOfRadialSections) {
+    TEST(SphericalCoordinateTraversal, LargeNumberOfRadialSectionsOne) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -637,7 +637,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, TimeBeginsIsNotZero) {
+    TEST(SphericalCoordinateTraversal, TimeBeginIsNotZero) {
         const BoundVec3 min_bound(-20.0, -20.0, -20.0);
         const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
