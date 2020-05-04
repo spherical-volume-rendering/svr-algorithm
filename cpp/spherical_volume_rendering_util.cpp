@@ -13,6 +13,7 @@ namespace svr {
 
     // Epsilon used for floating point comparisons in Knuth's algorithm.
     constexpr double ABS_EPSILON = 1e-12;
+    constexpr double REL_EPSILON = 1e-8;
 
     // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
     enum VoxelIntersectionType {
@@ -156,14 +157,20 @@ namespace svr {
     //        Donald. E. Knuth, 1998, Addison-Wesley Longman, Inc., ISBN 0-201-89684-2, Addison-Wesley Professional;
     //        3rd edition. (The relevant equations are in §4.2.2, Eq. 36 and 37.)
     inline bool isEqual(double a, double b) noexcept {
-        return std::abs(a - b) <= ABS_EPSILON;
+        const double diff = std::abs(a - b);
+        if (diff <= ABS_EPSILON) { return true; }
+        return diff <= std::max(std::abs(a), std::abs(b)) * REL_EPSILON;
     }
 
     // Overloaded version that checks for Knuth equality with vector cartesian coordinates.
     inline bool isEqual(const Vec3 &a, const Vec3 &b) noexcept {
-        return std::abs(a.x() - b.x()) <= ABS_EPSILON &&
-               std::abs(a.y() - b.y()) <= ABS_EPSILON &&
-               std::abs(a.z() - b.z()) <= ABS_EPSILON;
+        const double diff_x = std::abs(a.x() - b.x());
+        const double diff_y = std::abs(a.y() - b.y());
+        const double diff_z = std::abs(a.z() - b.z());
+        if (diff_x <= ABS_EPSILON && diff_y <= ABS_EPSILON && diff_z <= ABS_EPSILON) { return true; }
+        return diff_x <= std::max(std::abs(a.x()), std::abs(b.x())) * REL_EPSILON &&
+               diff_y <= std::max(std::abs(a.y()), std::abs(b.y())) * REL_EPSILON &&
+               diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * REL_EPSILON;
     }
 
     // Checks to see if a is strictly less than b with an absolute epsilon.

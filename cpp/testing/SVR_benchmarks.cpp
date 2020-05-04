@@ -8,31 +8,31 @@
 // To use Google Benchmark, see: https://github.com/google/benchmark#installation
 
 namespace {
-    // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10^4.
+    // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10^6.
     // The set up is the following:
     // This traversal is orthographic in nature, and all rays will intersect the sphere.
     // In the X plane: Ray origin moves incrementally from [-1000.0, 1000.0].
     // In the Y plane: Ray origin moves incrementally from [-1000.0, 1000.0].
-    // In the Z plane: Ray origin begins at -(10^4 + 1000.0). It does not move in the Z plane.
+    // In the Z plane: Ray origin begins at -(10^6 + 1.0). It does not move in the Z plane.
     // From this, one can infer that the ray moves incrementally in the XY plane from
     // (-1000.0, -1000.0) -> (1000.0, 1000.0) while remaining outside the sphere in the Z plane.
-    // Since the maximum sphere radius is 10^4, this ensures all rays will intersect.
+    // Since the maximum sphere radius is 10^6, this ensures all rays will intersect.
     void inline orthographicTraverseXSquaredRaysinYCubedVoxels(const std::size_t X, const std::size_t Y) noexcept {
-        const BoundVec3 min_bound(-20000.0, -20000.0, -20000.0);
-        const BoundVec3 max_bound(20000.0, 20000.0, 20000.0);
+        const BoundVec3 min_bound(-2000000.0, -2000000.0, -2000000.0);
+        const BoundVec3 max_bound(2000000.0, 2000000.0, 2000000.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
-        const double sphere_max_radius = 10.0 * 1000.0;
+        const double sphere_max_radius = 10e6;
         const std::size_t num_radial_sections = Y;
         const std::size_t num_angular_sections = Y;
         const std::size_t num_azimuthal_sections = Y;
         const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const double t_begin = 0.0;
-        const double t_end = sphere_max_radius * 2.0;
+        const double t_end = sphere_max_radius * 3;
 
         double ray_origin_x = -1000.0;
         double ray_origin_y = -1000.0;
-        const double ray_origin_z = -(sphere_max_radius + 1000.0);
+        const double ray_origin_z = -(sphere_max_radius + 1.0);
 
         const double ray_origin_plane_movement = 2000.0 / X;
         for (std::size_t i = 0; i < X; ++i) {
@@ -41,6 +41,11 @@ namespace {
                 const FreeVec3  ray_direction(0.0, 0.0, 1.0);
                 const auto actual_voxels = sphericalCoordinateVoxelTraversal(Ray(ray_origin, ray_direction),
                                                                              grid, t_begin, t_end);
+                const std::size_t last = actual_voxels.size() - 1;
+                if (actual_voxels[0].radial_voxel != 1 || actual_voxels[last].radial_voxel != 1) {
+                    printf("\nDid not complete entire traversal.");
+                    printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y, ray_origin_z);
+                }
                 ray_origin_y = (j == X - 1) ? -1000.0 : ray_origin_y + ray_origin_plane_movement;
             }
             ray_origin_x += ray_origin_plane_movement;
@@ -196,8 +201,8 @@ namespace {
     BENCHMARK(TraversalParallelY)->Unit(benchmark::kMillisecond);
     BENCHMARK(TraversalParallelZ)->Unit(benchmark::kMillisecond);
     BENCHMARK(MultipleRayNoIntersection)->Unit(benchmark::kMillisecond);
-    BENCHMARK(Orthographic_128SquaredRays_64CubedVoxels)->Unit(benchmark::kMillisecond);
-    BENCHMARK(Orthographic_256SquaredRays_128CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(10);
+    BENCHMARK(Orthographic_128SquaredRays_64CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(3);
+    BENCHMARK(Orthographic_256SquaredRays_128CubedVoxels)->Unit(benchmark::kMillisecond)->Repetitions(3);
 
 } // namespace
 
