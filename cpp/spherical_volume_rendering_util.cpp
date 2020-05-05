@@ -221,6 +221,7 @@ namespace svr {
                                          double t, double t_end) noexcept {
         const std::size_t voxel_idx = current_voxel_ID_r - 1;
         const double current_radius = grid.deltaRadii(voxel_idx);
+        printf("\nRadial Hit Entrance: < Current Voxel: %d, Current t: %f > -", current_voxel_ID_r, t);
 
         // Find the intersection times for the ray and the previous radial disc.
         const std::size_t previous_idx = std::min(voxel_idx + 1, grid.numRadialVoxels() - 1);
@@ -243,6 +244,8 @@ namespace svr {
             intersection_times[2] = ray.timeOfIntersectionAt(rh_data.v() - d_b);
             intersection_times[3] = ray.timeOfIntersectionAt(rh_data.v() + d_b);
         }
+        printf(" {it[0]: %f, it[1]: %f, it[2]: %f, it[3]: %f} ", intersection_times[0], intersection_times[1],
+                intersection_times[2], intersection_times[3]);
         const auto intersection_time_it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
                                                        [t](double i)->double{ return i > t; });
         if (intersection_time_it == intersection_times.cend()) {
@@ -253,12 +256,14 @@ namespace svr {
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isEqual(r_new, current_radius);
         const bool is_tangential_hit = isEqual(intersection_times[0], intersection_times[1]);
+        printf("- intersection_time: %f, is_radial_transition: %s, is_tangential_hit: %s",
+                intersection_time, is_radial_transition ? "True" : "False", is_tangential_hit ? "True" : "False");
         return {.tMaxR=intersection_time,
                 .tStepR=STEP[1 * !is_tangential_hit +
                              (!is_tangential_hit && !is_radial_transition
                               && lessThan(r_new, current_radius))],
                 .previous_transition_flag=is_radial_transition,
-                .within_bounds= lessThan(t, intersection_time) && lessThan(intersection_time, t_end) };
+                .within_bounds=lessThan(t, intersection_time) && lessThan(intersection_time, t_end) };
     }
 
     // A generalized version of the latter half of the angular and azimuthal hit parameters. Since the only difference
@@ -482,15 +487,12 @@ namespace svr {
     std::vector<svr::SphericalVoxel> sphericalCoordinateVoxelTraversal(const Ray &ray,
                                                                        const svr::SphericalVoxelGrid &grid,
                                                                        double t_begin, double t_end) noexcept {
-        // Determine ray location at t_begin.
-        const BoundVec3 point_at_t_begin = ray.pointAtParameter(t_begin);
-        const FreeVec3 rsv = grid.sphereCenter() - point_at_t_begin;   // Ray Sphere Vector.
-        const FreeVec3 rsv_tz = t_begin == 0.0 ? rsv : grid.sphereCenter() - ray.pointAtParameter(0.0);
+        const FreeVec3 rsv = grid.sphereCenter() - ray.pointAtParameter(t_begin);   // Ray Sphere Vector.
+        const FreeVec3 rsv_tz = (t_begin == 0.0) ? rsv : grid.sphereCenter() - ray.pointAtParameter(0.0);
 
-        std::size_t idx = grid.numRadialVoxels();
         const double rsvd_begin = rsv.dot(rsv);
-        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1,
-                                     grid.deltaRadiiSquared().crend(),
+        std::size_t idx = grid.numRadialVoxels();
+        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, grid.deltaRadiiSquared().crend(),
                                      [rsvd_begin, &idx](double dR_squared)-> bool {
             --idx;
             return rsvd_begin <= dR_squared;
@@ -505,21 +507,15 @@ namespace svr {
         const double rsvd = rsv_tz.dot(rsv_tz); // Ray Sphere Vector Dot product at time zero.
         const double v = rsv_tz.dot(ray.unitDirection().to_free());
         const double rsvd_minus_v_squared = rsvd - v * v;
-        const double discriminant = entry_radius_squared - rsvd_minus_v_squared;
 
-        if (discriminant <= 0.0) { return {}; }
-        const double d = std::sqrt(discriminant);
+        if (entry_radius_squared <= rsvd_minus_v_squared) { return {}; }
+        const double d = std::sqrt(entry_radius_squared - rsvd_minus_v_squared);
 
         // Calculate the time of entrance and exit of the ray.
-        // Need to use a non-zero direction to determine this.
-        const double t1 = ray.timeOfIntersectionAt(v - d);
-        const double t2 = ray.timeOfIntersectionAt(v + d);
+        const double t_entrance = ray.timeOfIntersectionAt(v - d);
+        const double t_exit = ray.timeOfIntersectionAt(v + d);
 
-        if ((t1 < t_begin && t2 < t_begin) || isEqual(t1, t2)) {
-            // Case 1: No intersection.
-            // Case 2: Tangent hit.
-            return {};
-        }
+        if ((t_entrance < t_begin && t_exit < t_begin) || isEqual(t_entrance, t_exit)) { return {}; }
         int current_voxel_ID_r = idx + 1;
 
         std::vector<svr::LineSegment> P_angular(grid.numAngularVoxels() + 1);
@@ -527,8 +523,8 @@ namespace svr {
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, ray_origin_is_outside_grid, grid, entry_radius);
 
         const FreeVec3 P_sphere = ray_origin_is_outside_grid ?
-                                  grid.sphereCenter() - ray.pointAtParameter(std::min(t1,t2)) :
-                                  isEqual(point_at_t_begin, grid.sphereCenter())              ?
+                                  grid.sphereCenter() - ray.pointAtParameter(t_entrance)      :
+                                  isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
                                   grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
         double p_x, p_y, p_z;
         const double angular_len = P_sphere.x() * P_sphere.x() + P_sphere.y() * P_sphere.y();
@@ -562,7 +558,7 @@ namespace svr {
         double t = INVALID_TIME;
         if (ray_origin_is_outside_grid) {
             t = ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z));
-            t_end = std::min(t_end, std::max(t1, t2));
+            t_end = std::min(t_end, t_exit);
         } else {
             t = t_begin;
             const double max_d = std::sqrt(max_radius_squared - rsvd_minus_v_squared);
@@ -649,14 +645,14 @@ namespace svr {
                                                                          double *sphere_center,
                                                                          double sphere_max_radius, double t_begin,
                                                                          double t_end) noexcept {
-        const Ray ray(BoundVec3(ray_origin[0], ray_origin[1], ray_origin[2]),
-                      FreeVec3(ray_direction[0], ray_direction[1], ray_direction[2]));
-        const svr::SphericalVoxelGrid grid(BoundVec3(min_bound[0], min_bound[1], min_bound[2]),
-                                           BoundVec3(max_bound[0], max_bound[1], max_bound[2]),
-                                           num_radial_voxels, num_angular_voxels, num_azimuthal_voxels,
-                                           BoundVec3(sphere_center[0], sphere_center[1], sphere_center[2]),
-                                           sphere_max_radius);
-        return svr::sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+        return svr::sphericalCoordinateVoxelTraversal(
+                Ray(BoundVec3(ray_origin[0], ray_origin[1], ray_origin[2]),
+                    FreeVec3(ray_direction[0], ray_direction[1], ray_direction[2])),
+                svr::SphericalVoxelGrid(BoundVec3(min_bound[0], min_bound[1], min_bound[2]),
+                                        BoundVec3(max_bound[0], max_bound[1], max_bound[2]),
+                                        num_radial_voxels, num_angular_voxels, num_azimuthal_voxels,
+                                        BoundVec3(sphere_center[0], sphere_center[1], sphere_center[2]),
+                                        sphere_max_radius), t_begin, t_end);
     }
 
 } // namespace svr
