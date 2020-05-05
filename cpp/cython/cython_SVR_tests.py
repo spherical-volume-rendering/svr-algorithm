@@ -96,9 +96,9 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, num_radial_sections,
                                                   num_angular_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, t_begin, t_end)
-        expected_radial_voxels = [3,2,1]
-        expected_theta_voxels = [3,3,3]
-        expected_phi_voxels = [3,3,3]
+        expected_radial_voxels = [4,3,2,1]
+        expected_theta_voxels = [3,3,3,3]
+        expected_phi_voxels = [0,0,0,0]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
     def test_ray_ends_within_sphere(self):
