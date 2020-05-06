@@ -1,6 +1,8 @@
 #include <benchmark/benchmark.h>
 #include "../spherical_volume_rendering_util.h"
 
+# define DEBUG 0
+
 // Benchmarking for the Spherical Volume Rendering algorithm.
 // Utilises the Google Benchmark library found at:
 // https://github.com/google/benchmark
@@ -8,6 +10,7 @@
 // To use Google Benchmark, see: https://github.com/google/benchmark#installation
 
 namespace {
+
     // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10^6.
     // The set up is the following:
     // This traversal is orthographic in nature, and all rays will intersect the sphere.
@@ -41,13 +44,18 @@ namespace {
                 const FreeVec3  ray_direction(0.0, 0.0, 1.0);
                 const auto actual_voxels = sphericalCoordinateVoxelTraversal(Ray(ray_origin, ray_direction),
                                                                              grid, t_begin, t_end);
+                #if DEBUG
                 const std::size_t last = actual_voxels.size() - 1;
                 if (actual_voxels[0].radial_voxel != 1 || actual_voxels[last].radial_voxel != 1) {
                     printf("\nDid not complete entire traversal.");
+                    const auto first_voxel = actual_voxels[0];
+                    const auto last_voxel = actual_voxels[last];
                     printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y, ray_origin_z);
+                    printf("\nEntrance Voxel: {%d, %d, %d} ... Exit Voxel: {%d, %d, %d}",
+                           first_voxel.radial_voxel, first_voxel.angular_voxel, first_voxel.azimuthal_voxel,
+                           last_voxel.radial_voxel, last_voxel.angular_voxel, last_voxel.azimuthal_voxel);
                 }
-                printf("\n");
-                for (const auto v : actual_voxels) printf("{ %d, %d, %d }, ", v.radial_voxel, v.angular_voxel, v.azimuthal_voxel);
+                # endif
                 ray_origin_y = (j == X - 1) ? -10000.0 : ray_origin_y + ray_origin_plane_movement;
             }
             ray_origin_x += ray_origin_plane_movement;
