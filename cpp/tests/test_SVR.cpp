@@ -4,12 +4,10 @@
 #include <algorithm>
 
 // Utilizes the Google Test suite.
-// To run, in the ../cpp/tests directory:
-//   1. Clone the googletest repository.
-//   >  git clone https://github.com/google/googletest.git
-//
-//   2. CMake
-//   >  mkdir build && cd build && cmake .. && make all && ./test_SVR
+// To run:
+//       > cd cpp/tests/
+//       >  git clone https://github.com/google/googletest.git
+//       >  mkdir build && cd build && cmake .. && make all && ./test_SVR
 //
 // For information on Google Test, see: https://github.com/google/googletest/blob/master/googletest/README.md
 // For examples of Google Test, see: https://github.com/google/googletest/tree/master/googletest/samples
