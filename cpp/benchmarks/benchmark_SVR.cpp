@@ -47,8 +47,7 @@ namespace {
             for (std::size_t j = 0; j < X; ++j) {
                 const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
                 const FreeVec3  ray_direction(0.0, 0.0, 1.0);
-                const auto actual_voxels = sphericalCoordinateVoxelTraversal(Ray(ray_origin, ray_direction),
-                                                                             grid, t_begin, t_end);
+                const auto actual_voxels = walkSphericalVolume(Ray(ray_origin, ray_direction), grid, t_begin, t_end);
                 #if DEBUG
                 const std::size_t last = actual_voxels.size() - 1;
                 if (actual_voxels[0].radial_voxel != 1 || actual_voxels[last].radial_voxel != 1) {

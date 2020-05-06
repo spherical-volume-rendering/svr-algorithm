@@ -49,7 +49,7 @@ const FreeVec3 ray_direction(1.0, 1.0, 1.0);
 const Ray ray(ray_origin, ray_direction);
 const double t_begin = 0.0;
 const double t_end = 30.0;
-const auto voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+const auto voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
 ```
 
 ## Cython Build Requirements
