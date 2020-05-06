@@ -1,7 +1,7 @@
 # C++, CMake
 /cpp/cmake-build-debug/
-/cpp/testing/cmake-build-debug/
-/cpp/testing/googletest/
+/cpp/tests/cmake-build-debug/
+/cpp/tests/googletest/
 /cpp/.DS_Store
 .DS_Store
 .idea/
@@ -12,7 +12,8 @@
 /cpp/cython/cython_SVR.cpp
 /cpp/cython/cython_SVR.cpython-37m-darwin.so
 /cpp/cython/.DS_Store
-/cpp/testing/build/
-/cpp/testing/SVR_debug_code.cpp
-/cpp/testing/benchmark/
-/cpp/testing/bin/
+/cpp/cython/tests/__pycache__
+/cpp/tests/build/
+/cpp/tests/SVR_debug_code.cpp
+/cpp/tests/benchmark/
+/cpp/tests/bin/

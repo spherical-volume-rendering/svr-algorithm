@@ -8,7 +8,7 @@ import unittest
 import numpy as np
 import cython_SVR
 
-class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
+class TestWalkSphericalVolume(unittest.TestCase):
     # Verifies correctness of the voxel traversal coordinates.
     def verify_voxels(self, voxels, expected_radial_voxels,  expected_theta_voxels,  expected_phi_voxels):
         actual_radial_voxels = []
@@ -537,8 +537,6 @@ class TestCythonizedSphericalVoxelTraversal(unittest.TestCase):
         expected_theta_voxels = [1, 1, 1, 1]
         expected_phi_voxels = [2, 2, 2, 2]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
-
-
 
 if __name__ == '__main__':
     unittest.main()

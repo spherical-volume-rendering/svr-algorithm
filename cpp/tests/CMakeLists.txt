@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.7)
 set(CMAKE_CXX_STANDARD 11)
 project(SVR)
 
-set(TESTING_BINARY ${CMAKE_PROJECT_NAME}_tests)
-set(BENCHMARK_BINARY ${CMAKE_PROJECT_NAME}_benchmarks)
-set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp SVR_tests.cpp)
+set(TESTING_BINARY test_${CMAKE_PROJECT_NAME})
+set(BENCHMARK_BINARY benchmark_${CMAKE_PROJECT_NAME})
+set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_SVR.cpp)
 set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp SVR_benchmarks.cpp)
 
 add_definitions(-DNDEBUG)
