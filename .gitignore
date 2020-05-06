@@ -15,6 +15,7 @@
 /cpp/tests/cmake-build-debug/
 /cpp/tests/build/
 /cpp/tests/bin/
+/cpp/tests/lib/
 /cpp/tests/googletest/
 /cpp/tests/print_tests_script.py
 /cpp/tests/sphere_test_plot.py
@@ -23,3 +24,4 @@
 /cpp/benchmarks/cmake-build-debug/
 /cpp/benchmarks/benchmark/
 /cpp/benchmarks/bin/
+/cpp/benchmarks/build/

@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 11)
 project(SVR)
 
 set(BENCHMARK_BINARY benchmark_${CMAKE_PROJECT_NAME})
-set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp SVR_benchmarks.cpp)
+set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp benchmark_SVR.cpp)
 
 add_definitions(-DNDEBUG)
 add_subdirectory(benchmark)
