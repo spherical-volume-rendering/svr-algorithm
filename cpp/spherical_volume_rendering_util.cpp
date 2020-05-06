@@ -648,7 +648,7 @@ namespace svr {
                                                                 BoundVec3(sphere_center[0],
                                                                           sphere_center[1],
                                                                           sphere_center[2]), sphere_max_radius),
-                                                                t_begin, t_end);
+                                        t_begin, t_end);
     }
 
 } // namespace svr
