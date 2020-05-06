@@ -8,10 +8,11 @@
 // https://github.com/google/benchmark
 //
 // To run the benchmarks, use the following commands:
-//    > cd cpp/benchmarks
-//    > git clone https://github.com/google/benchmark.git
-//    > git clone https://github.com/google/googletest.git benchmark/googletest
-//    > cd benchmark && mkdir build && cd build && cmake ../ && make
+//  > cd cpp/benchmarks
+//  > git clone https://github.com/google/benchmark.git
+//  > git clone https://github.com/google/googletest.git benchmark/googletest
+//  > cd benchmark && mkdir build && cd build && cmake ../ && make
+//  > cd .. && mkdir build && cd build && cmake .. && make all && cd .. && ./bin/benchmark_SVR
 
 namespace {
 
