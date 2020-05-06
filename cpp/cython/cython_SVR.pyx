@@ -9,13 +9,11 @@ cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
     cdef cppclass SphericalVoxel:
         int radial_voxel, angular_voxel, azimuthal_voxel
 
-    vector[SphericalVoxel] sphericalCoordinateVoxelTraversalCy(double* ray_origin, double* ray_direction,
-                                                               double* min_bound, double* max_bound,
-                                                               size_t num_radial_voxels,
-                                                               size_t num_angular_voxels,
-                                                               size_t num_azimuthal_voxels, double* sphere_center,
-                                                               double sphere_max_radius, double t_begin, double t_end)
-
+    vector[SphericalVoxel] walkSphericalVolume(double* ray_origin, double* ray_direction,
+                                               double* min_bound, double* max_bound,
+                                               size_t num_radial_voxels, size_t num_angular_voxels,
+                                               size_t num_azimuthal_voxels, double* sphere_center,
+                                               double sphere_max_radius, double t_begin, double t_end)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -63,11 +61,11 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     assert(max_bound.size == 3)
     assert(sphere_center.size == 3)
 
-    cdef vector[SphericalVoxel] voxels = sphericalCoordinateVoxelTraversalCy(&ray_origin[0], &ray_direction[0],
-                                                                             &min_bound[0], &max_bound[0],
-                                                                             num_radial_voxels, num_angular_voxels,
-                                                                             num_azimuthal_voxels, &sphere_center[0],
-                                                                             sphere_max_radius, t_begin, t_end)
+    cdef vector[SphericalVoxel] voxels = walkSphericalVolume(&ray_origin[0], &ray_direction[0],
+                                                             &min_bound[0], &max_bound[0],
+                                                             num_radial_voxels, num_angular_voxels,
+                                                             num_azimuthal_voxels, &sphere_center[0],
+                                                             sphere_max_radius, t_begin, t_end)
     cdef np.ndarray cyVoxels = np.empty((voxels.size(), 3), dtype=int)
     for i in range(voxels.size()):
         cyVoxels[i,0] = voxels[i].radial_voxel
