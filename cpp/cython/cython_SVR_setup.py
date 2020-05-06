@@ -1,8 +1,13 @@
 '''
 Setup file for the spherical coordinate voxel traversal algorithm.
+Requires Python 3.
+Dependencies:
+  1. Cython (https://cython.org/)
+  2. Numpy (https://numpy.org/)
+  3. distutils (https://docs.python.org/3/library/distutils.html)
 
 Code must be compiled before use:
-> python cython_SVR_setup.py build_ext --inplace
+  > python cython_SVR_setup.py build_ext --inplace
 '''
 
 import numpy

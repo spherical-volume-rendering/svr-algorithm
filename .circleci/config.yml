@@ -2,7 +2,6 @@ version: 2
 
 jobs:
   build:
-    working_directory: ~/cpp/tests
     docker:
       - image: "debian:stretch"
     steps:
@@ -19,15 +18,12 @@ jobs:
       - run:
           name: Install GIT
           command: 'apt-get update && apt-get install -y git'
-      - run: 
+      - run:
           name: Install Google Tests
-          command: 'git clone https://github.com/google/googletest.git'
-      - run: 
-          name: Create Build Files
-          command: 'cmake -H. -Bbuild'
-      - run: 
-          name: Create Binary Files
-          command: 'cmake --build build'
+          command: 'cd cpp/tests && git clone https://github.com/google/googletest.git'
+      - run:
+          name: Create Build, Binary Files
+          command: 'cd cpp/tests && cmake -H. -Bbuild && cmake --build build'
       - run:
           name: SVR Unit Testing
-          command: './bin/test_SVR'
+          command: 'cd cpp/tests/bin && ./test_SVR'
