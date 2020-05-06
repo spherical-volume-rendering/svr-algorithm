@@ -28,6 +28,8 @@ function [radial_voxels, angular_voxels, azimuthal_voxels, time_test, traversal_
 %    radial_voxels: A list of the radial voxels that were hit by the ray.
 %    angular_voxels: A list of the angular voxels that were hit by the ray.
 %    azimuthal_voxels: A list of the phi voxels that were hit by the ray.
+%    time_test: A float of expected traversal time of the ray in the grid;
+%    traversal_test: A float of actual total time spent on traversal in the grid.
 %
 %    Note: These lists, used in conjunction, will produce the path of the ray
 %    through the voxels using each voxel transition. For example,
