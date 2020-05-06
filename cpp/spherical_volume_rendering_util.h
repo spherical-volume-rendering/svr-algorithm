@@ -17,11 +17,9 @@ namespace svr {
 
     // A spherical coordinate voxel traversal algorithm. The algorithm traces the ray over the spherical voxel grid
     // provided. t_begin is the time the ray begins, and t_end is the time at which the ray ends. Returns a
-    // vector of the spherical coordinate voxels traversed. Recall that if, for example, a radial hit occurs,
-    // The azimuthal and angular voxels will remain the same as before. This applies for each traversal type.
-    //
-    // Notes: For further documentation and visualization, see the Progress Report for the algorithm:
-    // https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?usp=sharing
+    // vector of the spherical coordinate voxels traversed. Does not assume that the ray direction is normalized.
+    // Recall that if, for example, a radial hit occurs, the azimuthal and angular voxels will remain the
+    // same as before. This applies for each traversal type.
     std::vector<SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                                     double t_begin, double t_end) noexcept;
 
