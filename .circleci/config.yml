@@ -38,4 +38,4 @@ jobs:
           command: 'cd cpp/tests && cmake --build build'
       - run:
           name: SVR Unit Testing
-          command: 'cd cpp/tests && ./bin/SVR_tests'
+          command: 'cd cpp/tests && ./bin/test_SVR'
