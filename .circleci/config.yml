@@ -2,7 +2,7 @@ version: 2
 
 jobs:
   build:
-    working_directory: ~/cpp/tests
+    working_directory: /cpp/tests
     docker:
       - image: "debian:stretch"
     steps:
