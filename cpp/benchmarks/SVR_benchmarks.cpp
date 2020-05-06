@@ -3,11 +3,15 @@
 
 # define DEBUG 0
 
-// Benchmarking for the Spherical Volume Rendering algorithm.
+// Benchmarking for the spherical coordinate voxel traversal algorithm.
 // Utilises the Google Benchmark library found at:
 // https://github.com/google/benchmark
 //
-// To use Google Benchmark, see: https://github.com/google/benchmark#installation
+// To run the benchmarks, use the following commands:
+//    > cd cpp/benchmarks
+//    > git clone https://github.com/google/benchmark.git
+//    > git clone https://github.com/google/googletest.git benchmark/googletest
+//    > cd benchmark && mkdir build && cd build && cmake ../ && make
 
 namespace {
 
