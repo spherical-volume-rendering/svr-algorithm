@@ -536,7 +536,7 @@ class TestWalkSphericalVolume(unittest.TestCase):
         expected_radial_voxels = [4, 3, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1]
         expected_phi_voxels = [2, 2, 2, 2]
-        self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels
+        self.verify_voxels(voxels, expected_radial_voxels,pected_theta_voxels, expected_phi_voxels)
 
 if __name__ == '__main__':
     unittest.main()
