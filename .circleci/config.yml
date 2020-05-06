@@ -2,6 +2,7 @@ version: 2
 
 jobs:
   build:
+    working_directory: ~/cpp/tests
     docker:
       - image: "debian:stretch"
     steps:
@@ -20,22 +21,13 @@ jobs:
           command: 'apt-get update && apt-get install -y git'
       - run: 
           name: Install Google Tests
-          command: 'cd cpp/tests && git clone https://github.com/google/googletest.git'
-      - run: 
-          name: Install Google Benchmark I
-          command: 'cd cpp/tests && git clone https://github.com/google/benchmark.git'
-      - run: 
-          name: Install Google Benchmark II
-          command: 'cd cpp/tests && git clone https://github.com/google/googletest.git benchmark/googletest'
-      - run: 
-          name: Install Google Benchmark III
-          command: 'cd cpp/tests/benchmark && mkdir build && cd build && cmake ../ && make'
+          command: 'git clone https://github.com/google/googletest.git'
       - run: 
           name: Create Build Files
-          command: 'cd cpp/tests && cmake -H. -Bbuild'
+          command: 'cmake -H. -Bbuild'
       - run: 
           name: Create Binary Files
-          command: 'cd cpp/tests && cmake --build build'
+          command: 'cmake --build build'
       - run:
           name: SVR Unit Testing
-          command: 'cd cpp/tests && ./bin/SVR_tests'
+          command: './bin/test_SVR'

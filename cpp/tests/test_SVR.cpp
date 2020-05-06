@@ -720,18 +720,16 @@ namespace {
         const Ray ray(ray_origin, ray_direction);
         const auto actual_voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
         // TODO: Fix expected values.
-        std::vector<int> expected_radial_voxels(num_radial_sections * 2 - 1);
-        std::iota(expected_radial_voxels.begin(), expected_radial_voxels.begin() + num_radial_sections, 1);
-        std::iota(expected_radial_voxels.rbegin(), expected_radial_voxels.rbegin() + num_radial_sections - 1, 1);
+        std::vector<int> expected_radial_voxels(119 * 2 - 1);
+        std::iota(expected_radial_voxels.begin(), expected_radial_voxels.begin() + 119, 1);
+        std::iota(expected_radial_voxels.rbegin(), expected_radial_voxels.rbegin() + 119 - 1, 1);
 
-        std::vector<int> expected_theta_voxels(num_radial_sections * 2 - 1);
-        std::vector<int> expected_phi_voxels(num_radial_sections * 2 - 1);
+        std::vector<int> expected_theta_voxels(119 * 2 - 1);
+        std::vector<int> expected_phi_voxels(119 * 2 - 1);
         std::fill(expected_theta_voxels.begin(), expected_theta_voxels.end(), 1); // { 1, 1, ..., 1, 1 }
         std::fill(expected_phi_voxels.begin(), expected_phi_voxels.end(), 1);     // { 1, 1, ..., 1, 1 }
 
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
-
-
 
 } // namespace
