@@ -29,7 +29,7 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 - C++11-standard-compliant compiler
 
 #### To run the benchmarks: 
-1. Download CMake version 3.7 or higher (https://cmake.org/)
+1. Install CMake version 3.7 or higher (https://cmake.org/)
 2. Clone the repository and build the benchmarks:
 ```
 git clone https://github.com/spherical-volume-rendering/svr-algorithm.git && 
