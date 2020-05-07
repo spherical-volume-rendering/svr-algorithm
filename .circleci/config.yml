@@ -13,10 +13,10 @@ jobs:
           name: Installing GCC
           command: 'apt-get update && apt-get install -y gcc g++'
       - run:
-          name: Install CMAKE
+          name: Installing CMAKE
           command: 'apt-get update && sudo apt-get install -y cmake'
       - run:
-          name: Install GIT
+          name: Installing GIT
           command: 'apt-get update && apt-get install -y git'
       - run: 
           name: Create Build, Binary Files
