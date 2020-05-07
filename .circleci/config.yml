@@ -18,9 +18,6 @@ jobs:
       - run:
           name: Install GIT
           command: 'apt-get update && apt-get install -y git'
-      - run:
-          name: Install Google Tests
-          command: 'cd cpp/tests && git clone https://github.com/google/googletest.git'
       - run: 
           name: Create Build, Binary Files
           command: 'cd cpp/tests && cmake -H. -Bbuild && cmake --build build'
