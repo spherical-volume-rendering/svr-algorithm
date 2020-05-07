@@ -7,13 +7,6 @@
 namespace svr {
     constexpr double TAU = 2 * M_PI;
 
-    // Represents a bound for the sphere using voxel identifications.
-    struct VoxelBound {
-        std::size_t radial_voxel;
-        std::size_t angular_voxel;
-        std::size_t azimuthal_voxel;
-    };
-
     // Represents a line segment. This is used to represent the points of intersections between
     // the lines corresponding to voxel boundaries and a given radial voxel.
     struct LineSegment {
@@ -121,8 +114,6 @@ namespace svr {
         inline double sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
         inline const BoundVec3 &sphereCenter() const noexcept { return this->sphere_center_; }
-
-        inline double deltaRadius() const noexcept { return this->delta_radius_; }
 
         inline double deltaRadii(std::size_t i) const noexcept { return this->delta_radii_[i]; }
 

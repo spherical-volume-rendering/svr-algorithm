@@ -480,6 +480,8 @@ namespace svr {
     }
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
+                                                         const svr::VoxelBound &min_bound,
+                                                         const svr::VoxelBound &max_bound,
                                                          double t_begin, double t_end) noexcept {
         const FreeVec3 rsv = grid.sphereCenter() - ray.pointAtParameter(t_begin);   // Ray Sphere Vector.
         const FreeVec3 rsv_tz = (t_begin == 0.0) ? rsv : grid.sphereCenter() - ray.pointAtParameter(0.0);
@@ -509,14 +511,16 @@ namespace svr {
         const double t_entrance = ray.timeOfIntersectionAt(v - d);
         const double t_exit = ray.timeOfIntersectionAt(v + d);
 
-        if ((t_entrance < t_begin && t_exit < t_begin) || isEqual(t_entrance, t_exit)) { return {}; }
         int current_voxel_ID_r = idx + 1;
+        if ((t_entrance < t_begin && t_exit < t_begin) ||
+             isEqual(t_entrance, t_exit) ||
+             current_voxel_ID_r < min_bound.radial_voxel) { return {}; }
 
         std::vector<svr::LineSegment> P_angular(grid.numAngularVoxels() + 1);
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, ray_origin_is_outside_grid, grid, entry_radius);
 
-        const FreeVec3 P_sphere = ray_origin_is_outside_grid ?
+        const FreeVec3 P_sphere = ray_origin_is_outside_grid                                  ?
                                   grid.sphereCenter() - ray.pointAtParameter(t_entrance)      :
                                   isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
                                   grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
@@ -531,6 +535,7 @@ namespace svr {
             p_y = grid.sphereCenter().y() - P_sphere.y() * angr;
         }
         int current_voxel_ID_theta = calculateVoxelID(P_angular, p_x, p_y);
+        if (current_voxel_ID_theta < min_bound.angular_voxel) { return {}; }
 
         const double azimuthal_len = P_sphere.x() * P_sphere.x() + P_sphere.z() * P_sphere.z();
         if (isEqual(azimuthal_len, 0.0)) {
@@ -542,6 +547,7 @@ namespace svr {
             p_z = grid.sphereCenter().z() - P_sphere.z() * azir;
         }
         int current_voxel_ID_phi = calculateVoxelID(P_azimuthal, p_x, p_z);
+        if (current_voxel_ID_phi < min_bound.azimuthal_voxel) { return {}; }
 
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
@@ -565,7 +571,9 @@ namespace svr {
         RadialHitData radial_hit_data(v, rsvd_minus_v_squared);
         RaySegment ray_segment(&ray, t_end);
 
-        while (true) {
+        while (current_voxel_ID_r <= max_bound.radial_voxel &&
+               current_voxel_ID_theta <= max_bound.angular_voxel &&
+               current_voxel_ID_phi <= max_bound.azimuthal_voxel) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
             radial_hit_data.updateTransitionFlag(radial_params.previous_transition_flag);
             ray_segment.updateAtTime(t);
@@ -629,9 +637,11 @@ namespace svr {
                               .angular_voxel=current_voxel_ID_theta,
                               .azimuthal_voxel=current_voxel_ID_phi});
         }
+        return voxels;
     }
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(double *ray_origin, double *ray_direction,
+                                                         int *voxel_min_bound, int *voxel_max_bound,
                                                          std::size_t num_radial_voxels,
                                                          std::size_t num_angular_voxels,
                                                          std::size_t num_azimuthal_voxels,
@@ -645,6 +655,10 @@ namespace svr {
                                                                 BoundVec3(sphere_center[0],
                                                                           sphere_center[1],
                                                                           sphere_center[2]), sphere_max_radius),
+                                        svr::VoxelBound{.radial_voxel=voxel_min_bound[0], .angular_voxel=voxel_min_bound[1],
+                                                .azimuthal_voxel=voxel_min_bound[2]},
+                                        svr::VoxelBound{.radial_voxel=voxel_max_bound[0], .angular_voxel=voxel_max_bound[1],
+                                                .azimuthal_voxel=voxel_max_bound[2]},
                                         t_begin, t_end);
     }
 
