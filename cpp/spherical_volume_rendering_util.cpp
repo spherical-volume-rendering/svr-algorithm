@@ -535,7 +535,8 @@ namespace svr {
             p_y = grid.sphereCenter().y() - P_sphere.y() * angr;
         }
         int current_voxel_ID_theta = calculateVoxelID(P_angular, p_x, p_y);
-        if (current_voxel_ID_theta < min_bound.angular_voxel) { return {}; }
+        if (current_voxel_ID_theta < min_bound.angular_voxel ||
+            current_voxel_ID_theta > max_bound.angular_voxel) { return {}; }
 
         const double azimuthal_len = P_sphere.x() * P_sphere.x() + P_sphere.z() * P_sphere.z();
         if (isEqual(azimuthal_len, 0.0)) {
@@ -547,7 +548,8 @@ namespace svr {
             p_z = grid.sphereCenter().z() - P_sphere.z() * azir;
         }
         int current_voxel_ID_phi = calculateVoxelID(P_azimuthal, p_x, p_z);
-        if (current_voxel_ID_phi < min_bound.azimuthal_voxel) { return {}; }
+        if (current_voxel_ID_phi < min_bound.azimuthal_voxel ||
+            current_voxel_ID_phi > max_bound.azimuthal_voxel) { return {}; }
 
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
