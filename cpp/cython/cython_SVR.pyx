@@ -52,8 +52,6 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     '''
     assert(ray_origin.size == 3)
     assert(ray_direction.size == 3)
-    assert(min_bound.size == 3)
-    assert(max_bound.size == 3)
     assert(sphere_center.size == 3)
 
     cdef vector[SphericalVoxel] voxels = walkSphericalVolume(&ray_origin[0], &ray_direction[0],
