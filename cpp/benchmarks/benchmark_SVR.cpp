@@ -21,12 +21,12 @@ namespace {
     // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10^6.
     // The set up is the following:
     // This traversal is orthographic in nature, and all rays will intersect the sphere.
-    // In the X plane: Ray origin moves incrementally from [-1000.0, 1000.0].
-    // In the Y plane: Ray origin moves incrementally from [-1000.0, 1000.0].
-    // In the Z plane: Ray origin begins at -(10^6 + 1.0). It does not move in the Z plane.
+    // In the X plane: Ray origin moves incrementally from [-10,000.0, 10,000.0].
+    // In the Y plane: Ray origin moves incrementally from [-10,000.0, 10,000.0].
+    // In the Z plane: Ray origin begins at -(10e6 + 1.0). It does not move in the Z plane.
     // From this, one can infer that the ray moves incrementally in the XY plane from
-    // (-1000.0, -1000.0) -> (1000.0, 1000.0) while remaining outside the sphere in the Z plane.
-    // Since the maximum sphere radius is 10^6, this ensures all rays will intersect.
+    // (-10,000.0, -10,000.0) -> (10,000.0, 10,000.0) while remaining outside the sphere in the Z plane.
+    // Since the maximum sphere radius is 10e6, this ensures all rays will intersect.
     void inline orthographicTraverseXSquaredRaysinYCubedVoxels(const std::size_t X, const std::size_t Y) noexcept {
         const BoundVec3 min_bound(-2000000.0, -2000000.0, -2000000.0);
         const BoundVec3 max_bound(2000000.0, 2000000.0, 2000000.0);
