@@ -7,7 +7,7 @@
 // Utilises the Google Benchmark library.
 //
 // To build the benchmarks:
-//  Download CMake version 3.7 or higher (https://cmake.org/). Then, run the following command:
+//  Install CMake version 3.7 or higher (https://cmake.org/). Then, run the following command:
 //  >    cd cpp/benchmarks && mkdir build && cd build && cmake .. && make
 //
 //  To run the benchmarks:
@@ -15,8 +15,6 @@
 //
 // For more information on Google Benchmark, see: https://github.com/google/benchmark
 // For examples of Google Benchmark, see: https://github.com/google/benchmark#usage
-
-
 
 namespace {
 
