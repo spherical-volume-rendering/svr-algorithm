@@ -649,8 +649,8 @@ function testRayTangentialHit2(testCase)
     sphere_max_radius = 10.0;
     
     num_radial_sections = 4;
-    num_angular_sections = 4;
-    num_azimuthal_sections = 4;
+    num_angular_sections = 1;
+    num_azimuthal_sections = 1;
     t_begin = 0.0;
     t_end = 30.0;
     verbose = false;
@@ -659,7 +659,7 @@ function testRayTangentialHit2(testCase)
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
     verifyEqual(testCase, rVoxels,     [1,2,3,3,2,1]);
     verifyEqual(testCase, thetaVoxels, [1,1,1,1,1,1]);
-    verifyEqual(testCase, phiVoxels,   [1,1,1,2,2,2]);
+    verifyEqual(testCase, phiVoxels,   [1,1,1,1,1,1]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
