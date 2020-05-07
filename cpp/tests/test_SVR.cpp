@@ -38,14 +38,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayDoesNotEnterSphere) {
-        const BoundVec3 min_bound(0.0, 0.0, 0.0);
-        const BoundVec3 max_bound(30.0, 30.0, 30.0);
         const BoundVec3 sphere_center(15.0, 15.0, 15.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(3.0, 3.0, 3.0);
         const FreeVec3 ray_direction(-2.0, -1.3, 1.0);
@@ -58,14 +56,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsWithinSphere) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
@@ -81,14 +77,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsWithinSphereAndTimeBeginIsNotZero) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
@@ -104,14 +98,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayEndsWithinSphere) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(13.0, -15.0, 16.0);
         const FreeVec3 ray_direction(-1.5, 1.2, -1.5);
@@ -127,14 +119,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsAndEndsWithinSphere) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
@@ -150,14 +140,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, SphereCenteredAtOrigin) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
@@ -173,14 +161,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RaySlightOffsetInXYPlane) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
         const FreeVec3 ray_direction(1.0, 1.5, 1.0);
@@ -196,14 +182,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayTravelsAlongXAxis) {
-        const BoundVec3 min_bound(0.0, 0.0, 0.0);
-        const BoundVec3 max_bound(30.0, 30.0, 30.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, 0.0, 0.0);
         const FreeVec3 ray_direction(1.0, 0.0, 0.0);
@@ -219,14 +203,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayTravelsAlongYAxis) {
-        const BoundVec3 min_bound(0.0, 0.0, 0.0);
-        const BoundVec3 max_bound(30.0, 30.0, 30.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, -15.0, 0.0);
         const FreeVec3 ray_direction(0.0, 1.0, 0.0);
@@ -242,14 +224,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayTravelsAlongZAxis) {
-        const BoundVec3 min_bound(0.0, 0.0, 0.0);
-        const BoundVec3 max_bound(30.0, 30.0, 30.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, 0.0, -15.0);
         const FreeVec3 ray_direction(0.0, 0.0, 1.0);
@@ -265,14 +245,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayParallelToXYPlane) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, 0.0);
         const FreeVec3 ray_direction(1.0, 1.0, 0.0);
@@ -288,14 +266,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayParallelToXZPlane) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, 0.0, -15.0);
         const FreeVec3 ray_direction(1.0, 0.0, 1.0);
@@ -311,14 +287,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayParallelToYZPlane) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, -15.0, -15.0);
         const FreeVec3 ray_direction(0.0, 1.0, 1.0);
@@ -334,14 +308,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeXPositiveYZ) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(13.0, -15.0, -15.0);
         const FreeVec3 ray_direction(-1.0, 1.0, 1.0);
@@ -357,14 +329,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeYPositiveXZ) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, 17.0, -15.0);
         const FreeVec3 ray_direction(1.0, -1.2, 1.3);
@@ -380,14 +350,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeZPositiveXY) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, -12.0, 15.3);
         const FreeVec3 ray_direction(1.4, 2.0, -1.3);
@@ -403,14 +371,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeXYZ) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(15.0, 12.0, 15.0);
         const FreeVec3 ray_direction(-1.4, -2.0, -1.3);
@@ -426,14 +392,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, OddNumberAngularSections) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 9.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 3;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.3);
@@ -449,14 +413,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, OddNumberAzimuthalSections) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 3;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
@@ -472,14 +434,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, LargeNumberOfRadialSectionsOne) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 40;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
@@ -508,14 +468,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, LargeNumberRadialSectionsTwo) {
-        const BoundVec3 min_bound(-200000.0, -200000.0, -200000.0);
-        const BoundVec3 max_bound(200000.0, 200000.0, 200000.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10e6;
         const std::size_t num_radial_sections = 256;
         const std::size_t num_angular_sections = 1;
         const std::size_t num_azimuthal_sections = 1;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const double t_begin = 0.0;
         const double t_end = sphere_max_radius * 3;
@@ -535,14 +493,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, LargeNumberOfAngularSections) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 40;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
@@ -558,14 +514,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, LargeNumberOfAzimuthalSections) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 40;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
@@ -581,14 +535,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, TimeBeginIsNotZero) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, 15.0, 15.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
@@ -604,14 +556,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsInOutermostRadiusAndEndsWithinSphere) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-4.0, -4.0, -6.0);
         const FreeVec3 ray_direction(1.3, 1.0, 1.0);
@@ -627,14 +577,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsAtSphereOrigin) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, 0.0, 0.0);
         const FreeVec3 ray_direction(-1.5, 1.2, -1.5);
@@ -650,14 +598,12 @@ namespace {
     }
 
     TEST(DISABLED_SphericalCoordinateTraversal, TangentialHitWithInnerRadialVoxelOne) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-5.0, 0.0, 10.0);
         const FreeVec3 ray_direction(0.0, 0.0, -1.0);
@@ -673,14 +619,12 @@ namespace {
     }
 
     TEST(DISABLED_SphericalCoordinateTraversal, TangentialHitWithInnerRadialVoxelTwo) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-2.5, 0.0, 10.0);
         const FreeVec3 ray_direction(0.0, 0.0, -1.0);
@@ -696,14 +640,12 @@ namespace {
     }
 
     TEST(DISABLED_SphericalCoordinateTraversal, TangentialHitWithInnerRadialVoxelThree) {
-        const BoundVec3 min_bound(-200000.0, -200000.0, -200000.0);
-        const BoundVec3 max_bound(200000.0, 200000.0, 200000.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10e3;
         const std::size_t num_radial_sections = 128;
         const std::size_t num_angular_sections = 1;
         const std::size_t num_azimuthal_sections = 1;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const double t_begin = 0.0;
         const double t_end = sphere_max_radius * 3;
@@ -725,14 +667,12 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, NearlyTangentialHit) {
-        const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-        const BoundVec3 max_bound(20.0, 20.0, 20.0);
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_angular_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-5.01, 0.0, 10.0);
         const FreeVec3 ray_direction(0.0, 0.0, -1.0);

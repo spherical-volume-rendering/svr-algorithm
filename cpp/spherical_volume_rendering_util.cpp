@@ -632,7 +632,6 @@ namespace svr {
     }
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(double *ray_origin, double *ray_direction,
-                                                         double *min_bound, double *max_bound,
                                                          std::size_t num_radial_voxels,
                                                          std::size_t num_angular_voxels,
                                                          std::size_t num_azimuthal_voxels,
@@ -640,9 +639,7 @@ namespace svr {
                                                          double t_begin, double t_end) noexcept {
         return svr::walkSphericalVolume(Ray(BoundVec3(ray_origin[0], ray_origin[1], ray_origin[2]),
                                         FreeVec3(ray_direction[0], ray_direction[1], ray_direction[2])),
-                                        svr::SphericalVoxelGrid(BoundVec3(min_bound[0], min_bound[1], min_bound[2]),
-                                                                BoundVec3(max_bound[0], max_bound[1], max_bound[2]),
-                                                                num_radial_voxels,
+                                        svr::SphericalVoxelGrid(num_radial_voxels,
                                                                 num_angular_voxels,
                                                                 num_azimuthal_voxels,
                                                                 BoundVec3(sphere_center[0],

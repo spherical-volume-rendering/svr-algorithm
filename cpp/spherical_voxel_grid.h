@@ -7,6 +7,13 @@
 namespace svr {
     constexpr double TAU = 2 * M_PI;
 
+    // Represents a bound for the sphere using voxel identifications.
+    struct VoxelBound {
+        std::size_t radial_voxel;
+        std::size_t angular_voxel;
+        std::size_t azimuthal_voxel;
+    };
+
     // Represents a line segment. This is used to represent the points of intersections between
     // the lines corresponding to voxel boundaries and a given radial voxel.
     struct LineSegment {
@@ -30,11 +37,8 @@ namespace svr {
     //   sphere_max_radius > 0.0
     struct SphericalVoxelGrid {
     public:
-        SphericalVoxelGrid(const BoundVec3 &min_bound, const BoundVec3 &max_bound, std::size_t num_radial_voxels,
-                           std::size_t num_angular_voxels, std::size_t num_azimuthal_voxels,
-                           const BoundVec3 &sphere_center, double sphere_max_radius) :
-                min_bound_(min_bound),
-                max_bound_(max_bound),
+        SphericalVoxelGrid(std::size_t num_radial_voxels, std::size_t num_angular_voxels,
+                std::size_t num_azimuthal_voxels, const BoundVec3 &sphere_center, double sphere_max_radius) :
                 num_radial_voxels_(num_radial_voxels),
                 num_angular_voxels_(num_angular_voxels),
                 num_azimuthal_voxels_(num_azimuthal_voxels),
@@ -114,10 +118,6 @@ namespace svr {
 
         inline std::size_t numAzimuthalVoxels() const noexcept { return this->num_azimuthal_voxels_; }
 
-        inline const BoundVec3 &minBound() const noexcept { return this->min_bound_; }
-
-        inline const BoundVec3 &maxBound() const noexcept { return this->max_bound_; }
-
         inline double sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
         inline const BoundVec3 &sphereCenter() const noexcept { return this->sphere_center_; }
@@ -147,12 +147,6 @@ namespace svr {
         azimuthalTrigValues() const noexcept { return azimuthal_trig_values_; }
 
     private:
-        // The minimum bound vector of the voxel grid.
-        const BoundVec3 min_bound_;
-
-        // The maximum bound vector of the voxel grid.
-        const BoundVec3 max_bound_;
-
         // The number of radial, angular, and azimuthal voxels.
         const std::size_t num_radial_voxels_, num_angular_voxels_, num_azimuthal_voxels_;
 
