@@ -7,7 +7,7 @@
 // Utilizes the Google Test suite.
 // To build tests:
 //   Download CMake version 3.7 or higher (https://cmake.org/). Then, run the following command:
-//   >    cd cpp/tests && mkdir build && cd build && cmake ..
+//   >    cd cpp/tests && mkdir build && cd build && cmake .. && make
 // To run tests:
 //   >    cd .. && ./bin/test_SVR
 //
