@@ -3,11 +3,13 @@
 #include "../spherical_volume_rendering_util.h"
 #include <algorithm>
 
+// Testing for the spherical coordinate voxel traversal algorithm.
 // Utilizes the Google Test suite.
-// To run:
-//       > cd cpp/tests/
-//       >  git clone https://github.com/google/googletest.git
-//       >  mkdir build && cd build && cmake .. && make all && ./test_SVR
+// To build tests:
+//   Download CMake version 3.7 or higher (https://cmake.org/). Then, run the following command:
+//   >    cd cpp/tests && mkdir build && cd build && cmake ..
+// To run tests:
+//   >    cd .. && ./bin/test_SVR
 //
 // For information on Google Test, see: https://github.com/google/googletest/blob/master/googletest/README.md
 // For examples of Google Test, see: https://github.com/google/googletest/tree/master/googletest/samples

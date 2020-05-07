@@ -2,11 +2,21 @@ cmake_minimum_required(VERSION 3.7)
 set(CMAKE_CXX_STANDARD 11)
 project(SVR)
 
+add_definitions(-DNDEBUG) # Run benchmarks in release mode.
+
+include(FetchContent)
+FetchContent_Declare(googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG master)
+FetchContent_Declare(googlebenchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG master)
+FetchContent_MakeAvailable(
+        googletest
+        googlebenchmark)
+
 set(BENCHMARK_BINARY benchmark_${CMAKE_PROJECT_NAME})
 set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp benchmark_SVR.cpp)
-
-add_definitions(-DNDEBUG)
-add_subdirectory(benchmark)
 
 add_executable(${BENCHMARK_BINARY} ${BENCHMARK_SOURCE_FILES})
 

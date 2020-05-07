@@ -4,15 +4,19 @@
 # define DEBUG 0
 
 // Benchmarking for the spherical coordinate voxel traversal algorithm.
-// Utilises the Google Benchmark library found at:
-// https://github.com/google/benchmark
+// Utilises the Google Benchmark library.
 //
-// To run the benchmarks, use the following commands:
-//  > cd cpp/benchmarks
-//  > git clone https://github.com/google/benchmark.git
-//  > git clone https://github.com/google/googletest.git benchmark/googletest
-//  > cd benchmark && mkdir build && cd build && cmake ../ && make
-//  > cd .. && mkdir build && cd build && cmake .. && make all && cd .. && ./bin/benchmark_SVR
+// To build the benchmarks:
+//  Download CMake version 3.7 or higher (https://cmake.org/). Then, run the following command:
+//  >    cd cpp/benchmarks && mkdir build && cd build && cmake ..
+//
+//  To run the benchmarks:
+//  >    cd .. && ./bin/benchmark_SVR
+//
+// For more information on Google Benchmark, see: https://github.com/google/benchmark
+// For examples of Google Benchmark, see: https://github.com/google/benchmark#usage
+
+
 
 namespace {
 
