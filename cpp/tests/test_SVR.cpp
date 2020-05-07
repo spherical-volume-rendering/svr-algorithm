@@ -791,4 +791,45 @@ namespace {
         EXPECT_EQ(actual_voxels.size(), 0);
     }
 
+    TEST(SphericalCoordinateTraversal, IntersectionUpperHemisphere) {
+        const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+        const double sphere_max_radius = 10.0;
+        const std::size_t num_radial_sections = 4;
+        const std::size_t num_angular_sections = 8;
+        const std::size_t num_azimuthal_sections = 8;
+        const svr::VoxelBound max_bound = {.radial_voxel=3, .angular_voxel=4, .azimuthal_voxel=4};
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
+        const BoundVec3 ray_origin(0.0, 0.0, 15.0);
+        const FreeVec3 ray_direction(0.0, 0.0, -1.0);
+        const Ray ray(ray_origin, ray_direction);
+        const double t_begin = 0.0;
+        const double t_end = 30.0;
+
+        const auto actual_voxels = walkSphericalVolume(ray, grid, min_bound, max_bound, t_begin, t_end);
+        const std::vector<int> expected_radial_voxels = {1,2,3,4};
+        const std::vector<int> expected_theta_voxels = {0,0,0,0};
+        const std::vector<int> expected_phi_voxels = {1,1,1,1};
+        expectEqualVoxels(walkSphericalVolume(ray, grid, min_bound, max_bound, t_begin, t_end),
+                          expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+    }
+
+    TEST(SphericalCoordinateTraversal, NoIntersectionUpperHemisphere) {
+        const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+        const double sphere_max_radius = 10.0;
+        const std::size_t num_radial_sections = 4;
+        const std::size_t num_angular_sections = 8;
+        const std::size_t num_azimuthal_sections = 8;
+        const svr::VoxelBound max_bound = {.radial_voxel=3, .angular_voxel=4, .azimuthal_voxel=4};
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+                                           num_azimuthal_sections, sphere_center, sphere_max_radius);
+        const BoundVec3 ray_origin(0.0, 0.0, -15.0);
+        const FreeVec3 ray_direction(0.0, 0.0, 1.0);
+        const Ray ray(ray_origin, ray_direction);
+        const double t_begin = 0.0;
+        const double t_end = 30.0;
+        const auto actual_voxels = walkSphericalVolume(ray, grid, min_bound, max_bound, t_begin, t_end);
+        EXPECT_EQ(actual_voxels.size(), 0);
+    }
+
 } // namespace
