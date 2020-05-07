@@ -616,7 +616,7 @@ function testBeginsAtSphereOrigin(testCase)
 end
 
 % Ray with a tangential hit
-function testRayTangentialHit(testCase)
+function testRayTangentialHit1(testCase)
     min_bound = [-20, -20.0, -20.0];
     max_bound = [20.0, 20.0, 20.0];
     ray_origin = [-5.0, 0.0, 10.0];
@@ -636,6 +636,30 @@ function testRayTangentialHit(testCase)
     verifyEqual(testCase, rVoxels,     [1,2,2,1]);
     verifyEqual(testCase, thetaVoxels, [1,1,1,1]);
     verifyEqual(testCase, phiVoxels,   [1,1,2,2]);
+    tRelError = (tTest-tTraversal)/(tTest^2)
+end
+
+% Ray with a tangential hit
+function testRayTangentialHit2(testCase)
+    min_bound = [-20, -20.0, -20.0];
+    max_bound = [20.0, 20.0, 20.0];
+    ray_origin = [-2.5, 0.0, 10.0];
+    ray_direction = [0.0,0.0,-1.0];
+    sphere_center = [0.0, 0.0, 0.0];
+    sphere_max_radius = 10.0;
+    
+    num_radial_sections = 4;
+    num_angular_sections = 4;
+    num_azimuthal_sections = 4;
+    t_begin = 0.0;
+    t_end = 30.0;
+    verbose = false;
+    
+    [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
+    sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
+    verifyEqual(testCase, rVoxels,     [1,2,3,3,2,1]);
+    verifyEqual(testCase, thetaVoxels, [1,1,1,1,1,1]);
+    verifyEqual(testCase, phiVoxels,   [1,1,1,2,2,2]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
