@@ -38,12 +38,12 @@ namespace svr {
     // Example 2: If one wants to traverse a sector of the sphere, say the first quadrant:
     //            If num_radial_sections = num_angular_sections = num_azimuthal_sections = 4, then
     //            VoxelBound min_bound = {.radial_voxel = 1, .angular_voxel = 0, .azimuthal_voxel = 0};
-    //            VoxelBound max_bound = {.radial_voxel = 3, .angular_voxel = 1, .azimuthal_voxel = 1};
+    //            VoxelBound max_bound = {.radial_voxel = 3, .angular_voxel = 0, .azimuthal_voxel = 0};
     //
     // Note: We assume for each voxel v, min_bound.v < max_bound.v. Therefore, if one wanted to traverse the section
     //       of a circle representing (pi/4, -pi/4) -> (pi/4, pi/4), this would need to be broken into two separate
     //       function calls. Similarly, for a voxel with 8 angular sections, if one wants to traverse from
-    //       (angular section 7) -> (angular section 1), this would need to be broken into two separate function calls.
+    //       (angular section 7) -> (angular section 0), this would need to be broken into two separate function calls.
     std::vector<SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                                     const svr::VoxelBound &min_bound,
                                                     const svr::VoxelBound &max_bound,
