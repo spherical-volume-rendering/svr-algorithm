@@ -5,9 +5,10 @@
 
 // Testing for the spherical coordinate voxel traversal algorithm.
 // Utilizes the Google Test suite.
+//
 // To build tests:
 //   Download CMake version 3.7 or higher (https://cmake.org/). Then, run the following command:
-//   >    cd cpp/tests && mkdir build && cd build && cmake ..
+//   >    cd cpp/tests && mkdir build && cd build && cmake .. && make
 // To run tests:
 //   >    cd .. && ./bin/test_SVR
 //
@@ -17,10 +18,10 @@
 namespace {
 
     // Determines equality amongst actual spherical voxels, and the expected spherical voxels.
-    void expectEqualVoxels(const std::vector<svr::SphericalVoxel>& actual_voxels,
-                           const std::vector<int>& expected_radial_voxels,
-                           const std::vector<int>& expected_theta_voxels,
-                           const std::vector<int>& expected_phi_voxels) {
+    void expectEqualVoxels(const std::vector<svr::SphericalVoxel> &actual_voxels,
+                           const std::vector<int> &expected_radial_voxels,
+                           const std::vector<int> &expected_theta_voxels,
+                           const std::vector<int> &expected_phi_voxels) {
         const std::size_t num_voxels = actual_voxels.size();
         std::vector<int> radial_voxels(num_voxels);
         std::vector<int> theta_voxels(num_voxels);
@@ -193,7 +194,6 @@ namespace {
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 2, 0, 0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
-
 
     TEST(SphericalCoordinateTraversal, RayTravelsAlongXAxis) {
         const BoundVec3 min_bound(0.0, 0.0, 0.0);

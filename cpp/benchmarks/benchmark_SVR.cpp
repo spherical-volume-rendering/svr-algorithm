@@ -8,7 +8,7 @@
 //
 // To build the benchmarks:
 //  Download CMake version 3.7 or higher (https://cmake.org/). Then, run the following command:
-//  >    cd cpp/benchmarks && mkdir build && cd build && cmake ..
+//  >    cd cpp/benchmarks && mkdir build && cd build && cmake .. && make
 //
 //  To run the benchmarks:
 //  >    cd .. && ./bin/benchmark_SVR
