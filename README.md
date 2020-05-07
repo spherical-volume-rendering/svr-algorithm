@@ -11,6 +11,19 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 - Ariel Kellison (ak2485 at cornell.edu)
 - Youhan Yuan (yy435 at cornell.edu)
 
+## Initial Benchmarks*
+| # Rays 	| # Voxels 	| CPU Mean (ms) 	| CPU Median (ms) 	| CPU Std Dev (ms) 	|
+|--------	|----------	|---------------	|-----------------	|------------------	|
+| 128^2  	| 64^3     	| 233           	| 233             	| 1.0              	|
+| 256^2  	| 64^3     	| 928           	| 926             	| 4.5              	|
+| 512^2  	| 64^3    	| 3717          	| 3713            	| 24.1            	|
+| 128^2  	| 128^3    	| 463           	| 462             	| 2.2              	|
+| 256^2  	| 128^3    	| 1838          	| 1833            	| 12.0             	|
+| 512^2  	| 128^3    	| 7346          	| 7324            	| 16.9            	|
+
+<sup>\*Run on (4 X 1600 MHz CPUs). </sup>
+<sup>CPU Caches: L1 Data 32 KiB (x2), L1 Instruction 32 KiB (x2), L2 Unified 256 KiB (x2), L3 Unified 3072 KiB (x1)</sup>
+
 ## C++ Build Requirements
 - [CMake](https://cmake.org/)
 - C++11-standard-compliant compiler
@@ -36,7 +49,7 @@ const FreeVec3 ray_direction(1.0, 1.0, 1.0);
 const Ray ray(ray_origin, ray_direction);
 const double t_begin = 0.0;
 const double t_end = 30.0;
-const auto voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+const auto voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
 ```
 
 ## Cython Build Requirements
