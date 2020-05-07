@@ -18,7 +18,7 @@
 
 namespace {
 
-    // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10^6.
+    // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10e6.
     // The set up is the following:
     // This traversal is orthographic in nature, and all rays will intersect the sphere.
     // In the X plane: Ray origin moves incrementally from [-10,000.0, 10,000.0].
