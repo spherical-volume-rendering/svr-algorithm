@@ -1,5 +1,5 @@
-function [radial_voxels, angular_voxels, azimuthal_voxels, time_test, traversal_time] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, sphere_center, ...
-    sphere_max_radius, num_radial_sections, num_polar_sections, num_azimuthal_sections, t_begin, t_end, verbose)
+function [radial_voxels, angular_voxels, azimuthal_voxels, time_test, traversal_time] = sphericalCoordinateTraversalSectioned(minbound, ...
+    maxbound,ray_origin, ray_direction, sphere_center, num_radial_sections, num_polar_sections, num_azimuthal_sections, t_begin, t_end, verbose)
 % Input:
 %    min_bound: The lower left corner of the bounding box.
 %    max_bound: The upper right corner of the bounding box.
@@ -37,6 +37,13 @@ function [radial_voxels, angular_voxels, azimuthal_voxels, time_test, traversal_
 %    is the first voxel the ray travels through. If the next traversal is a radial hit,
 %    angular_voxels(2) and azimuthal_voxels(2) will remain the same.
 
+sphere_min_radius = minbound(1);
+min_pol_bound = minbound(2);
+min_azi_bound = minbound(3);
+sphere_max_radius = maxbound(1);
+max_pol_bound = maxbound(2);
+max_azi_bound = maxbound(3);
+
 angular_voxels = [];
 radial_voxels = [];
 azimuthal_voxels = [];
@@ -48,7 +55,6 @@ azimuthal_voxels = [];
         sphere_center, sphere_max_radius);
 
 % The ray may not intersect the grid at all.
-% In particular, if the ray is outside the grid at t_begin.
 if t1 < t_begin && t2 < t_begin 
     time_test = 1.0;
     traversal_time = 1.0;
@@ -74,11 +80,21 @@ end
 % Calculate initial angular voxel ID and the initial point of intersection
 % between the 
 [current_voxel_ID_theta, p1_xy, P_max_pol] = ...
-    angular_init(num_polar_sections, sphere_center, sphere_max_radius,...
+    angular_init(num_polar_sections, min_pol_bound, max_pol_bound, sphere_center, sphere_max_radius,...
     r, ray_origin, ray_direction, 'xy');
 [current_voxel_ID_phi, p1_xz, P_max_azi] = ...
-    angular_init(num_azimuthal_sections, sphere_center, sphere_max_radius,...
+    angular_init(num_azimuthal_sections, min_azi_bound, max_azi_bound, sphere_center, sphere_max_radius,...
     r, ray_origin, ray_direction, 'xz');
+
+% The ray may not enter the desginated subregion. 
+ if current_voxel_ID_phi == -1 || current_voxel_ID_theta == -1
+    time_test = 1.0;
+    traversal_time = 1.0;
+    if verbose
+        fprintf("ray does not enter the desginated subregion\n")
+    end
+    return;
+end 
 
 % Set initial voxel IDs. 
 azimuthal_voxels = [current_voxel_ID_phi];
