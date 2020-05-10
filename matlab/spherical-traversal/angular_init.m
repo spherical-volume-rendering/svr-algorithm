@@ -1,4 +1,4 @@
-function[current_voxel_ID_angular, p1, P_max_ang] = angular_init(num_angular_sections,...
+function[current_voxel_ID_angular, p1, P_max_ang] = angular_init(num_angular_sections, min_ang_bound, max_ang_bound, ...
     sphere_center, sphere_max_radius, current_radius, ray_origin, ray_direction, plane_string)
 
 if strcmp(plane_string, 'xy'); ind1 = 1; ind2 = 2; end
@@ -7,16 +7,16 @@ if strcmp(plane_string, 'xz'); ind1 = 1; ind2 = 3; end
 [pa] = radial_intersection_points(ray_origin, ray_direction, ...
     sphere_center, current_radius);
 
-delta_ang = 2 * pi/ num_angular_sections;
+delta_ang = (max_ang_bound-min_ang_bound)/ num_angular_sections;
 r = current_radius;
 % Create an array of values representing the points of intersection between 
 % the lines corresponding to angular voxels boundaries and the initial 
 % radial voxel of the ray. Note that spherical coordinates are unnecessary,
 % this is just marking the voxel boundaries in the plane. 
 i = 1;
-k = 0;
+k = min_ang_bound;
 trig_ang = zeros(num_angular_sections,2);
-while k <= 2*pi 
+while k <= max_ang_bound
     trig_ang(i,1) = cos(k);
     trig_ang(i,2) = sin(k);
     k = k + delta_ang;
@@ -24,8 +24,6 @@ while k <= 2*pi
 end
 P_max_ang = sphere_max_radius .* trig_ang + [sphere_center(ind1) sphere_center(ind2)];
 P_ang = current_radius.* trig_ang + [sphere_center(ind1) sphere_center(ind2)];
-
-
 % Find the point of intersection between the vector created by the point of
 % ray intersection with the initial sphere radius and the sphere center.
 ray_origin2d = [ray_origin(ind1), ray_origin(ind2)];
@@ -54,6 +52,7 @@ if approximatelyEqual(l,0.0,1e-12,1e-8)
 else
     p1 = sphere_center2d - (r/l) .* [a b];
 end
+
 % This point will lie between two angular voxel boundaries iff the angle between
 % it and the angular boundary intersection points along the circle of 
 % max radius is obtuse. Equality represents the case when the
@@ -67,6 +66,8 @@ while i < length(P_ang)
                 approximatelyEqual(d1+d2,d3,1e-12,1e-8)
         current_voxel_ID_angular = i - 1;
         i = length(P_ang);
+    else
+        current_voxel_ID_angular = -1;
     end
     i = i + 1;
 end
