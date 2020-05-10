@@ -25,8 +25,20 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 <sup>CPU Caches: L1 Data 32 KiB (x2), L1 Instruction 32 KiB (x2), L2 Unified 256 KiB (x2), L3 Unified 3072 KiB (x1)</sup>
 
 ## C++ Build Requirements
-- [CMake](https://cmake.org/)
+- [CMake 3.7 or later](https://cmake.org/)
 - C++11-standard-compliant compiler
+
+#### To run the benchmarks: 
+1. Install CMake version 3.7 or higher (https://cmake.org/)
+2. Clone the repository and build the benchmarks:
+```
+git clone https://github.com/spherical-volume-rendering/svr-algorithm.git && 
+cd svr-algorithm/cpp/benchmarks && mkdir build && cd build && cmake .. && make
+```
+3. Run the benchmarks:
+```
+cd .. && ./bin/benchmark_SVR
+```
 
 ### C++ Example
 ```
@@ -49,7 +61,7 @@ const FreeVec3 ray_direction(1.0, 1.0, 1.0);
 const Ray ray(ray_origin, ray_direction);
 const double t_begin = 0.0;
 const double t_end = 30.0;
-const auto voxels = sphericalCoordinateVoxelTraversal(ray, grid, t_begin, t_end);
+const auto voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
 ```
 
 ## Cython Build Requirements
