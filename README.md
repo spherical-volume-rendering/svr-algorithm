@@ -54,10 +54,10 @@ const svr::SphericalVoxelGrid grid(min_bound, max_bound,
 const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
 const FreeVec3 ray_direction(1.0, 1.0, 1.0);
 const Ray ray(ray_origin, ray_direction);
-const SphereBound min_bound = { .radial=0.0, .polar=0.0, .azimuthal=0.0 };
-const SphereBound max_bound = { .radial=sphere_max_radius, .polar=2*M_PI, .azimuthal=2*M_PI };
-const auto voxels = walkSphericalVolume(ray, grid, min_bound, max_bound, 
-                                        /*t_begin=*/0.0, /*t_end=*/30.0);
+const svr::SphereBound min_bound = { .radial=0.0, .polar=0.0, .azimuthal=0.0 };
+const svr::SphereBound max_bound = { .radial=sphere_max_radius, .polar=2*M_PI, .azimuthal=2*M_PI };
+const auto voxels = svr::walkSphericalVolume(ray, grid, min_bound, max_bound, 
+                                             /*t_begin=*/0.0, /*t_end=*/30.0);
 ```
 
 ## Cython Build Requirements
