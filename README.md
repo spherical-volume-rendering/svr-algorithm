@@ -76,15 +76,15 @@ import numpy as np
 
 ray_origin    = np.array([-13.0, -13.0, -13.0])
 ray_direction = np.array([1.0, 1.0, 1.0])
-min_bound     = np.array([-20.0, -20.0, -20.0])
-max_bound     = np.array([20.0, 20.0, 20.0])
 sphere_center = np.array([0.0, 0.0, 0.0])
 sphere_max_radius      = 10.0
 num_radial_sections    =  4
 num_polar_sections     =  4
 num_azimuthal_sections =  4
-t_begin = 0.0
-t_end =  30.0
+min_bound = np.array([0.0, 0.0, 0.0])
+max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
+t_begin   = 0.0
+t_end     = 30.0
 voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, 
                                           num_radial_sections, num_polar_sections, 
                                           num_azimuthal_sections, sphere_center,
