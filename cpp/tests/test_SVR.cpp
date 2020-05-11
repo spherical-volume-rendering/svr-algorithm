@@ -695,7 +695,6 @@ namespace {
                                                MIN_BOUND, max_bound, t_begin, t_end);
             EXPECT_NE(v.size(), 0);
         }
-
     }
 
     TEST(SphericalCoordinateTraversal, UpperHemisphereMiss) {

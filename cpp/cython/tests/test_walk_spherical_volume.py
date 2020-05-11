@@ -591,5 +591,42 @@ class TestWalkSphericalVolume(unittest.TestCase):
         expected_phi_voxels = [1, 1, 2, 2]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
+    def test_upper_hemisphere_hit(self):
+        ray_origin = np.array([-11.0, 2.0, 1.0])
+        ray_direction = np.array([1.0, 0.0, 0.0])
+        sphere_center = np.array([0.0, 0.0, 0.0])
+        sphere_max_radius = 10.0
+        num_radial_sections = 4
+        num_angular_sections = 8
+        num_azimuthal_sections = 8
+        t_begin = 0.0
+        t_end = 35.0
+        min_bound = np.array([0.0, 0.0, 0.0])
+        max_bound = np.array([sphere_max_radius, 2 * np.pi, np.pi])
+        voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
+                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  sphere_max_radius, min_bound, max_bound, t_begin, t_end)
+        expected_radial_voxels = [1, 2, 3, 3, 4, 4, 4, 4, 3, 3, 2, 1]
+        expected_theta_voxels = [3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 0]
+        expected_phi_voxels = [3, 3, 3, 3, 3, 2, 1, 0, 0, 0, 0, 0]
+        self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
+
+    def test_upper_hemisphere_miss(self):
+        ray_origin = np.array([-5.0, -5.0, -5.0])
+        ray_direction = np.array([1.0, 0.0, 0.0])
+        sphere_center = np.array([0.0, 0.0, 0.0])
+        sphere_max_radius = 10.0
+        num_radial_sections = 4
+        num_angular_sections = 8
+        num_azimuthal_sections = 8
+        t_begin = 0.0
+        t_end = 35.0
+        min_bound = np.array([0.0, 0.0, 0.0])
+        max_bound = np.array([sphere_max_radius, 2 * np.pi, np.pi])
+        voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
+                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  sphere_max_radius, min_bound, max_bound, t_begin, t_end)
+        assert voxels.size == 0
+
 if __name__ == '__main__':
     unittest.main()
