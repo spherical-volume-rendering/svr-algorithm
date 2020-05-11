@@ -8,7 +8,7 @@ namespace svr {
     // An array of step values used to avoid branch prediction in radialHit().
     constexpr std::array<int, 3> STEP{0, -1, 1};
 
-    // Represents an invalid time.
+    // Represents an invalid time. At no point should the time be a negative number.
     constexpr double INVALID_TIME = -1.0;
 
     // Epsilon used for floating point comparisons in Knuth's algorithm.
@@ -195,8 +195,8 @@ namespace svr {
     // intersection points along the circle of max radius is obtuse. Equality represents the case when the point lies
     // on an polar boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane
     // (XY for polar, XZ for azimuthal), this can be generalized to a single function.
-    inline int calculateVoxelID(const std::vector<svr::LineSegment> &plane, double p1, double p2) noexcept {
-        return index_adjacent_find_until(plane.cbegin(), plane.cend(),
+    inline int calculateVoxelIDFromPoints(const std::vector<LineSegment> &angular_max, const double p1, double p2) noexcept {
+        return index_adjacent_find_until(angular_max.cbegin(), angular_max.cend(),
                                          [p1, p2](const LineSegment &LS1, const LineSegment &LS2) -> bool {
                                              const double X_diff = LS1.P1 - LS2.P1;
                                              const double Y_diff = LS1.P2 - LS2.P2;
@@ -209,6 +209,21 @@ namespace svr {
                                              const double d3 = (X_diff * X_diff) + (Y_diff * Y_diff);
                                              return d1d2 < d3 || isEqual(d1d2, d3);
                                          });
+    }
+
+
+    // Initializes an angular voxel ID. For polar initializations=, *_2 represents the y-plane. For azimuthal
+    // initialization, it represents the z-plane. If the squared euclidean distance of the ray_sphere vector in the
+    // given plane is zero, the voxel ID is set to 0.
+    inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid, const FreeVec3 &ray_sphere,
+                                        const std::vector<LineSegment> &angular_max,
+                                        double ray_sphere_2, double grid_sphere_2, double entry_radius) noexcept {
+        const double SED = ray_sphere.x() * ray_sphere.x() + ray_sphere_2 * ray_sphere_2;
+        if (isEqual(SED, 0.0)) { return 0; }
+        const double r = entry_radius / std::sqrt(SED);
+        const double p1 = grid.sphereCenter().x() - ray_sphere.x() * r;
+        const double p2 = grid_sphere_2 - ray_sphere_2 * r;
+        return calculateVoxelIDFromPoints(angular_max, p1, p2);
     }
 
     // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
@@ -323,8 +338,8 @@ namespace svr {
                 const double max_radius_over_plane_length = grid.sphereMaxRadius() / std::sqrt(a * a + b * b);
                 const double p1 = grid.sphereCenter().x() - max_radius_over_plane_length * a;
                 const double p2 = sphere_center_2 - max_radius_over_plane_length * b;
-                const int next_step = std::abs(current_voxel_ID - calculateVoxelID(P_max, p1, p2));
-                return { .tMax = t_max,
+                const int next_step = std::abs(current_voxel_ID - calculateVoxelIDFromPoints(P_max, p1, p2));
+                return {.tMax = t_max,
                         .tStep = (lessThan(ray_direction_2, 0.0) || lessThan(ray.direction().x(), 0.0)) ?
                                  next_step : -next_step,
                         .within_bounds = true
@@ -527,27 +542,14 @@ namespace svr {
                                     isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
 
-        int current_voxel_ID_theta = 0;
-        const double ray_sphere_squared = ray_sphere.x() * ray_sphere.x();
-        const double polar_SED = ray_sphere_squared + ray_sphere.y() * ray_sphere.y();
-        if (!isEqual(polar_SED, 0.0)) { // If the squared euclidean distance is zero, the current voxel ID is zero.
-            const double r = entry_radius / std::sqrt(polar_SED);
-            const double P1 = grid.sphereCenter().x() - ray_sphere.x() * r;
-            const double P2 = grid.sphereCenter().y() - ray_sphere.y() * r;
-            current_voxel_ID_theta = calculateVoxelID(P_polar, P1, P2);
-        }
+        int current_voxel_ID_theta = initializeAngularVoxelID(grid, ray_sphere, P_polar, ray_sphere.y(),
+                                                              grid.sphereCenter().y(), entry_radius);
         const int min_polar_ID = min_bound.polar * grid.invDeltaTheta();
         const int max_polar_ID = max_bound.polar * grid.invDeltaTheta();
         if (current_voxel_ID_theta < min_polar_ID || current_voxel_ID_theta > max_polar_ID - 1) { return {}; }
 
-        int current_voxel_ID_phi = 0;
-        const double azimuthual_SED = ray_sphere_squared + ray_sphere.z() * ray_sphere.z();
-        if (!isEqual(azimuthual_SED, 0.0)) {
-            const double r = entry_radius / std::sqrt(azimuthual_SED);
-            const double P1 = grid.sphereCenter().x() - ray_sphere.x() * r;
-            const double P2 = grid.sphereCenter().z() - ray_sphere.z() * r;
-            current_voxel_ID_phi = calculateVoxelID(P_azimuthal, P1, P2);
-        }
+        int current_voxel_ID_phi= initializeAngularVoxelID(grid, ray_sphere, P_azimuthal, ray_sphere.z(),
+                                                           grid.sphereCenter().z(), entry_radius);
         const int min_azimuthal_ID = min_bound.azimuthal * grid.invDeltaPhi();
         const int max_azimuthal_ID = max_bound.azimuthal * grid.invDeltaPhi();
         if (current_voxel_ID_phi < min_azimuthal_ID || current_voxel_ID_phi > max_azimuthal_ID - 1) { return {}; }
