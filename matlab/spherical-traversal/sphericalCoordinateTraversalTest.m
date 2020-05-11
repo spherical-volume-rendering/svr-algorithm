@@ -657,9 +657,9 @@ function testRayTangentialHit2(testCase)
     
     [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose);
-    verifyEqual(testCase, rVoxels,     [1,2,3,3,2,1]);
-    verifyEqual(testCase, thetaVoxels, [1,1,1,1,1,1]);
-    verifyEqual(testCase, phiVoxels,   [1,1,1,1,1,1]);
+    verifyEqual(testCase, rVoxels,     [1,2,3,2,1]);
+    verifyEqual(testCase, thetaVoxels, [1,1,1,1,1]);
+    verifyEqual(testCase, phiVoxels,   [1,1,1,1,1]);
     tRelError = (tTest-tTraversal)/(tTest^2)
 end
 
