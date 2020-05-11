@@ -7,6 +7,14 @@
 namespace svr {
     constexpr double TAU = 2 * M_PI;
 
+    // Represents the boundary for the sphere. This is used to determine the minimum and maximum
+    // boundaries for a sectored traversal.
+    struct SphereBound {
+        double radial;
+        double polar;
+        double azimuthal;
+    };
+
     // Represents a line segment that is used for the points of intersections between
     // the lines corresponding to voxel boundaries and a given radial voxel.
     struct LineSegment {
@@ -20,26 +28,28 @@ namespace svr {
         double sine;
     };
 
-    // Represents a 3-dimensional spherical voxel grid. The minimum and maximum bounds [min_bound_, max_bound_]
-    // contain the entirety of the sphere that is to be traversed.
-    // Requires:
-    //   max_bound > min_bound
-    //   num_radial_voxels > 0
-    //   num_polar_voxels > 0
-    //   num_azimuthal_voxels > 0
-    //   sphere_max_radius > 0.0
+
+    // todo: Add bounds to the grid.
+    // todo: Documentation
+    // The sphere bounds are used to determine the sector of the sphere to be traversed.
+    // For example, if one wants to traverse the entire sphere, then:
+    // SphereBound min_bound = { .radial=0.0, .polar=0.0, .azimuthal=0.0 }
+    // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .polar=2 * M_PI, .azimuthal=2 * M_PI }
+    // If instead one wants to traverse the upper hemisphere, then:
+    // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .polar=2*M_PI, .azimuthal=M_PI }
     struct SphericalVoxelGrid {
     public:
-        SphericalVoxelGrid(std::size_t num_radial_voxels, std::size_t num_polar_voxels,
-                std::size_t num_azimuthal_voxels, const BoundVec3 &sphere_center, double sphere_max_radius) :
+        SphericalVoxelGrid(const SphereBound &min_bound, const SphereBound &max_bound,
+                std::size_t num_radial_voxels, std::size_t num_polar_voxels, std::size_t num_azimuthal_voxels,
+                const BoundVec3 &sphere_center) :
                 num_radial_voxels_(num_radial_voxels),
                 num_polar_voxels_(num_polar_voxels),
                 num_azimuthal_voxels_(num_azimuthal_voxels),
                 sphere_center_(sphere_center),
-                sphere_max_radius_(sphere_max_radius),
-                delta_radius_(sphere_max_radius / num_radial_voxels),
-                delta_theta_(TAU / num_polar_voxels),
-                delta_phi_(TAU / num_azimuthal_voxels),
+                sphere_max_radius_(max_bound.radial),
+                delta_radius_((max_bound.radial - min_bound.radial) / num_radial_voxels),
+                delta_theta_((max_bound.polar - min_bound.polar) / num_polar_voxels),
+                delta_phi_((max_bound.azimuthal - min_bound.azimuthal) / num_azimuthal_voxels),
                 inverse_delta_radius_(1.0 / delta_radius_),
                 inverse_delta_theta_(1.0 / delta_theta_),
                 inverse_delta_phi_(1.0 / delta_phi_) {
@@ -58,6 +68,8 @@ namespace svr {
 
             P_max_polar_.resize(num_polar_voxels + 1);
             P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
+            center_to_polar_bound_vectors_.reserve(num_polar_voxels + 1);
+            center_to_azimuthal_bound_vectors_.reserve(num_azimuthal_voxels + 1);
             if (num_polar_voxels == num_azimuthal_voxels) {
                 double radians = 0.0;
                 polar_trig_values_.resize(num_polar_voxels + 1);
@@ -72,11 +84,16 @@ namespace svr {
                                P_max_polar_.begin(),
                                P_max_azimuthal_.begin(),
                                [&](const TrigonometricValues &tv, LineSegment &ang_LS) -> LineSegment {
-                                   const double px_max_value = sphere_max_radius * tv.cosine + sphere_center.x();
-                                   const double max_radius_times_s = sphere_max_radius * tv.sine;
+                                   const double px_max_value = sphere_max_radius_ * tv.cosine + sphere_center.x();
+                                   const double max_radius_times_s = sphere_max_radius_ * tv.sine;
                                    ang_LS = {.P1=px_max_value, .P2=max_radius_times_s + sphere_center.y()};
                                    return {.P1=px_max_value, .P2=max_radius_times_s + sphere_center.z()};
                                });
+                for (const auto& points : P_max_polar_) {
+                    const BoundVec3 v = sphere_center - FreeVec3(points.P1, points.P2, points.P2);
+                    center_to_polar_bound_vectors_.push_back(v);
+                    center_to_azimuthal_bound_vectors_.push_back(v);
+                }
                 return;
             }
 
@@ -98,14 +115,20 @@ namespace svr {
             });
             std::transform(polar_trig_values_.cbegin(), polar_trig_values_.cend(), P_max_polar_.begin(),
                            [&](const TrigonometricValues &ang_tv) -> LineSegment {
-                               return {.P1=sphere_max_radius * ang_tv.cosine + sphere_center.x(),
-                                       .P2=sphere_max_radius * ang_tv.sine + sphere_center.y()};
+                               return {.P1=sphere_max_radius_ * ang_tv.cosine + sphere_center.x(),
+                                       .P2=sphere_max_radius_ * ang_tv.sine + sphere_center.y()};
                            });
             std::transform(azimuthal_trig_values_.cbegin(), azimuthal_trig_values_.cend(), P_max_azimuthal_.begin(),
                            [&](const TrigonometricValues &azi_tv) -> LineSegment {
-                               return {.P1=sphere_max_radius * azi_tv.cosine + sphere_center.x(),
-                                       .P2=sphere_max_radius * azi_tv.sine + sphere_center.z()};
+                               return {.P1=sphere_max_radius_ * azi_tv.cosine + sphere_center.x(),
+                                       .P2=sphere_max_radius_ * azi_tv.sine + sphere_center.z()};
                            });
+            for (const auto& points : P_max_polar_) {
+                center_to_polar_bound_vectors_.emplace_back(sphere_center - FreeVec3(points.P1, points.P2, 0.0));
+            }
+            for (const auto& points : P_max_azimuthal_) {
+                center_to_azimuthal_bound_vectors_.emplace_back(sphere_center - FreeVec3(points.P1, 0.0, points.P2));
+            }
         }
 
         inline std::size_t numRadialVoxels() const noexcept { return this->num_radial_voxels_; }
@@ -136,9 +159,15 @@ namespace svr {
 
         inline const std::vector<LineSegment> &pMaxPolar() const noexcept { return this->P_max_polar_; }
 
+        inline const BoundVec3 &
+        centerToPolarBound(std::size_t i) const noexcept { return this->center_to_polar_bound_vectors_[i]; }
+
         inline const LineSegment &pMaxAzimuthal(std::size_t i) const noexcept { return this->P_max_azimuthal_[i]; }
 
         inline const std::vector<LineSegment> &pMaxAzimuthal() const noexcept { return this->P_max_azimuthal_; }
+
+        inline const BoundVec3 &
+        centerToAzimuthalBound(std::size_t i) const noexcept { return this->center_to_azimuthal_bound_vectors_[i]; }
 
         inline const std::vector<TrigonometricValues> &polarTrigValues() const noexcept { return polar_trig_values_; }
 
@@ -182,6 +211,12 @@ namespace svr {
         // The trigonometric values for each delta phi. In the case where delta theta is equal to delta phi,
         // this is left uninitialized and polar_trig_values_ is used.
         std::vector<TrigonometricValues> azimuthal_trig_values_;
+
+        // The vectors represented by sphere_center_ - P_max_polar_[i].
+        std::vector<BoundVec3> center_to_polar_bound_vectors_;
+
+        // The vectors represented by sphere_center_ - P_max_azimuthal_[i].
+        std::vector<BoundVec3> center_to_azimuthal_bound_vectors_;
     };
 
 } // namespace svr

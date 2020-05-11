@@ -12,9 +12,9 @@ cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
         double radial, polar, azimuthal
 
     vector[SphericalVoxel] walkSphericalVolume(double *ray_origin, double *ray_direction,
+                                               double *min_bound, double *max_bound,
                                                size_t num_radial_voxels, size_t num_polar_voxels,
                                                size_t num_azimuthal_voxels, double *sphere_center,
-                                               double sphere_max_radius, double *min_bound, double *max_bound,
                                                double t_begin, double t_end)
 
 @cython.boundscheck(False)
@@ -22,11 +22,10 @@ cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
 @cython.cdivision(True)
 def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] ray_direction,
-                          int num_radial_voxels, int num_polar_voxels, int num_azimuthal_voxels,
-                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center,
-                          np.float64_t sphere_max_radius,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] min_bound,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] max_bound,
+                          int num_radial_voxels, int num_polar_voxels, int num_azimuthal_voxels,
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center,
                           np.float64_t t_begin, np.float64_t t_end):
     '''
     Spherical Coordinate Voxel Traversal Algorithm
@@ -34,13 +33,12 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     Arguments:
            ray_origin: The 3-dimensional (x,y,z) origin of the ray.
            ray_direction: The 3-dimensional (x,y,z) direction of the ray.
+           min_bound: The minimum boundary of the sectored sphere in the form (radial, theta, phi).
+           max_bound: The maximum boundary of the sectored sphere in the form (radial, theta, phi).
            num_radial_voxels: The number of radial voxels.
            num_polar_voxels: The number of polar voxels.
            num_azimuthal_voxels: The number of azimuthal voxels.
            sphere_center: The 3-dimensional (x,y,z) center of the sphere.
-           min_bound: The minimum boundary of the sectored sphere in the form (radial, theta, phi).
-           max_bound: The maximum boundary of the sectored sphere in the form (radial, theta, phi).
-           sphere_max_radius: The maximum radius of the sphere.
            t_begin: The beginning time of the ray.
            t_end: The end time of the ray.
     Returns:
@@ -64,9 +62,9 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
     assert(max_bound.size == 3)
 
     cdef vector[SphericalVoxel] voxels = walkSphericalVolume(&ray_origin[0], &ray_direction[0],
+                                                             &min_bound[0], &max_bound[0],
                                                              num_radial_voxels, num_polar_voxels,
                                                              num_azimuthal_voxels, &sphere_center[0],
-                                                             sphere_max_radius, &min_bound[0], &max_bound[0],
                                                              t_begin, t_end)
     cdef np.ndarray cyVoxels = np.empty((voxels.size(), 3), dtype=int)
     for i in range(voxels.size()):
