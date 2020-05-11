@@ -26,6 +26,15 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                  ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
 
+#if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+#    add_link_options(-Wall -fprofile-arcs -ftest-coverage -fprofile-instr-generate)
+#    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+#    add_compile_options(--coverage)
+#elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GCC")
+#    add_compile_options(-fprofile-arcs -ftest-coverage)
+#endif ()
+
 set(TESTING_BINARY test_${CMAKE_PROJECT_NAME})
 set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_SVR.cpp)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
