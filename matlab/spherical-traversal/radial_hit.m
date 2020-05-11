@@ -1,5 +1,5 @@
 function[tMaxR, tStepR, transition_flag]=radial_hit(ray_origin, ray_direction, current_radial_voxel, ...
-        sphere_center, sphere_max_radius, delta_radius, t, ray_unit_vector, ray_circle_vector, v, prev_transition_flag, verbose)
+        sphere_center, sphere_max_radius, delta_radius, t, prev_transition_flag, verbose)
 % Determines whether a radial hit occurs for the given ray.
 % This follows closely the mathematics presented in:
 % http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
@@ -51,64 +51,25 @@ end
 % Initialize two arrays for the intersection times of the ray 
 % and neighboring (preiovus and next) spherical discs.
 time_array_a = [];
-time_array_b = [];
-discr = r_a^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
-if (discr >= 0 )        
-    d = sqrt(discr);
-    ta = (v-d);
-    tb = (v+d);
-    pa = ray_origin + ta.*ray_unit_vector;
-    pb = ray_origin + tb.*ray_unit_vector;    
-    if ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
-        t1 = (pa(2) - ray_origin(2))/ray_direction(2);
-        t2 = (pb(2) - ray_origin(2))/ray_direction(2);
-    elseif ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
-        t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-        t2 = (pb(1) - ray_origin(1))/ray_direction(1);
-    else
-        t1 = (pa(3) - ray_origin(3))/ray_direction(3);
-        t2 = (pb(3) - ray_origin(3))/ray_direction(3);
-    end
-    time_array_a(1) = t1;
-    time_array_a(2) = t2;
+[~,~,discra] = radial_intersection_points(ray_origin, ray_direction,...
+        sphere_center, r_a);
+if (discra >= 0 )        
+    [t1,t2] = radial_intersection_times(ray_origin, ray_direction,...
+        sphere_center, r_a);
 else
     r_a = r_a + delta_radius;
-    discr = r_a^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
-    d = sqrt(discr);
-    ta = (v-d);
-    tb = (v+d);
-    pa = ray_origin + ta.*ray_unit_vector;
-    pb = ray_origin + tb.*ray_unit_vector;
-    if ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
-        t1 = (pa(2) - ray_origin(2))/ray_direction(2);
-        t2 = (pb(2) - ray_origin(2))/ray_direction(2);
-    elseif ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
-        t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-        t2 = (pb(1) - ray_origin(1))/ray_direction(1);
-    else
-        t1 = (pa(3) - ray_origin(3))/ray_direction(3);
-        t2 = (pb(3) - ray_origin(3))/ray_direction(3);
-    end
-    time_array_a(1) = t1;
-    time_array_a(2) = t2;
+    [t1,t2] = radial_intersection_times(ray_origin, ray_direction,...
+        sphere_center, r_a);
 end
-discr = r_b^2 - (dot(ray_circle_vector,ray_circle_vector) - v^2);
-if discr >= 0      
-    d = sqrt(discr);
-    ta = (v-d);
-    tb = (v+d);
-    pa = ray_origin + ta.*ray_unit_vector;
-    pb = ray_origin + tb.*ray_unit_vector;
-    if ~approximatelyEqual(ray_direction(2),0.0,1e-12,1e-8)
-        t1 = (pa(2) - ray_origin(2))/ray_direction(2);
-        t2 = (pb(2) - ray_origin(2))/ray_direction(2);
-    elseif ~approximatelyEqual(ray_direction(1),0.0,1e-12,1e-8)
-        t1 = (pa(1) - ray_origin(1))/ray_direction(1);
-        t2 = (pb(1) - ray_origin(1))/ray_direction(1);
-    else
-        t1 = (pa(3) - ray_origin(3))/ray_direction(3);
-        t2 = (pb(3) - ray_origin(3))/ray_direction(3);
-    end
+time_array_a(1) = t1;
+time_array_a(2) = t2;
+
+time_array_b = [];
+[~,~,discrb] = radial_intersection_points(ray_origin, ray_direction,...
+        sphere_center, r_b);
+if discrb >= 0      
+    [t1,t2] = radial_intersection_times(ray_origin, ray_direction,...
+        sphere_center, r_b);
     time_array_b(1) = t1;
     time_array_b(2) = t2;
 end

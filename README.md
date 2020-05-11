@@ -25,31 +25,39 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 <sup>CPU Caches: L1 Data 32 KiB (x2), L1 Instruction 32 KiB (x2), L2 Unified 256 KiB (x2), L3 Unified 3072 KiB (x1)</sup>
 
 ## C++ Build Requirements
-- [CMake](https://cmake.org/)
+- [CMake 3.7 or later](https://cmake.org/)
 - C++11-standard-compliant compiler
+
+#### To run the benchmarks: 
+1. Install CMake version 3.7 or higher (https://cmake.org/)
+2. Clone the repository and build the benchmarks:
+```
+git clone https://github.com/spherical-volume-rendering/svr-algorithm.git && 
+cd svr-algorithm/cpp/benchmarks && mkdir build && cd build && cmake .. && make
+```
+3. Run the benchmarks:
+```
+cd .. && ./bin/benchmark_SVR
+```
 
 ### C++ Example
 ```
 #include "spherical_volume_rendering_util.h"
 
-const BoundVec3 min_bound(-20.0, -20.0, -20.0);
-const BoundVec3 max_bound(20.0, 20.0, 20.0);
 const BoundVec3 sphere_center(0.0, 0.0, 0.0);
 const double sphere_max_radius = 10.0;
-const std::size_t num_radial_sections = 4;
-const std::size_t num_angular_sections = 4;
-const std::size_t num_azimuthal_sections = 4;
 const svr::SphericalVoxelGrid grid(min_bound, max_bound, 
-                                   num_radial_sections, 
-                                   num_angular_sections,
-                                   num_azimuthal_sections, 
+                                   /*num_radial_sections=*/4, 
+                                   /*num_polar_sections=*/4,
+                                   /*num_azimuthal_sections=*/4, 
                                    sphere_center, sphere_max_radius);
 const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
 const FreeVec3 ray_direction(1.0, 1.0, 1.0);
 const Ray ray(ray_origin, ray_direction);
-const double t_begin = 0.0;
-const double t_end = 30.0;
-const auto voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
+const svr::SphereBound min_bound = { .radial=0.0, .polar=0.0, .azimuthal=0.0 };
+const svr::SphereBound max_bound = { .radial=sphere_max_radius, .polar=2*M_PI, .azimuthal=2*M_PI };
+const auto voxels = svr::walkSphericalVolume(ray, grid, min_bound, max_bound, 
+                                             /*t_begin=*/0.0, /*t_end=*/30.0);
 ```
 
 ## Cython Build Requirements
@@ -66,19 +74,19 @@ const auto voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
 import cython_SVR
 import numpy as np
 
-ray_origin =    np.array([-13.0, -13.0, -13.0])
+ray_origin    = np.array([-13.0, -13.0, -13.0])
 ray_direction = np.array([1.0, 1.0, 1.0])
-min_bound =     np.array([-20.0, -20.0, -20.0])
-max_bound =     np.array([20.0, 20.0, 20.0])
+min_bound     = np.array([-20.0, -20.0, -20.0])
+max_bound     = np.array([20.0, 20.0, 20.0])
 sphere_center = np.array([0.0, 0.0, 0.0])
-sphere_max_radius =     10.0
-num_radial_sections =    4
-num_angular_sections =   4
-num_azimuthal_sections = 4
+sphere_max_radius      = 10.0
+num_radial_sections    =  4
+num_polar_sections     =  4
+num_azimuthal_sections =  4
 t_begin = 0.0
 t_end =  30.0
 voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, 
-                                          num_radial_sections, num_angular_sections, 
+                                          num_radial_sections, num_polar_sections, 
                                           num_azimuthal_sections, sphere_center,
                                           sphere_max_radius, t_begin, t_end)
 ```
