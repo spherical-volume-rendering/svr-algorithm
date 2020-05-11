@@ -39,7 +39,10 @@ namespace svr {
                 sphere_max_radius_(sphere_max_radius),
                 delta_radius_(sphere_max_radius / num_radial_voxels),
                 delta_theta_(TAU / num_angular_voxels),
-                delta_phi_(TAU / num_azimuthal_voxels) {
+                delta_phi_(TAU / num_azimuthal_voxels),
+                inverse_delta_radius_(1.0 / delta_radius_),
+                inverse_delta_theta_(1.0 / delta_theta_),
+                inverse_delta_phi_(1.0 / delta_phi_) {
 
             delta_radii_.resize(num_radial_voxels + 1);
             double current_delta_radius = delta_radius_ * num_radial_voxels;
@@ -113,6 +116,12 @@ namespace svr {
 
         inline double sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
+        inline double invDeltaRadius() const noexcept { return this->inverse_delta_radius_; }
+
+        inline double invDeltaTheta() const noexcept { return this->inverse_delta_theta_; }
+
+        inline double invDeltaPhi() const noexcept { return this->inverse_delta_phi_; }
+
         inline const BoundVec3 &sphereCenter() const noexcept { return this->sphere_center_; }
 
         inline double deltaRadii(std::size_t i) const noexcept { return this->delta_radii_[i]; }
@@ -152,6 +161,9 @@ namespace svr {
 
         // 2 * PI divided by X, where X is the number of angular and number of azimuthal sections respectively.
         const double delta_theta_, delta_phi_;
+
+        // The inverse of the deltas.
+        const double inverse_delta_radius_, inverse_delta_theta_, inverse_delta_phi_;
 
         // The delta radii ranging from 0...num_radial_voxels.
         std::vector<double> delta_radii_;

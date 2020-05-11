@@ -265,6 +265,7 @@ namespace svr {
     // is the 2-d plane for which they exist in, this portion can be generalized to a single function call.
     // The calculations presented below follow closely the works of [Foley et al, 1996], [O'Rourke, 1998].
     // Reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
+    // TODO: Rename to angularPlaneHit().
     GenHitParameters
     generalizedPlaneHit(const svr::SphericalVoxelGrid &grid, const Ray &ray, double perp_uv_min, double perp_uv_max,
                         double perp_uw_min, double perp_uw_max, double perp_vw_min, double perp_vw_max,
@@ -341,6 +342,7 @@ namespace svr {
 
     // Determines whether an angular hit occurs for the given ray. An angular hit is considered an intersection with
     // the ray and an angular section. The angular sections live in the XY plane.
+    // TODO: Rename to polarHit().
     inline AngularHitParameters angularHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                            const RaySegment &RS, const std::array<double, 2> &collinear_times,
                                            int current_voxel_ID_theta, double t, double t_end) noexcept {
@@ -480,12 +482,15 @@ namespace svr {
     }
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
+                                                         const svr::SphereBound &min_bound,
+                                                         const svr::SphereBound &max_bound,
                                                          double t_begin, double t_end) noexcept {
         const FreeVec3 rsv = grid.sphereCenter() - ray.pointAtParameter(t_begin);   // Ray Sphere Vector.
         const FreeVec3 rsv_tz = (t_begin == 0.0) ? rsv : grid.sphereCenter() - ray.pointAtParameter(0.0);
 
         const double rsvd_begin = rsv.dot(rsv);
         std::size_t idx = grid.numRadialVoxels();
+        const double radial_bound = std::min(grid.sphereMaxRadius(), max_bound.radial);
         const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, grid.deltaRadiiSquared().crend(),
                                      [rsvd_begin, &idx](double dR_squared)-> bool {
                                          --idx;
@@ -511,6 +516,9 @@ namespace svr {
 
         if ((t_entrance < t_begin && t_exit < t_begin) || isEqual(t_entrance, t_exit)) { return {}; }
         int current_voxel_ID_r = idx + 1;
+        const int min_radial_ID = std::max(min_bound.radial * grid.invDeltaRadius(), 1.0);
+        const int max_radial_ID = max_bound.radial * grid.invDeltaRadius();
+        if (current_voxel_ID_r < min_radial_ID) { return {}; }
 
         std::vector<svr::LineSegment> P_angular(grid.numAngularVoxels() + 1);
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
@@ -531,6 +539,9 @@ namespace svr {
             p_y = grid.sphereCenter().y() - P_sphere.y() * angr;
         }
         int current_voxel_ID_theta = calculateVoxelID(P_angular, p_x, p_y);
+        const int min_angular_ID = min_bound.angular * grid.invDeltaTheta();
+        const int max_angular_ID = max_bound.angular * grid.invDeltaTheta();
+        if (current_voxel_ID_theta < min_angular_ID || current_voxel_ID_theta > max_angular_ID - 1) { return {}; }
 
         const double azimuthal_len = P_sphere.x() * P_sphere.x() + P_sphere.z() * P_sphere.z();
         if (isEqual(azimuthal_len, 0.0)) {
@@ -542,6 +553,9 @@ namespace svr {
             p_z = grid.sphereCenter().z() - P_sphere.z() * azir;
         }
         int current_voxel_ID_phi = calculateVoxelID(P_azimuthal, p_x, p_z);
+        const int min_azimuthal_ID = min_bound.azimuthal * grid.invDeltaPhi();
+        const int max_azimuthal_ID = max_bound.azimuthal * grid.invDeltaPhi();
+        if (current_voxel_ID_phi < min_azimuthal_ID || current_voxel_ID_phi > max_azimuthal_ID - 1) { return {}; }
 
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
@@ -564,8 +578,9 @@ namespace svr {
 
         RadialHitData radial_hit_data(v, rsvd_minus_v_squared);
         RaySegment ray_segment(&ray, t_end);
-
-        while (true) {
+        while (current_voxel_ID_r <= max_radial_ID &&
+               current_voxel_ID_theta < max_angular_ID &&
+               current_voxel_ID_phi < max_azimuthal_ID) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
             radial_hit_data.updateTransitionFlag(radial_params.previous_transition_flag);
             ray_segment.updateAtTime(t);
@@ -629,6 +644,7 @@ namespace svr {
                                      .angular_voxel=current_voxel_ID_theta,
                                      .azimuthal_voxel=current_voxel_ID_phi});
         }
+        return voxels;
     }
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(double *ray_origin, double *ray_direction,
@@ -636,6 +652,7 @@ namespace svr {
                                                          std::size_t num_angular_voxels,
                                                          std::size_t num_azimuthal_voxels,
                                                          double *sphere_center, double sphere_max_radius,
+                                                         double *min_bound, double* max_bound,
                                                          double t_begin, double t_end) noexcept {
         return svr::walkSphericalVolume(Ray(BoundVec3(ray_origin[0], ray_origin[1], ray_origin[2]),
                                             FreeVec3(ray_direction[0], ray_direction[1], ray_direction[2])),
@@ -644,6 +661,12 @@ namespace svr {
                                                                 num_azimuthal_voxels,
                                                                 BoundVec3(sphere_center[0], sphere_center[1],
                                                                           sphere_center[2]), sphere_max_radius),
+                                        svr::SphereBound{.radial=min_bound[0],
+                                                         .angular=min_bound[1],
+                                                         .azimuthal=min_bound[2]},
+                                        svr::SphereBound{.radial=max_bound[0],
+                                                         .angular=max_bound[1],
+                                                         .azimuthal=max_bound[2]},
                                         t_begin, t_end);
     }
 
