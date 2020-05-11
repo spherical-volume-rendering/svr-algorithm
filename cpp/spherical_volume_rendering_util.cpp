@@ -576,9 +576,7 @@ namespace svr {
 
         RadialHitData radial_hit_data(v, rsvd_minus_v_squared);
         RaySegment ray_segment(&ray, t_end);
-        while (current_voxel_ID_r <= max_radial_ID &&
-               current_voxel_ID_theta < max_polar_ID &&
-               current_voxel_ID_phi < max_azimuthal_ID) {
+        while (true) {
             const auto radial_params = radialHit(ray, grid, radial_hit_data, current_voxel_ID_r, t, t_end);
             radial_hit_data.updateTransitionFlag(radial_params.previous_transition_flag);
             ray_segment.updateAtTime(t);
@@ -640,11 +638,15 @@ namespace svr {
                     return voxels;
                 }
             }
+            if (current_voxel_ID_r > max_radial_ID ||
+                current_voxel_ID_theta >= max_polar_ID ||
+                current_voxel_ID_phi >= max_azimuthal_ID) {
+                return voxels;
+            }
             voxels.push_back({.radial_voxel=current_voxel_ID_r,
                               .polar_voxel=current_voxel_ID_theta,
                               .azimuthal_voxel=current_voxel_ID_phi});
         }
-        return voxels;
     }
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(double *ray_origin, double *ray_direction,

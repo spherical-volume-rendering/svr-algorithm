@@ -722,4 +722,23 @@ namespace {
         }
     }
 
+    TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
+        const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+        const double sphere_max_radius = 10.0;
+        const std::size_t num_radial_sections = 4;
+        const std::size_t num_polar_sections = 4;
+        const std::size_t num_azimuthal_sections = 4;
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections, num_azimuthal_sections,
+                                           sphere_center, sphere_max_radius);
+        const double t_begin = 0.0;
+        const double t_end = 30.0;
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=M_PI/2.0, .azimuthal=M_PI/2.0};
+        const auto actual_voxels = walkSphericalVolume(Ray(BoundVec3(13.0, 13.0, 13.0), FreeVec3(-1.0, -1.0, -1.0)),
+                                                       grid, MIN_BOUND, max_bound, t_begin, t_end);
+        const std::vector<int> expected_radial_voxels = {1, 2, 3, 4};
+        const std::vector<int> expected_theta_voxels = {0, 0, 0, 0};
+        const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
+        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+    }
+
 } // namespace
