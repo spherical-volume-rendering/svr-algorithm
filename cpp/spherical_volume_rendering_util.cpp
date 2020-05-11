@@ -195,7 +195,8 @@ namespace svr {
     // intersection points along the circle of max radius is obtuse. Equality represents the case when the point lies
     // on an polar boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane
     // (XY for polar, XZ for azimuthal), this can be generalized to a single function.
-    inline int calculateVoxelIDFromPoints(const std::vector<LineSegment> &angular_max, const double p1, double p2) noexcept {
+    inline int calculateVoxelIDFromPoints(const std::vector<LineSegment> &angular_max,
+                                          const double p1, double p2) noexcept {
         return index_adjacent_find_until(angular_max.cbegin(), angular_max.cend(),
                                          [p1, p2](const LineSegment &LS1, const LineSegment &LS2) -> bool {
                                              const double X_diff = LS1.P1 - LS2.P1;
@@ -548,7 +549,7 @@ namespace svr {
         const int max_polar_ID = max_bound.polar * grid.invDeltaTheta();
         if (current_voxel_ID_theta < min_polar_ID || current_voxel_ID_theta > max_polar_ID - 1) { return {}; }
 
-        int current_voxel_ID_phi= initializeAngularVoxelID(grid, ray_sphere, P_azimuthal, ray_sphere.z(),
+        int current_voxel_ID_phi = initializeAngularVoxelID(grid, ray_sphere, P_azimuthal, ray_sphere.z(),
                                                            grid.sphereCenter().z(), entry_radius);
         const int min_azimuthal_ID = min_bound.azimuthal * grid.invDeltaPhi();
         const int max_azimuthal_ID = max_bound.azimuthal * grid.invDeltaPhi();
