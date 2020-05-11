@@ -8,13 +8,13 @@
     num_radial_sections = 4;
     num_angular_sections = 3;
     num_azimuthal_sections = 4;
-    t_begin = 0.0;
+    t_begin = 0.01;
     t_end = 30.0;
     verbose = true;
     
     [rVoxels, thetaVoxels, phiVoxels, tTest, tTraversal] = sphericalCoordinateTraversal(min_bound, max_bound, ray_origin, ray_direction, ...
     sphere_center, sphere_max_radius, num_radial_sections, num_angular_sections, num_azimuthal_sections, t_begin, t_end, verbose)
-   % verifyEqual(testCase, rVoxels,     [1,2,3,3,2,1]);
-   % verifyEqual(testCase, thetaVoxels, [1,1,1,0,0,0]);
-   % verifyEqual(testCase, phiVoxels,   [2,2,1,0,0,0]);
+   % verifyEqual(testCase, rVoxels,     [1,2,2,3,2,1]);
+   % verifyEqual(testCase, thetaVoxels, [1,1,1,1,0,0]);
+   % verifyEqual(testCase, phiVoxels,   [2,2,1,1,0,0]);
     tRelError = (tTest-tTraversal)/(tTest^2)
