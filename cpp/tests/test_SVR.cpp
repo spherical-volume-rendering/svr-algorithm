@@ -674,17 +674,28 @@ namespace {
         const std::size_t num_azimuthal_sections = 8;
         const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
-        const BoundVec3 ray_origin(-11.0, 2.0, 1.0);
-        const FreeVec3 ray_direction(1.0, 0.0, 0.0);
-        const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 35.0;
         const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=M_PI};
-        const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
+        const auto actual_voxels = walkSphericalVolume(Ray(BoundVec3(-11.0, 2.0, 1.0), FreeVec3(1.0, 0.0, 0.0)),
+                                                       grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 4, 4, 3, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {3, 3, 3, 3, 3, 2, 1, 0, 0, 0, 0, 0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+
+        const std::vector<const BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, 5.0),
+                                                          BoundVec3(-1.0, -1.0, 10.0),
+                                                          BoundVec3(0.0, 0.0, 15.0),
+                                                          BoundVec3(-3.0, -3.0, 1.0),
+                                                          BoundVec3(-1.0, -5.0, 20.0)};
+        for (const auto ray_origin : ray_origins) {
+            const FreeVec3 ray_direction(0.0, 0.0, -1.0);
+            const auto v = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
+                                               MIN_BOUND, max_bound, t_begin, t_end);
+            EXPECT_NE(v.size(), 0);
+        }
+
     }
 
     TEST(SphericalCoordinateTraversal, UpperHemisphereMiss) {
@@ -706,8 +717,8 @@ namespace {
                                                           BoundVec3(-1.0, -1.0, -15.0)};
         for (const auto ray_origin : ray_origins) {
             const FreeVec3 ray_direction(1.0, 0.0, 0.0);
-            const Ray ray(ray_origin, ray_direction);
-            const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
+            const auto actual_voxels = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
+                                                               MIN_BOUND, max_bound, t_begin, t_end);
             EXPECT_EQ(actual_voxels.size(), 0);
         }
     }
