@@ -29,14 +29,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([15.0, 15.0, 15.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 8
+        num_polar_sections = 8
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 15.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         assert voxels.size == 0
 
@@ -46,14 +46,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [2,2,2,2,0,0,0,0]
@@ -66,14 +66,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [2,3,4,4,4,4,3,2,1]
         expected_theta_voxels = [1,1,1,0,3,3,3,3,3]
@@ -86,14 +86,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 5.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [4,3,2,1]
         expected_theta_voxels = [3,3,3,3]
@@ -106,14 +106,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 10.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 2, 3]
         expected_theta_voxels = [3, 3, 2, 2]
@@ -126,14 +126,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 5.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [2,3,4,4,4]
         expected_theta_voxels = [1,1,1,0,3]
@@ -146,14 +146,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 2, 3, 2, 2, 1]
         expected_theta_voxels = [2, 2, 1, 1, 1, 0, 0]
@@ -167,14 +167,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 8
+        num_polar_sections = 8
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [3,3,3,3,0,0,0,0]
@@ -187,14 +187,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 8
+        num_polar_sections = 8
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [5,5,5,5,1,1,1,1]
@@ -207,14 +207,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 8
+        num_polar_sections = 8
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [0,0,0,0,0,0,0,0]
@@ -227,14 +227,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [2,2,2,2,0,0,0,0]
@@ -247,14 +247,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [1,1,1,1,0,0,0,0]
@@ -267,14 +267,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1,2,3,4,4,3,2,1]
         expected_theta_voxels = [2,2,2,2,0,0,0,0]
@@ -287,14 +287,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 3, 4, 4, 3, 3, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1, 1, 0, 0, 3, 3, 3]
@@ -307,14 +307,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 1, 2, 2, 1]
         expected_theta_voxels = [2, 1, 1, 0, 0]
@@ -327,14 +327,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 3, 4, 4, 3, 2, 1]
         expected_theta_voxels = [3, 3, 3, 2, 2, 1, 1, 1, 1]
@@ -347,14 +347,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 1, 2, 1, 1]
         expected_theta_voxels = [0, 3, 3, 3, 2]
@@ -367,14 +367,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 9.0
         num_radial_sections = 4
-        num_angular_sections = 3
+        num_polar_sections = 3
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 2, 3, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1, 0, 0]
@@ -387,14 +387,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 3
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 4, 4, 3, 2, 1]
         expected_theta_voxels = [2, 2, 2, 2, 0, 0, 0, 0]
@@ -407,14 +407,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 40
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                                   18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
@@ -437,14 +437,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 40
+        num_polar_sections = 40
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 4, 4, 3, 2, 1]
         expected_theta_voxels = [24, 24, 24, 24, 4, 4, 4, 4]
@@ -457,14 +457,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 40
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 4, 4, 3, 2, 1]
         expected_theta_voxels = [2, 2, 2, 2, 0, 0, 0, 0]
@@ -477,14 +477,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.01
         t_end = 50.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 4, 4, 3, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1, 3, 3, 3, 3]
@@ -497,14 +497,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 4.3
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 3, 4, 4]
         expected_theta_voxels = [2, 2, 2, 3, 3, 0]
@@ -517,14 +517,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [4, 3, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1]
@@ -537,14 +537,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 1
+        num_polar_sections = 1
         num_azimuthal_sections = 1
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1]
@@ -557,14 +557,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 3, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1, 1, 1]
@@ -577,14 +577,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 4
+        num_polar_sections = 4
         num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 2, 1]
         expected_theta_voxels = [1, 1, 1, 1]
@@ -597,14 +597,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 8
+        num_polar_sections = 8
         num_azimuthal_sections = 8
         t_begin = 0.0
         t_end = 35.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         expected_radial_voxels = [1, 2, 3, 3, 4, 4, 4, 4, 3, 3, 2, 1]
         expected_theta_voxels = [3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 0]
@@ -617,14 +617,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_angular_sections = 8
+        num_polar_sections = 8
         num_azimuthal_sections = 8
         t_begin = 0.0
         t_end = 35.0
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, num_radial_sections,
-                                                  num_angular_sections, num_azimuthal_sections, sphere_center,
+                                                  num_polar_sections, num_azimuthal_sections, sphere_center,
                                                   sphere_max_radius, min_bound, max_bound, t_begin, t_end)
         assert voxels.size == 0
 
