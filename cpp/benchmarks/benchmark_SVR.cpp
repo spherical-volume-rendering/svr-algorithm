@@ -31,11 +31,11 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10e6;
         const std::size_t num_radial_sections = Y;
-        const std::size_t num_angular_sections = Y;
+        const std::size_t num_polar_sections = Y;
         const std::size_t num_azimuthal_sections = Y;
-        const svr::SphereBound min_bound = {.radial=0.0, .angular=0.0, .azimuthal=0.0};
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=2 * M_PI, .azimuthal=2 * M_PI};
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphereBound min_bound = {.radial=0.0, .polar=0.0, .azimuthal=0.0};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=2 * M_PI, .azimuthal=2 * M_PI};
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const double t_begin = 0.0;
         const double t_end = sphere_max_radius * 3;
@@ -59,8 +59,8 @@ namespace {
                     const auto last_voxel = actual_voxels[last];
                     printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y, ray_origin_z);
                     printf("\nEntrance Voxel: {%d, %d, %d} ... Exit Voxel: {%d, %d, %d}",
-                           first_voxel.radial_voxel, first_voxel.angular_voxel, first_voxel.azimuthal_voxel,
-                           last_voxel.radial_voxel, last_voxel.angular_voxel, last_voxel.azimuthal_voxel);
+                           first_voxel.radial_voxel, first_voxel.polar_voxel, first_voxel.azimuthal_voxel,
+                           last_voxel.radial_voxel, last_voxel.polar_voxel, last_voxel.azimuthal_voxel);
                 }
                 # endif
                 ray_origin_y = (j == X - 1) ? -10000.0 : ray_origin_y + ray_origin_plane_movement;

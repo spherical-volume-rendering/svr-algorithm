@@ -17,7 +17,7 @@
 
 namespace {
     constexpr double TAU = 2 * M_PI;
-    constexpr svr::SphereBound MIN_BOUND = {.radial=0.0, .angular=0.0, .azimuthal=0.0};
+    constexpr svr::SphereBound MIN_BOUND = {.radial=0.0, .polar=0.0, .azimuthal=0.0};
 
     // Determines equality amongst actual spherical voxels, and the expected spherical voxels.
     void expectEqualVoxels(const std::vector<svr::SphericalVoxel> &actual_voxels,
@@ -31,7 +31,7 @@ namespace {
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), radial_voxels.begin(),
                        [](const svr::SphericalVoxel &sv) -> int { return sv.radial_voxel; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), theta_voxels.begin(),
-                       [](const svr::SphericalVoxel &sv) -> int { return sv.angular_voxel; });
+                       [](const svr::SphericalVoxel &sv) -> int { return sv.polar_voxel; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), phi_voxels.begin(),
                        [](const svr::SphericalVoxel &sv) -> int { return sv.azimuthal_voxel; });
         EXPECT_THAT(radial_voxels, testing::ContainerEq(expected_radial_voxels));
@@ -43,9 +43,9 @@ namespace {
         const BoundVec3 sphere_center(15.0, 15.0, 15.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 8;
+        const std::size_t num_polar_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(3.0, 3.0, 3.0);
         const FreeVec3 ray_direction(-2.0, -1.3, 1.0);
@@ -53,7 +53,7 @@ namespace {
 
         const double t_begin = 0.0;
         const double t_end = 15.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         EXPECT_EQ(actual_voxels.size(), 0);
     }
@@ -62,16 +62,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3, 3, 3, 3, 3};
@@ -83,16 +83,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 5.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 3};
@@ -104,16 +104,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(13.0, -15.0, 16.0);
         const FreeVec3 ray_direction(-1.5, 1.2, -1.5);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 10.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 3};
         const std::vector<int> expected_theta_voxels = {3, 3, 2, 2};
@@ -125,16 +125,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 5.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3};
@@ -146,16 +146,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -167,16 +167,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
         const FreeVec3 ray_direction(1.0, 1.5, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 3, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 1, 1, 1, 0, 0};
@@ -188,16 +188,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 8;
+        const std::size_t num_polar_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, 0.0, 0.0);
         const FreeVec3 ray_direction(1.0, 0.0, 0.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 3, 0, 0, 0, 0};
@@ -209,16 +209,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 8;
+        const std::size_t num_polar_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, -15.0, 0.0);
         const FreeVec3 ray_direction(0.0, 1.0, 0.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {5, 5, 5, 5, 1, 1, 1, 1};
@@ -230,16 +230,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 8;
+        const std::size_t num_polar_sections = 8;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, 0.0, -15.0);
         const FreeVec3 ray_direction(0.0, 0.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -251,16 +251,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, 0.0);
         const FreeVec3 ray_direction(1.0, 1.0, 0.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -272,16 +272,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, 0.0, -15.0);
         const FreeVec3 ray_direction(1.0, 0.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
@@ -293,16 +293,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, -15.0, -15.0);
         const FreeVec3 ray_direction(0.0, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -314,16 +314,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(13.0, -15.0, -15.0);
         const FreeVec3 ray_direction(-1.0, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 2, 2, 1, 1, 1, 1};
@@ -335,16 +335,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, 17.0, -15.0);
         const FreeVec3 ray_direction(1.0, -1.2, 1.3);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 3, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 1, 0, 0, 3, 3, 3};
@@ -356,16 +356,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-13.0, -12.0, 15.3);
         const FreeVec3 ray_direction(1.4, 2.0, -1.3);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 1, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 1, 1, 0, 0};
@@ -377,16 +377,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(15.0, 12.0, 15.0);
         const FreeVec3 ray_direction(-1.4, -2.0, -1.3);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 1, 2, 1, 1};
         const std::vector<int> expected_theta_voxels = {0, 3, 3, 3, 2};
@@ -398,16 +398,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 9.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 3;
+        const std::size_t num_polar_sections = 3;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.3);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0, 0};
@@ -419,16 +419,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 3;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -440,16 +440,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 40;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
                                                          17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
@@ -474,16 +474,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 40;
+        const std::size_t num_polar_sections = 40;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {24, 24, 24, 24, 4, 4, 4, 4};
@@ -495,16 +495,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 40;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
         const FreeVec3 ray_direction(1.0, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -516,16 +516,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-15.0, 15.0, 15.0);
         const FreeVec3 ray_direction(1.0, -1.0, -1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.01;
         const double t_end = 50.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 3, 3, 3, 3};
@@ -537,16 +537,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-4.0, -4.0, -6.0);
         const FreeVec3 ray_direction(1.3, 1.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 4.3;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 3, 3, 0};
@@ -558,16 +558,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(0.0, 0.0, 0.0);
         const FreeVec3 ray_direction(-1.5, 1.2, -1.5);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
@@ -579,16 +579,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-5.0, 0.0, 10.0);
         const FreeVec3 ray_direction(0.0, 0.0, -1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
@@ -600,16 +600,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-2.5, 0.0, 10.0);
         const FreeVec3 ray_direction(0.0, 0.0, -1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 1, 1};
@@ -621,16 +621,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10e3;
         const std::size_t num_radial_sections = 128;
-        const std::size_t num_angular_sections = 1;
+        const std::size_t num_polar_sections = 1;
         const std::size_t num_azimuthal_sections = 1;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const double t_begin = 0.0;
         const double t_end = sphere_max_radius * 3;
         const BoundVec3 ray_origin(-421.875, -562.5, -(sphere_max_radius + 1.0));
         const FreeVec3 ray_direction(0.0, 0.0, 1.0);
         const Ray ray(ray_origin, ray_direction);
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         // TODO: Fix expected values.
         std::vector<int> expected_radial_voxels(119 * 2 - 1);
@@ -649,16 +649,16 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 4;
+        const std::size_t num_polar_sections = 4;
         const std::size_t num_azimuthal_sections = 4;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const BoundVec3 ray_origin(-5.01, 0.0, 10.0);
         const FreeVec3 ray_direction(0.0, 0.0, -1.0);
         const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 30.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=TAU};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=TAU};
         const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
@@ -670,13 +670,13 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 8;
+        const std::size_t num_polar_sections = 8;
         const std::size_t num_azimuthal_sections = 8;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const double t_begin = 0.0;
         const double t_end = 35.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=M_PI};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=M_PI};
         const auto actual_voxels = walkSphericalVolume(Ray(BoundVec3(-11.0, 2.0, 1.0), FreeVec3(1.0, 0.0, 0.0)),
                                                        grid, MIN_BOUND, max_bound, t_begin, t_end);
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 4, 4, 3, 3, 2, 1};
@@ -701,13 +701,13 @@ namespace {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
-        const std::size_t num_angular_sections = 8;
+        const std::size_t num_polar_sections = 8;
         const std::size_t num_azimuthal_sections = 8;
-        const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
+        const svr::SphericalVoxelGrid grid(num_radial_sections, num_polar_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
         const double t_begin = 0.0;
         const double t_end = 35.0;
-        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=M_PI};
+        const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=M_PI};
         const std::vector<const BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, -5.0),
                                                           BoundVec3(-1.0, -1.0, -1.0),
                                                           BoundVec3(-15.0, -15.0, -15.0),

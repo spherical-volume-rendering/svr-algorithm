@@ -7,7 +7,7 @@
 namespace svr {
     constexpr double TAU = 2 * M_PI;
 
-    // Represents a line segment. This is used to represent the points of intersections between
+    // Represents a line segment that is used for the points of intersections between
     // the lines corresponding to voxel boundaries and a given radial voxel.
     struct LineSegment {
         double P1;
@@ -25,20 +25,20 @@ namespace svr {
     // Requires:
     //   max_bound > min_bound
     //   num_radial_voxels > 0
-    //   num_angular_voxels > 0
+    //   num_polar_voxels > 0
     //   num_azimuthal_voxels > 0
     //   sphere_max_radius > 0.0
     struct SphericalVoxelGrid {
     public:
-        SphericalVoxelGrid(std::size_t num_radial_voxels, std::size_t num_angular_voxels,
+        SphericalVoxelGrid(std::size_t num_radial_voxels, std::size_t num_polar_voxels,
                 std::size_t num_azimuthal_voxels, const BoundVec3 &sphere_center, double sphere_max_radius) :
                 num_radial_voxels_(num_radial_voxels),
-                num_angular_voxels_(num_angular_voxels),
+                num_polar_voxels_(num_polar_voxels),
                 num_azimuthal_voxels_(num_azimuthal_voxels),
                 sphere_center_(sphere_center),
                 sphere_max_radius_(sphere_max_radius),
                 delta_radius_(sphere_max_radius / num_radial_voxels),
-                delta_theta_(TAU / num_angular_voxels),
+                delta_theta_(TAU / num_polar_voxels),
                 delta_phi_(TAU / num_azimuthal_voxels),
                 inverse_delta_radius_(1.0 / delta_radius_),
                 inverse_delta_theta_(1.0 / delta_theta_),
@@ -56,20 +56,20 @@ namespace svr {
             std::transform(delta_radii_.cbegin(), delta_radii_.cend(), delta_radii_sq_.begin(),
                            [](double dR) -> double { return dR * dR; });
 
-            P_max_angular_.resize(num_angular_voxels + 1);
+            P_max_polar_.resize(num_polar_voxels + 1);
             P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
-            if (num_angular_voxels == num_azimuthal_voxels) {
+            if (num_polar_voxels == num_azimuthal_voxels) {
                 double radians = 0.0;
-                angular_trig_values_.resize(num_angular_voxels + 1);
-                std::generate(angular_trig_values_.begin(), angular_trig_values_.end(),
+                polar_trig_values_.resize(num_polar_voxels + 1);
+                std::generate(polar_trig_values_.begin(), polar_trig_values_.end(),
                               [&]() -> TrigonometricValues {
                                   const double cos = std::cos(radians);
                                   const double sin = std::sin(radians);
                                   radians += delta_theta_;
                                   return {.cosine=cos, .sine=sin};
                               });
-                std::transform(angular_trig_values_.cbegin(), angular_trig_values_.cend(),
-                               P_max_angular_.begin(),
+                std::transform(polar_trig_values_.cbegin(), polar_trig_values_.cend(),
+                               P_max_polar_.begin(),
                                P_max_azimuthal_.begin(),
                                [&](const TrigonometricValues &tv, LineSegment &ang_LS) -> LineSegment {
                                    const double px_max_value = sphere_max_radius * tv.cosine + sphere_center.x();
@@ -81,8 +81,8 @@ namespace svr {
             }
 
             double radians = 0.0;
-            angular_trig_values_.resize(num_angular_voxels + 1);
-            std::generate(angular_trig_values_.begin(), angular_trig_values_.end(), [&]() -> TrigonometricValues {
+            polar_trig_values_.resize(num_polar_voxels + 1);
+            std::generate(polar_trig_values_.begin(), polar_trig_values_.end(), [&]() -> TrigonometricValues {
                 const double cos = std::cos(radians);
                 const double sin = std::sin(radians);
                 radians += delta_theta_;
@@ -96,7 +96,7 @@ namespace svr {
                 radians += delta_phi_;
                 return {.cosine=cos, .sine=sin};
             });
-            std::transform(angular_trig_values_.cbegin(), angular_trig_values_.cend(), P_max_angular_.begin(),
+            std::transform(polar_trig_values_.cbegin(), polar_trig_values_.cend(), P_max_polar_.begin(),
                            [&](const TrigonometricValues &ang_tv) -> LineSegment {
                                return {.P1=sphere_max_radius * ang_tv.cosine + sphere_center.x(),
                                        .P2=sphere_max_radius * ang_tv.sine + sphere_center.y()};
@@ -110,7 +110,7 @@ namespace svr {
 
         inline std::size_t numRadialVoxels() const noexcept { return this->num_radial_voxels_; }
 
-        inline std::size_t numAngularVoxels() const noexcept { return this->num_angular_voxels_; }
+        inline std::size_t numPolarVoxels() const noexcept { return this->num_polar_voxels_; }
 
         inline std::size_t numAzimuthalVoxels() const noexcept { return this->num_azimuthal_voxels_; }
 
@@ -132,23 +132,22 @@ namespace svr {
 
         inline const std::vector<double> &deltaRadiiSquared() const noexcept { return this->delta_radii_sq_; }
 
-        inline const LineSegment &pMaxAngular(std::size_t i) const noexcept { return this->P_max_angular_[i]; }
+        inline const LineSegment &pMaxPolar(std::size_t i) const noexcept { return this->P_max_polar_[i]; }
 
-        inline const std::vector<LineSegment> &pMaxAngular() const noexcept { return this->P_max_angular_; }
+        inline const std::vector<LineSegment> &pMaxPolar() const noexcept { return this->P_max_polar_; }
 
         inline const LineSegment &pMaxAzimuthal(std::size_t i) const noexcept { return this->P_max_azimuthal_[i]; }
 
         inline const std::vector<LineSegment> &pMaxAzimuthal() const noexcept { return this->P_max_azimuthal_; }
 
-        inline const std::vector<TrigonometricValues> &
-        angularTrigValues() const noexcept { return angular_trig_values_; }
+        inline const std::vector<TrigonometricValues> &polarTrigValues() const noexcept { return polar_trig_values_; }
 
         inline const std::vector<TrigonometricValues> &
         azimuthalTrigValues() const noexcept { return azimuthal_trig_values_; }
 
     private:
-        // The number of radial, angular, and azimuthal voxels.
-        const std::size_t num_radial_voxels_, num_angular_voxels_, num_azimuthal_voxels_;
+        // The number of radial, polar, and azimuthal voxels.
+        const std::size_t num_radial_voxels_, num_polar_voxels_, num_azimuthal_voxels_;
 
         // The center of the sphere.
         const BoundVec3 sphere_center_;
@@ -159,7 +158,7 @@ namespace svr {
         // The maximum sphere radius divided by the number of radial sections.
         const double delta_radius_;
 
-        // 2 * PI divided by X, where X is the number of angular and number of azimuthal sections respectively.
+        // 2 * PI divided by X, where X is the number of polar and number of azimuthal sections respectively.
         const double delta_theta_, delta_phi_;
 
         // The inverse of the deltas.
@@ -171,17 +170,17 @@ namespace svr {
         // The delta radii squared ranging from 0...num_radial_voxels.
         std::vector<double> delta_radii_sq_;
 
-        // The maximum radius line segments for angular voxels.
-        std::vector<LineSegment> P_max_angular_;
+        // The maximum radius line segments for polar voxels.
+        std::vector<LineSegment> P_max_polar_;
 
         // The maximum radius line segments for azimuthal voxels.
         std::vector<LineSegment> P_max_azimuthal_;
 
         // The trigonometric values for each delta theta.
-        std::vector<TrigonometricValues> angular_trig_values_;
+        std::vector<TrigonometricValues> polar_trig_values_;
 
         // The trigonometric values for each delta phi. In the case where delta theta is equal to delta phi,
-        // this is left uninitialized and angular_trig_values_ is used.
+        // this is left uninitialized and polar_trig_values_ is used.
         std::vector<TrigonometricValues> azimuthal_trig_values_;
     };
 
