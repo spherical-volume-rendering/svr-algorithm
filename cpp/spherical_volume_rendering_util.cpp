@@ -523,35 +523,32 @@ namespace svr {
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
         initializeVoxelBoundarySegments(P_angular, P_azimuthal, ray_origin_is_outside_grid, grid, entry_radius);
 
-        const FreeVec3 P_sphere = ray_origin_is_outside_grid ?
-                                  grid.sphereCenter() - ray.pointAtParameter(t_entrance)      :
-                                  isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
-                                  grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
-        double p_x, p_y, p_z;
-        const double angular_len = P_sphere.x() * P_sphere.x() + P_sphere.y() * P_sphere.y();
-        if (isEqual(angular_len, 0.0)) {
-            p_x = grid.sphereCenter().x() + entry_radius;
-            p_y = grid.sphereCenter().y();
-        } else {
-            const double angr = entry_radius / std::sqrt(angular_len);
-            p_x = grid.sphereCenter().x() - P_sphere.x() * angr;
-            p_y = grid.sphereCenter().y() - P_sphere.y() * angr;
+        const FreeVec3 ray_sphere = ray_origin_is_outside_grid                                  ?
+                                    grid.sphereCenter() - ray.pointAtParameter(t_entrance)      :
+                                    isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
+                                    grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
+
+        int current_voxel_ID_theta = 0;
+        const double ray_sphere_squared = ray_sphere.x() * ray_sphere.x();
+        const double angular_SED = ray_sphere_squared + ray_sphere.y() * ray_sphere.y();
+        if (!isEqual(angular_SED, 0.0)) { // If the squared euclidean distance is zero, the current voxel ID is zero.
+            const double r = entry_radius / std::sqrt(angular_SED);
+            const double P1 = grid.sphereCenter().x() - ray_sphere.x() * r;
+            const double P2 = grid.sphereCenter().y() - ray_sphere.y() * r;
+            current_voxel_ID_theta = calculateVoxelID(P_angular, P1, P2);
         }
-        int current_voxel_ID_theta = calculateVoxelID(P_angular, p_x, p_y);
         const int min_angular_ID = min_bound.angular * grid.invDeltaTheta();
         const int max_angular_ID = max_bound.angular * grid.invDeltaTheta();
         if (current_voxel_ID_theta < min_angular_ID || current_voxel_ID_theta > max_angular_ID - 1) { return {}; }
 
-        const double azimuthal_len = P_sphere.x() * P_sphere.x() + P_sphere.z() * P_sphere.z();
-        if (isEqual(azimuthal_len, 0.0)) {
-            p_x = grid.sphereCenter().x() + entry_radius;
-            p_z = grid.sphereCenter().z();
-        } else {
-            const double azir = entry_radius / std::sqrt(azimuthal_len);
-            p_x = grid.sphereCenter().x() - P_sphere.x() * azir;
-            p_z = grid.sphereCenter().z() - P_sphere.z() * azir;
+        int current_voxel_ID_phi = 0;
+        const double azimuthual_SED = ray_sphere_squared + ray_sphere.z() * ray_sphere.z();
+        if (!isEqual(azimuthual_SED, 0.0)) {
+            const double r = entry_radius / std::sqrt(azimuthual_SED);
+            const double P1 = grid.sphereCenter().x() - ray_sphere.x() * r;
+            const double P2 = grid.sphereCenter().z() - ray_sphere.z() * r;
+            current_voxel_ID_phi = calculateVoxelID(P_azimuthal, P1, P2);
         }
-        int current_voxel_ID_phi = calculateVoxelID(P_azimuthal, p_x, p_z);
         const int min_azimuthal_ID = min_bound.azimuthal * grid.invDeltaPhi();
         const int max_azimuthal_ID = max_bound.azimuthal * grid.invDeltaPhi();
         if (current_voxel_ID_phi < min_azimuthal_ID || current_voxel_ID_phi > max_azimuthal_ID - 1) { return {}; }
@@ -559,18 +556,17 @@ namespace svr {
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialVoxels() + grid.numAngularVoxels() + grid.numAzimuthalVoxels());
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
-                                 .angular_voxel=current_voxel_ID_theta,
-                                 .azimuthal_voxel=current_voxel_ID_phi});
+                          .angular_voxel=current_voxel_ID_theta,
+                          .azimuthal_voxel=current_voxel_ID_phi});
 
-        double t = INVALID_TIME;
+
         if (ray_origin_is_outside_grid) {
-            t = ray.timeOfIntersectionAt(Vec3(p_x, p_y, p_z));
             t_end = std::min(t_end, t_exit);
         } else {
-            t = t_begin;
             const double max_d = std::sqrt(max_radius_squared - rsvd_minus_v_squared);
             t_end = std::min(t_end, std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d)));
         }
+        double t = ray_origin_is_outside_grid ? t_entrance : t_begin;
 
         // Initialize the time in case of collinear min or collinear max for generalized plane hits.
         const std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
@@ -637,11 +633,13 @@ namespace svr {
                             (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
                     break;
                 }
-                case None: return voxels;
+                case None: {
+                    return voxels;
+                }
             }
             voxels.push_back({.radial_voxel=current_voxel_ID_r,
-                                     .angular_voxel=current_voxel_ID_theta,
-                                     .azimuthal_voxel=current_voxel_ID_phi});
+                              .angular_voxel=current_voxel_ID_theta,
+                              .azimuthal_voxel=current_voxel_ID_phi});
         }
         return voxels;
     }
