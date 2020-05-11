@@ -48,7 +48,7 @@ const BoundVec3 sphere_center(0.0, 0.0, 0.0);
 const double sphere_max_radius = 10.0;
 const svr::SphericalVoxelGrid grid(min_bound, max_bound, 
                                    /*num_radial_sections=*/4, 
-                                   /*num_angular_sections=*/4,
+                                   /*num_polar_sections=*/4,
                                    /*num_azimuthal_sections=*/4, 
                                    sphere_center, sphere_max_radius);
 const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
