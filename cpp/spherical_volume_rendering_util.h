@@ -42,7 +42,7 @@ namespace svr {
     // Simplified parameters to Cythonize the function; implementation remains the same as above.
     std::vector<SphericalVoxel> walkSphericalVolume(double *ray_origin, double *ray_direction,
                                                     std::size_t num_radial_voxels,
-                                                    std::size_t num_angular_voxels,
+                                                    std::size_t num_polar_voxels,
                                                     std::size_t num_azimuthal_voxels,
                                                     double *sphere_center, double sphere_max_radius,
                                                     double *min_bound, double *max_bound,

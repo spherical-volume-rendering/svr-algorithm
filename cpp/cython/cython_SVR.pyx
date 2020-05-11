@@ -12,7 +12,7 @@ cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
         double radial, polar, azimuthal
 
     vector[SphericalVoxel] walkSphericalVolume(double *ray_origin, double *ray_direction,
-                                               size_t num_radial_voxels, size_t num_angular_voxels,
+                                               size_t num_radial_voxels, size_t num_polar_voxels,
                                                size_t num_azimuthal_voxels, double *sphere_center,
                                                double sphere_max_radius, double *min_bound, double *max_bound,
                                                double t_begin, double t_end)
