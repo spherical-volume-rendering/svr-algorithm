@@ -548,13 +548,13 @@ namespace svr {
                                                               grid.sphereCenter().y(), entry_radius);
         const int min_polar_ID = min_bound.polar * grid.invDeltaTheta();
         const int max_polar_ID = max_bound.polar * grid.invDeltaTheta();
-        if (current_voxel_ID_theta < min_polar_ID || current_voxel_ID_theta > max_polar_ID - 1) { return {}; }
+        if (current_voxel_ID_theta < min_polar_ID || current_voxel_ID_theta >= max_polar_ID) { return {}; }
 
         int current_voxel_ID_phi = initializeAngularVoxelID(grid, ray_sphere, P_azimuthal, ray_sphere.z(),
                                                            grid.sphereCenter().z(), entry_radius);
         const int min_azimuthal_ID = min_bound.azimuthal * grid.invDeltaPhi();
         const int max_azimuthal_ID = max_bound.azimuthal * grid.invDeltaPhi();
-        if (current_voxel_ID_phi < min_azimuthal_ID || current_voxel_ID_phi > max_azimuthal_ID - 1) { return {}; }
+        if (current_voxel_ID_phi < min_azimuthal_ID || current_voxel_ID_phi >= max_azimuthal_ID) { return {}; }
 
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialVoxels() + grid.numPolarVoxels() + grid.numAzimuthalVoxels());
