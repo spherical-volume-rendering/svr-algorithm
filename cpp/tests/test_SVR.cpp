@@ -684,12 +684,12 @@ namespace {
         const std::vector<int> expected_phi_voxels = {3, 3, 3, 3, 3, 2, 1, 0, 0, 0, 0, 0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
 
-        const std::vector<const BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, 5.0),
-                                                          BoundVec3(-1.0, -1.0, 10.0),
-                                                          BoundVec3(0.0, 0.0, 15.0),
-                                                          BoundVec3(-3.0, -3.0, 1.0),
-                                                          BoundVec3(-1.0, -5.0, 20.0)};
-        for (const auto ray_origin : ray_origins) {
+        const std::vector<BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, 5.0),
+                                                    BoundVec3(-1.0, -1.0, 10.0),
+                                                    BoundVec3(0.0, 0.0, 15.0),
+                                                    BoundVec3(-3.0, -3.0, 1.0),
+                                                    BoundVec3(-1.0, -5.0, 20.0)};
+        for (const auto& ray_origin : ray_origins) {
             const FreeVec3 ray_direction(0.0, 0.0, -1.0);
             const auto v = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
                                                MIN_BOUND, max_bound, t_begin, t_end);
@@ -708,13 +708,13 @@ namespace {
         const double t_begin = 0.0;
         const double t_end = 35.0;
         const svr::SphereBound max_bound = {.radial=sphere_max_radius, .polar=TAU, .azimuthal=M_PI};
-        const std::vector<const BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, -5.0),
-                                                          BoundVec3(-1.0, -1.0, -1.0),
-                                                          BoundVec3(-15.0, -15.0, -15.0),
-                                                          BoundVec3(-15.0, -1.0, -1.0),
-                                                          BoundVec3(-1.0, -15.0, -1.0),
-                                                          BoundVec3(-1.0, -1.0, -15.0)};
-        for (const auto ray_origin : ray_origins) {
+        const std::vector<BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, -5.0),
+                                                    BoundVec3(-1.0, -1.0, -1.0),
+                                                    BoundVec3(-15.0, -15.0, -15.0),
+                                                    BoundVec3(-15.0, -1.0, -1.0),
+                                                    BoundVec3(-1.0, -15.0, -1.0),
+                                                    BoundVec3(-1.0, -1.0, -15.0)};
+        for (const auto& ray_origin : ray_origins) {
             const FreeVec3 ray_direction(1.0, 0.0, 0.0);
             const auto actual_voxels = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
                                                                MIN_BOUND, max_bound, t_begin, t_end);
