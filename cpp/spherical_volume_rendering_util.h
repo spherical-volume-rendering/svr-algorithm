@@ -31,7 +31,7 @@ namespace svr {
     // of the sphere to be traversed.
     // For example, if one wants to traverse the entire sphere, then:
     // SphereBound min_bound = { .radial=0.0, .angular=0.0, .azimuthal=0.0 }
-    // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .angular=2*M_PI, .azimuthal=2*M_PI }
+    // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .angular=2 * M_PI, .azimuthal=2 * M_PI }
     // If instead one wants to traverse the upper hemisphere, then:
     // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .angular=2*M_PI, .azimuthal=M_PI }
     std::vector<SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
