@@ -15,7 +15,8 @@ namespace svr {
         int azimuthal_voxel;
     };
 
-    // Represents the boundary for the sphere.
+    // Represents the boundary for the sphere. This is used to determine the minimum and maximum
+    // boundaries for a sectored traversal.
     struct SphereBound {
         double radial;
         double angular;
@@ -31,9 +32,7 @@ namespace svr {
     // For example, if one wants to traverse the entire sphere, then:
     // SphereBound min_bound = { .radial=0.0, .angular=0.0, .azimuthal=0.0 }
     // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .angular=2*M_PI, .azimuthal=2*M_PI }
-    //
     // If instead one wants to traverse the upper hemisphere, then:
-    // SphereBound min_bound = { .radial=0.0, .angular=0.0, .azimuthal=0.0 }
     // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .angular=2*M_PI, .azimuthal=M_PI }
     std::vector<SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                                     const svr::SphereBound &min_bound,

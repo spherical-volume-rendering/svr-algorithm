@@ -490,7 +490,6 @@ namespace svr {
 
         const double rsvd_begin = rsv.dot(rsv);
         std::size_t idx = grid.numRadialVoxels();
-        const double radial_bound = std::min(grid.sphereMaxRadius(), max_bound.radial);
         const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, grid.deltaRadiiSquared().crend(),
                                      [rsvd_begin, &idx](double dR_squared)-> bool {
                                          --idx;

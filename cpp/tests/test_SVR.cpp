@@ -695,14 +695,21 @@ namespace {
         const std::size_t num_azimuthal_sections = 8;
         const svr::SphericalVoxelGrid grid(num_radial_sections, num_angular_sections,
                                            num_azimuthal_sections, sphere_center, sphere_max_radius);
-        const BoundVec3 ray_origin(-3.0, -3.0, -3.0);
-        const FreeVec3 ray_direction(1.0, 0.0, 0.0);
-        const Ray ray(ray_origin, ray_direction);
         const double t_begin = 0.0;
         const double t_end = 35.0;
         const svr::SphereBound max_bound = {.radial=sphere_max_radius, .angular=TAU, .azimuthal=M_PI};
-        const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
-        EXPECT_EQ(actual_voxels.size(), 0);
+        const std::vector<const BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, -5.0),
+                                                          BoundVec3(-1.0, -1.0, -1.0),
+                                                          BoundVec3(-15.0, -15.0, -15.0),
+                                                          BoundVec3(-15.0, -1.0, -1.0),
+                                                          BoundVec3(-1.0, -15.0, -1.0),
+                                                          BoundVec3(-1.0, -1.0, -15.0)};
+        for (const auto ray_origin : ray_origins) {
+            const FreeVec3 ray_direction(1.0, 0.0, 0.0);
+            const Ray ray(ray_origin, ray_direction);
+            const auto actual_voxels = walkSphericalVolume(ray, grid, MIN_BOUND, max_bound, t_begin, t_end);
+            EXPECT_EQ(actual_voxels.size(), 0);
+        }
     }
 
 } // namespace
