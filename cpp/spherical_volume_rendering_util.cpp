@@ -215,8 +215,8 @@ namespace svr {
 
     // Initializes an angular voxel ID. For polar initializations=, *_2 represents the y-plane. For azimuthal
     // initialization, it represents the z-plane. If the squared euclidean distance of the ray_sphere vector in the
-    // given plane is zero, the voxel ID is set to 0. Otherwise, we find the point of intersection between the vector
-    // created by the point of ray intersection with the initial sphere radius and the sphere center.
+    // given plane is zero, the voxel ID is set to 0. Otherwise, we find the traversal point of the ray and the
+    // sphere center with the projected circle given by the entry_radius.
     inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid, const FreeVec3 &ray_sphere,
                                         const std::vector<LineSegment> &angular_max,
                                         double ray_sphere_2, double grid_sphere_2, double entry_radius) noexcept {
