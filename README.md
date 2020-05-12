@@ -68,7 +68,7 @@ const auto voxels = svr::walkSphericalVolume(ray, grid, /*t_begin=*/0.0, /*t_end
 ### Cython Example
 ```
 #   Compile code before use:
-#   python cython_SVR_setup.py build_ext --inplace
+#   python3 cython_SVR_setup.py build_ext --inplace
 
 import cython_SVR
 import numpy as np

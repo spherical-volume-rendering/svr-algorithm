@@ -53,7 +53,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
           and max_bound = [SPHERE_MAX_RADIUS, 2*pi, 2*pi]. Similarly, if one wants to traverse
           the upper hemisphere, max_bound = SPHERE_MAX_RADIUS, 2*pi, pi].
         - Code must be compiled before use:
-           > python cython_SVR_setup.py build_ext --inplace
+           > python3 cython_SVR_setup.py build_ext --inplace
     '''
     assert(ray_origin.size == 3)
     assert(ray_direction.size == 3)

@@ -1,7 +1,7 @@
 '''
 Testing for cythonized version of the spherical coordinate voxel traversal algorithm.
 To compile SVR code:
-    python cython_SVR_setup.py build_ext --inplace
+    python3 cython_SVR_setup.py build_ext --inplace
 '''
 
 import unittest
