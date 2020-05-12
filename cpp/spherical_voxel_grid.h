@@ -29,14 +29,10 @@ namespace svr {
     };
 
 
-    // todo: Add bounds to the grid.
-    // todo: Documentation
-    // The sphere bounds are used to determine the sector of the sphere to be traversed.
-    // For example, if one wants to traverse the entire sphere, then:
-    // SphereBound min_bound = { .radial=0.0, .polar=0.0, .azimuthal=0.0 }
-    // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .polar=2 * M_PI, .azimuthal=2 * M_PI }
-    // If instead one wants to traverse the upper hemisphere, then:
-    // SphereBound max_bound = { .radial=SPHERE_MAX_RADIUS, .polar=2*M_PI, .azimuthal=M_PI }
+    // Represents a spherical voxel grid used for ray casting. The bounds of the grid are determined by min_bound
+    // and max_bound. The deltas are then determined by (max_bound.X - min_bound.X) / num_X_sections. To minimize
+    // calculation duplication, many calculations are completed once here and used each time a ray traverses the
+    // spherical voxel grid.
     struct SphericalVoxelGrid {
     public:
         SphericalVoxelGrid(const SphereBound &min_bound, const SphereBound &max_bound,
