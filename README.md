@@ -87,6 +87,9 @@ t_end     = 30.0
 voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound, 
                                           num_radial_sections, num_polar_sections, 
                                           num_azimuthal_sections, sphere_center, t_begin, t_end)
+
+# Expected voxels: [ [1, 2, 2], [2, 2, 2], [3, 2, 2], [4, 2, 2],
+#                    [4, 0, 0], [3, 0, 0], [2, 0, 0], [1, 0, 0] ]
 ```
 
 ### Project Links
