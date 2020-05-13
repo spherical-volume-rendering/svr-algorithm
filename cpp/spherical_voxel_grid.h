@@ -180,9 +180,6 @@ namespace svr {
         // 2 * PI divided by X, where X is the number of polar and number of azimuthal sections respectively.
         const double delta_theta_, delta_phi_;
 
-        // The inverse of the deltas.
-        const double inverse_delta_radius_, inverse_delta_theta_, inverse_delta_phi_;
-
         // The delta radii ranging from 0...num_radial_voxels.
         std::vector<double> delta_radii_;
 
