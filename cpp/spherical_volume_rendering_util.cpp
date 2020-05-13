@@ -533,20 +533,21 @@ namespace svr {
         const double d = std::sqrt(entry_radius_squared - rsvd_minus_v_squared);
 
         // Calculate the time of entrance and exit of the ray.
-        const double t_entrance = ray.timeOfIntersectionAt(v - d);
-        const double t_exit = ray.timeOfIntersectionAt(v + d);
+        const double t_sphere_entrance = ray.timeOfIntersectionAt(v - d);
+        const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
 
-        if ((t_entrance < t_begin && t_exit < t_begin) || isEqual(t_entrance, t_exit)) { return {}; }
+        if ((t_sphere_entrance < t_begin && t_sphere_exit < t_begin) ||
+             isEqual(t_sphere_entrance, t_sphere_exit)) { return {}; }
         int current_voxel_ID_r = idx + 1;
 
         std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalSections() + 1);
         initializeVoxelBoundarySegments(P_polar, P_azimuthal, ray_origin_is_outside_grid, grid, entry_radius);
 
-        const FreeVec3 ray_sphere = ray_origin_is_outside_grid                                  ?
-                                    grid.sphereCenter() - ray.pointAtParameter(t_entrance)      :
-                                    isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
-                                    grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
+        const FreeVec3 ray_sphere = ray_origin_is_outside_grid ?
+                                    grid.sphereCenter() - ray.pointAtParameter(t_sphere_entrance) :
+                                    isEqual(rsv, Vec3(0.0, 0.0, 0.0))                             ?
+                                    grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)     :   rsv;
 
         int current_voxel_ID_theta = initializeAngularVoxelID(grid, grid.numPolarSections(), ray_sphere, P_polar,
                                                               ray_sphere.y(), grid.sphereCenter().y(), entry_radius);
@@ -564,8 +565,8 @@ namespace svr {
 
         double t;
         if (ray_origin_is_outside_grid) {
-            t = t_entrance;
-            t_end = std::min(t_end, t_exit);
+            t = t_sphere_entrance;
+            t_end = std::min(t_end, t_sphere_exit);
         } else {
             t = t_begin;
             const double max_d = std::sqrt(max_radius_squared - rsvd_minus_v_squared);
