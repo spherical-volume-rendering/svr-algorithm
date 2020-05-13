@@ -537,8 +537,8 @@ class TestWalkSphericalVolume(unittest.TestCase):
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_polar_sections = 1
-        num_azimuthal_sections = 1
+        num_polar_sections = 4
+        num_azimuthal_sections = 4
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
@@ -571,14 +571,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         expected_phi_voxels = [1, 1, 1, 2, 2, 2]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
-    def test_ray_tangential_hit_two(self):
+    def test_num_angular_sections_is_one(self):
         ray_origin = np.array([-2.5, 0.0, 10.0])
         ray_direction = np.array([0.0, 0.0, -1.0])
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
-        num_polar_sections = 4
-        num_azimuthal_sections = 4
+        num_polar_sections = 1
+        num_azimuthal_sections = 1
         t_begin = 0.0
         t_end = 30.0
         min_bound = np.array([0.0, 0.0, 0.0])
