@@ -220,7 +220,7 @@ namespace svr {
     inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid, std::size_t number_of_sections,
                                         const FreeVec3 &ray_sphere, const std::vector<LineSegment> &angular_max,
                                         double ray_sphere_2, double grid_sphere_2, double entry_radius) noexcept {
-        if (number_of_sections == 1) return 0;
+        if (number_of_sections == 1) { return 0; }
         const double SED = ray_sphere.x() * ray_sphere.x() + ray_sphere_2 * ray_sphere_2;
         if (isEqual(SED, 0.0)) { return 0; }
         const double r = entry_radius / std::sqrt(SED);
