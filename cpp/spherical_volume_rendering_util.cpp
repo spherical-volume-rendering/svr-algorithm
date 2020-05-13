@@ -263,21 +263,19 @@ namespace svr {
             intersection_times[3] = ray.timeOfIntersectionAt(rh_data.v() + d_b);
         }
 
-        const auto intersection_time_it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
+        const auto it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
                                                        [t](double i)->double{ return i > t; });
-        if (intersection_time_it == intersection_times.cend()) {
+        if (it == intersection_times.cend() || (t >= *it) || (*it >= t_end)) {
             return {.tMaxR=std::numeric_limits<double>::max(), .tStepR=0,
                     .previous_transition_flag=false, .within_bounds=false };
         }
 
-        const double intersection_time = *intersection_time_it;
-        const bool is_tangential_hit = intersection_times[0] > t && isEqual(intersection_times[0], intersection_times[1]);
-        const bool within_t_bounds = lessThan(t, intersection_time) && lessThan(intersection_time, t_end);
-        if (is_tangential_hit) {
+        const double intersection_time = *it;
+        if (intersection_times[0] > t && isEqual(intersection_times[0], intersection_times[1])) {
             return {.tMaxR=intersection_time,
                     .tStepR=0,
                     .previous_transition_flag=true,
-                    .within_bounds=within_t_bounds
+                    .within_bounds=true
             };
         }
 
@@ -286,7 +284,7 @@ namespace svr {
         return {.tMaxR=intersection_time,
                 .tStepR=STEP[!is_radial_transition && lessThan(r_new, current_radius)],
                 .previous_transition_flag=is_radial_transition,
-                .within_bounds=within_t_bounds
+                .within_bounds=true
         };
     }
 
