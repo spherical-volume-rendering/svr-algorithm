@@ -262,23 +262,24 @@ namespace svr {
             intersection_times[3] = ray.timeOfIntersectionAt(rh_data.v() + d_b);
         }
 
-        const auto it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
-                                     [t, t_end](double intersection_time) -> double {
-                                         return intersection_time > t && intersection_time < t_end;
-                                     });
-        if (it == intersection_times.cend()) {
-            return {.tMaxR=std::numeric_limits<double>::max(), .tStepR=0,
-                    .previous_transition_flag=false, .within_bounds=false };
-        }
-
-        const double intersection_time = *it;
         if (intersection_times[0] > t && isEqual(intersection_times[0], intersection_times[1])) {
-            return {.tMaxR=intersection_time,
+            return {.tMaxR=intersection_times[0],
                     .tStepR=0,
                     .previous_transition_flag=true,
                     .within_bounds=true
             };
         }
+
+        const auto intersection_time_it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
+                                                       [t, t_end](double intersection_time) -> double {
+                                                           return intersection_time > t && intersection_time < t_end;
+                                                       });
+        if (intersection_time_it == intersection_times.cend()) {
+            return {.tMaxR=std::numeric_limits<double>::max(), .tStepR=0,
+                    .previous_transition_flag=false, .within_bounds=false };
+        }
+
+        const double intersection_time = *intersection_time_it;
 
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isEqual(r_new, current_radius);
@@ -334,16 +335,16 @@ namespace svr {
         }
 
 
-        if (t_max_within_bounds && is_intersect_max && !is_intersect_min && !is_collinear_min) {
-            return { .tMax = t_max, .tStep = 1, .within_bounds = true };
+        if (is_intersect_max && !is_intersect_min && !is_collinear_min) {
+            return { .tMax = t_max, .tStep = 1, .within_bounds = t_max_within_bounds };
         }
-        if (t_min_within_bounds && is_intersect_min && !is_intersect_max && !is_collinear_max) {
-            return { .tMax = t_min, .tStep = -1, .within_bounds = true };
+        if (is_intersect_min && !is_intersect_max && !is_collinear_max) {
+            return { .tMax = t_min, .tStep = -1, .within_bounds = t_min_within_bounds };
         }
         if ((is_intersect_min && is_intersect_max) ||
             (is_intersect_min && is_collinear_max) ||
             (is_intersect_max && is_collinear_min)) {
-            if (t_min_within_bounds && isEqual(t_min, t_max)) {
+            if (isEqual(t_min, t_max)) {
                 const double perturbed_t = 0.1;
                 a = -ray.direction().x() * perturbed_t;
                 b = -ray_direction_2 * perturbed_t;
@@ -354,7 +355,7 @@ namespace svr {
                 return {.tMax = t_max,
                         .tStep = (lessThan(ray_direction_2, 0.0) || lessThan(ray.direction().x(), 0.0)) ?
                                  next_step : -next_step,
-                        .within_bounds = true
+                        .within_bounds = t_min_within_bounds
                 };
             }
             if (t_min_within_bounds && (lessThan(t_min, t_max) || isEqual(t, t_max))) {
@@ -533,7 +534,6 @@ namespace svr {
         if (entry_radius_squared <= rsvd_minus_v_squared) { return {}; }
         const double d = std::sqrt(entry_radius_squared - rsvd_minus_v_squared);
 
-        // Calculate the time of entrance and exit of the ray.
         const double t_sphere_entrance = ray.timeOfIntersectionAt(v - d);
         const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
 
