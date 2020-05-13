@@ -6,7 +6,7 @@
 
 namespace svr {
     // An array of step values used to avoid branch prediction in radialHit().
-    constexpr std::array<int, 3> STEP{0, -1, 1};
+    constexpr std::array<int, 3> STEP{-1, 1};
 
     // Represents an invalid time. At no point should the time be a negative number.
     constexpr double INVALID_TIME = -1.0;
@@ -262,22 +262,31 @@ namespace svr {
             intersection_times[2] = ray.timeOfIntersectionAt(rh_data.v() - d_b);
             intersection_times[3] = ray.timeOfIntersectionAt(rh_data.v() + d_b);
         }
+
         const auto intersection_time_it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
                                                        [t](double i)->double{ return i > t; });
         if (intersection_time_it == intersection_times.cend()) {
             return {.tMaxR=std::numeric_limits<double>::max(), .tStepR=0,
                     .previous_transition_flag=false, .within_bounds=false };
         }
+
         const double intersection_time = *intersection_time_it;
+        const bool is_tangential_hit = intersection_times[0] > t && isEqual(intersection_times[0], intersection_times[1]);
+        const bool within_t_bounds = lessThan(t, intersection_time) && lessThan(intersection_time, t_end);
+        if (is_tangential_hit) {
+            return {.tMaxR=intersection_time,
+                    .tStepR=0,
+                    .previous_transition_flag=true,
+                    .within_bounds=within_t_bounds
+            };
+        }
+
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isEqual(r_new, current_radius);
-        const bool is_tangential_hit = intersection_times[0] > t && isEqual(intersection_times[0], intersection_times[1]);
         return {.tMaxR=intersection_time,
-                .tStepR=STEP[1 * !is_tangential_hit +
-                             (!is_tangential_hit && !is_radial_transition
-                              && lessThan(r_new, current_radius))],
-                .previous_transition_flag=is_radial_transition || is_tangential_hit,
-                .within_bounds=lessThan(t, intersection_time) && lessThan(intersection_time, t_end)
+                .tStepR=STEP[!is_radial_transition && lessThan(r_new, current_radius)],
+                .previous_transition_flag=is_radial_transition,
+                .within_bounds=within_t_bounds
         };
     }
 
