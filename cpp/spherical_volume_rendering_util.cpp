@@ -214,12 +214,13 @@ namespace svr {
 
 
     // Initializes an angular voxel ID. For polar initializations=, *_2 represents the y-plane. For azimuthal
-    // initialization, it represents the z-plane. If the squared euclidean distance of the ray_sphere vector in the
-    // given plane is zero, the voxel ID is set to 0. Otherwise, we find the traversal point of the ray and the
-    // sphere center with the projected circle given by the entry_radius.
-    inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid, const FreeVec3 &ray_sphere,
-                                        const std::vector<LineSegment> &angular_max,
+    // initialization, it represents the z-plane. If the number of sections is 1 or the squared euclidean distance
+    // of the ray_sphere vector in the given plane is zero, the voxel ID is set to 0. Otherwise, we find the traversal
+    // point of the ray and the sphere center with the projected circle given by the entry_radius.
+    inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid, std::size_t number_of_sections,
+                                        const FreeVec3 &ray_sphere, const std::vector<LineSegment> &angular_max,
                                         double ray_sphere_2, double grid_sphere_2, double entry_radius) noexcept {
+        if (number_of_sections == 1) return 0;
         const double SED = ray_sphere.x() * ray_sphere.x() + ray_sphere_2 * ray_sphere_2;
         if (isEqual(SED, 0.0)) { return 0; }
         const double r = entry_radius / std::sqrt(SED);
@@ -252,6 +253,7 @@ namespace svr {
         // To find the next radius, we need to check the previous_transition_flag:
         // In the case that the ray has sequential hits with equal radii, e.g.
         // the innermost radial disc, this ensures that the proper radii are being checked.
+
         const double transition_radii[] = {grid.deltaRadiiSquared( std::min(voxel_idx - 1, std::size_t{0}) ),
                                            grid.deltaRadiiSquared( voxel_idx ) };
         const double r_b = transition_radii[rh_data.transitionFlag()];
@@ -269,12 +271,12 @@ namespace svr {
         const double intersection_time = *intersection_time_it;
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isEqual(r_new, current_radius);
-        const bool is_tangential_hit = isEqual(intersection_times[0], intersection_times[1]);
+        const bool is_tangential_hit = intersection_times[0] > t && isEqual(intersection_times[0], intersection_times[1]);
         return {.tMaxR=intersection_time,
                 .tStepR=STEP[1 * !is_tangential_hit +
                              (!is_tangential_hit && !is_radial_transition
                               && lessThan(r_new, current_radius))],
-                .previous_transition_flag=is_radial_transition,
+                .previous_transition_flag=is_radial_transition || is_tangential_hit,
                 .within_bounds=lessThan(t, intersection_time) && lessThan(intersection_time, t_end)
         };
     }
@@ -539,12 +541,12 @@ namespace svr {
                                     isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
 
-        int current_voxel_ID_theta = initializeAngularVoxelID(grid, ray_sphere, P_polar, ray_sphere.y(),
-                                                              grid.sphereCenter().y(), entry_radius);
+        int current_voxel_ID_theta = initializeAngularVoxelID(grid, grid.numPolarVoxels(), ray_sphere, P_polar,
+                                                              ray_sphere.y(), grid.sphereCenter().y(), entry_radius);
         if (current_voxel_ID_theta == grid.numPolarVoxels()) { return {}; }
 
-        int current_voxel_ID_phi = initializeAngularVoxelID(grid, ray_sphere, P_azimuthal, ray_sphere.z(),
-                                                           grid.sphereCenter().z(), entry_radius);
+        int current_voxel_ID_phi = initializeAngularVoxelID(grid, grid.numAzimuthalVoxels(), ray_sphere, P_azimuthal,
+                                                            ray_sphere.z(), grid.sphereCenter().z(), entry_radius);
         if (current_voxel_ID_phi == grid.numAzimuthalVoxels()) { return {}; }
 
         std::vector<svr::SphericalVoxel> voxels;
