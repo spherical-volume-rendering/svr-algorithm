@@ -253,7 +253,6 @@ namespace svr {
         // To find the next radius, we need to check the previous_transition_flag:
         // In the case that the ray has sequential hits with equal radii, e.g.
         // the innermost radial disc, this ensures that the proper radii are being checked.
-
         const double transition_radii[] = {grid.deltaRadiiSquared( std::min(voxel_idx - 1, std::size_t{0}) ),
                                            grid.deltaRadiiSquared( voxel_idx ) };
         const double r_b = transition_radii[rh_data.transitionFlag()];
@@ -264,8 +263,10 @@ namespace svr {
         }
 
         const auto it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
-                                                       [t](double i)->double{ return i > t; });
-        if (it == intersection_times.cend() || (t >= *it) || (*it >= t_end)) {
+                                     [t, t_end](double intersection_time) -> double {
+                                         return intersection_time > t && intersection_time < t_end;
+                                     });
+        if (it == intersection_times.cend()) {
             return {.tMaxR=std::numeric_limits<double>::max(), .tStepR=0,
                     .previous_transition_flag=false, .within_bounds=false };
         }
