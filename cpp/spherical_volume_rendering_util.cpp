@@ -282,7 +282,7 @@ namespace svr {
         const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
         const bool is_radial_transition = isEqual(r_new, current_radius);
         return {.tMaxR=intersection_time,
-                .tStepR=STEP[!is_radial_transition && lessThan(r_new, current_radius)],
+                .tStepR=STEP[!is_radial_transition && r_new < current_radius],
                 .previous_transition_flag=is_radial_transition,
                 .within_bounds=true
         };
@@ -405,14 +405,14 @@ namespace svr {
                              grid.pMaxAzimuthal(current_voxel_ID_phi).P2);
         const FreeVec3 p_two(grid.pMaxAzimuthal(current_voxel_ID_phi + 1).P1, 0.0,
                              grid.pMaxAzimuthal(current_voxel_ID_phi + 1).P2);
-        const BoundVec3 u_min(grid.centerToAzimuthalBound(current_voxel_ID_phi));
-        const BoundVec3 u_max(grid.centerToAzimuthalBound(current_voxel_ID_phi + 1));
+        const BoundVec3 *u_min = &grid.centerToAzimuthalBound(current_voxel_ID_phi);
+        const BoundVec3 *u_max = &grid.centerToAzimuthalBound(current_voxel_ID_phi + 1);
         const FreeVec3 w_min = p_one - FreeVec3(RS.P1());
         const FreeVec3 w_max = p_two - FreeVec3(RS.P1());
-        const double perp_uv_min = u_min.x() * RS.raySegment().z() - u_min.z() * RS.raySegment().x();
-        const double perp_uv_max = u_max.x() * RS.raySegment().z() - u_max.z() * RS.raySegment().x();
-        const double perp_uw_min = u_min.x() * w_min.z() - u_min.z() * w_min.x();
-        const double perp_uw_max = u_max.x() * w_max.z() - u_max.z() * w_max.x();
+        const double perp_uv_min = u_min->x() * RS.raySegment().z() - u_min->z() * RS.raySegment().x();
+        const double perp_uv_max = u_max->x() * RS.raySegment().z() - u_max->z() * RS.raySegment().x();
+        const double perp_uw_min = u_min->x() * w_min.z() - u_min->z() * w_min.x();
+        const double perp_uw_max = u_max->x() * w_max.z() - u_max->z() * w_max.x();
         const double perp_vw_min = RS.raySegment().x() * w_min.z() - RS.raySegment().z() * w_min.x();
         const double perp_vw_max = RS.raySegment().x() * w_max.z() - RS.raySegment().z() * w_max.x();
         const AngularHitParameters params = angularHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,

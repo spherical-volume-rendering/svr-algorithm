@@ -135,12 +135,6 @@ namespace svr {
 
         inline double sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
-        inline double invDeltaRadius() const noexcept { return this->inverse_delta_radius_; }
-
-        inline double invDeltaTheta() const noexcept { return this->inverse_delta_theta_; }
-
-        inline double invDeltaPhi() const noexcept { return this->inverse_delta_phi_; }
-
         inline const BoundVec3 &sphereCenter() const noexcept { return this->sphere_center_; }
 
         inline double deltaRadii(std::size_t i) const noexcept { return this->delta_radii_[i]; }
