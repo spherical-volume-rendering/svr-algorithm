@@ -36,36 +36,36 @@ namespace svr {
     struct SphericalVoxelGrid {
     public:
         SphericalVoxelGrid(const SphereBound &min_bound, const SphereBound &max_bound,
-                std::size_t num_radial_voxels, std::size_t num_polar_voxels, std::size_t num_azimuthal_voxels,
-                const BoundVec3 &sphere_center) :
-                num_radial_voxels_(num_radial_voxels),
-                num_polar_voxels_(num_polar_voxels),
-                num_azimuthal_voxels_(num_azimuthal_voxels),
+                           std::size_t num_radial_sections, std::size_t num_polar_sections,
+                           std::size_t num_azimuthal_sections, const BoundVec3 &sphere_center) :
+                num_radial_sections_(num_radial_sections),
+                num_polar_sections_(num_polar_sections),
+                num_azimuthal_sections_(num_azimuthal_sections),
                 sphere_center_(sphere_center),
                 sphere_max_radius_(max_bound.radial),
-                delta_radius_((max_bound.radial - min_bound.radial) / num_radial_voxels),
-                delta_theta_((max_bound.polar - min_bound.polar) / num_polar_voxels),
-                delta_phi_((max_bound.azimuthal - min_bound.azimuthal) / num_azimuthal_voxels) {
+                delta_radius_((max_bound.radial - min_bound.radial) / num_radial_sections),
+                delta_theta_((max_bound.polar - min_bound.polar) / num_polar_sections),
+                delta_phi_((max_bound.azimuthal - min_bound.azimuthal) / num_azimuthal_sections) {
 
-            delta_radii_.resize(num_radial_voxels + 1);
-            double current_delta_radius = delta_radius_ * num_radial_voxels;
+            delta_radii_.resize(num_radial_sections + 1);
+            double current_delta_radius = delta_radius_ * num_radial_sections;
             std::generate(delta_radii_.begin(), delta_radii_.end(),
                           [&]() -> double {
                               const double old_delta_radius = current_delta_radius;
                               current_delta_radius -= delta_radius_;
                               return old_delta_radius;
                           });
-            delta_radii_sq_.resize(num_radial_voxels + 1);
+            delta_radii_sq_.resize(num_radial_sections + 1);
             std::transform(delta_radii_.cbegin(), delta_radii_.cend(), delta_radii_sq_.begin(),
                            [](double dR) -> double { return dR * dR; });
 
-            P_max_polar_.resize(num_polar_voxels + 1);
-            P_max_azimuthal_.resize(num_azimuthal_voxels + 1);
-            center_to_polar_bound_vectors_.reserve(num_polar_voxels + 1);
-            center_to_azimuthal_bound_vectors_.reserve(num_azimuthal_voxels + 1);
-            if (num_polar_voxels == num_azimuthal_voxels) {
+            P_max_polar_.resize(num_polar_sections + 1);
+            P_max_azimuthal_.resize(num_azimuthal_sections + 1);
+            center_to_polar_bound_vectors_.reserve(num_polar_sections + 1);
+            center_to_azimuthal_bound_vectors_.reserve(num_azimuthal_sections + 1);
+            if (num_polar_sections == num_azimuthal_sections) {
                 double radians = 0.0;
-                polar_trig_values_.resize(num_polar_voxels + 1);
+                polar_trig_values_.resize(num_polar_sections + 1);
                 std::generate(polar_trig_values_.begin(), polar_trig_values_.end(),
                               [&]() -> TrigonometricValues {
                                   const double cos = std::cos(radians);
@@ -91,7 +91,7 @@ namespace svr {
             }
 
             double radians = 0.0;
-            polar_trig_values_.resize(num_polar_voxels + 1);
+            polar_trig_values_.resize(num_polar_sections + 1);
             std::generate(polar_trig_values_.begin(), polar_trig_values_.end(), [&]() -> TrigonometricValues {
                 const double cos = std::cos(radians);
                 const double sin = std::sin(radians);
@@ -99,7 +99,7 @@ namespace svr {
                 return {.cosine=cos, .sine=sin};
             });
             radians = 0.0;
-            azimuthal_trig_values_.resize(num_azimuthal_voxels + 1);
+            azimuthal_trig_values_.resize(num_azimuthal_sections + 1);
             std::generate(azimuthal_trig_values_.begin(), azimuthal_trig_values_.end(), [&]() -> TrigonometricValues {
                 const double cos = std::cos(radians);
                 const double sin = std::sin(radians);
@@ -124,11 +124,11 @@ namespace svr {
             }
         }
 
-        inline std::size_t numRadialVoxels() const noexcept { return this->num_radial_voxels_; }
+        inline std::size_t numRadialSections() const noexcept { return this->num_radial_sections_; }
 
-        inline std::size_t numPolarVoxels() const noexcept { return this->num_polar_voxels_; }
+        inline std::size_t numPolarSections() const noexcept { return this->num_polar_sections_; }
 
-        inline std::size_t numAzimuthalVoxels() const noexcept { return this->num_azimuthal_voxels_; }
+        inline std::size_t numAzimuthalSections() const noexcept { return this->num_azimuthal_sections_; }
 
         inline double sphereMaxRadius() const noexcept { return this->sphere_max_radius_; }
 
@@ -163,7 +163,7 @@ namespace svr {
 
     private:
         // The number of radial, polar, and azimuthal voxels.
-        const std::size_t num_radial_voxels_, num_polar_voxels_, num_azimuthal_voxels_;
+        const std::size_t num_radial_sections_, num_polar_sections_, num_azimuthal_sections_;
 
         // The center of the sphere.
         const BoundVec3 sphere_center_;

@@ -241,7 +241,7 @@ namespace svr {
         const double current_radius = grid.deltaRadii(voxel_idx);
 
         // Find the intersection times for the ray and the previous radial disc.
-        const std::size_t previous_idx = std::min(voxel_idx + 1, grid.numRadialVoxels() - 1);
+        const std::size_t previous_idx = std::min(voxel_idx + 1, grid.numRadialSections() - 1);
         const double r_a = grid.deltaRadiiSquared(previous_idx -
                                                   (grid.deltaRadiiSquared(previous_idx) < rh_data.rsvdMinusVSquared()));
         const double d_a = std::sqrt(r_a - rh_data.rsvdMinusVSquared());
@@ -482,7 +482,7 @@ namespace svr {
             return;
         }
 
-        if (grid.numPolarVoxels() == grid.numAzimuthalVoxels()) {
+        if (grid.numPolarSections() == grid.numAzimuthalSections()) {
             std::transform(grid.polarTrigValues().cbegin(), grid.polarTrigValues().cend(),
                            P_polar.begin(), P_azimuthal.begin(),
                            [current_radius, &grid](const TrigonometricValues &tv,
@@ -512,7 +512,7 @@ namespace svr {
         const FreeVec3 rsv_tz = (t_begin == 0.0) ? rsv : grid.sphereCenter() - ray.pointAtParameter(0.0);
 
         const double rsvd_begin = rsv.dot(rsv);
-        std::size_t idx = grid.numRadialVoxels();
+        std::size_t idx = grid.numRadialSections();
         const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, grid.deltaRadiiSquared().crend(),
                                      [rsvd_begin, &idx](double dR_squared)-> bool {
                                          --idx;
@@ -539,8 +539,8 @@ namespace svr {
         if ((t_entrance < t_begin && t_exit < t_begin) || isEqual(t_entrance, t_exit)) { return {}; }
         int current_voxel_ID_r = idx + 1;
 
-        std::vector<svr::LineSegment> P_polar(grid.numPolarVoxels() + 1);
-        std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalVoxels() + 1);
+        std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
+        std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalSections() + 1);
         initializeVoxelBoundarySegments(P_polar, P_azimuthal, ray_origin_is_outside_grid, grid, entry_radius);
 
         const FreeVec3 ray_sphere = ray_origin_is_outside_grid                                  ?
@@ -548,16 +548,16 @@ namespace svr {
                                     isEqual(rsv, Vec3(0.0, 0.0, 0.0))                           ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)   :   rsv;
 
-        int current_voxel_ID_theta = initializeAngularVoxelID(grid, grid.numPolarVoxels(), ray_sphere, P_polar,
+        int current_voxel_ID_theta = initializeAngularVoxelID(grid, grid.numPolarSections(), ray_sphere, P_polar,
                                                               ray_sphere.y(), grid.sphereCenter().y(), entry_radius);
-        if (static_cast<std::size_t>(current_voxel_ID_theta) == grid.numPolarVoxels()) { return {}; }
+        if (static_cast<std::size_t>(current_voxel_ID_theta) == grid.numPolarSections()) { return {}; }
 
-        int current_voxel_ID_phi = initializeAngularVoxelID(grid, grid.numAzimuthalVoxels(), ray_sphere, P_azimuthal,
+        int current_voxel_ID_phi = initializeAngularVoxelID(grid, grid.numAzimuthalSections(), ray_sphere, P_azimuthal,
                                                             ray_sphere.z(), grid.sphereCenter().z(), entry_radius);
-        if (static_cast<std::size_t>(current_voxel_ID_phi) == grid.numAzimuthalVoxels()) { return {}; }
+        if (static_cast<std::size_t>(current_voxel_ID_phi) == grid.numAzimuthalSections()) { return {}; }
 
         std::vector<svr::SphericalVoxel> voxels;
-        voxels.reserve(grid.numRadialVoxels() + grid.numPolarVoxels() + grid.numAzimuthalVoxels());
+        voxels.reserve(grid.numRadialSections() + grid.numPolarSections() + grid.numAzimuthalSections());
         voxels.push_back({.radial_voxel=current_voxel_ID_r,
                           .polar_voxel=current_voxel_ID_theta,
                           .azimuthal_voxel=current_voxel_ID_phi});
@@ -595,44 +595,44 @@ namespace svr {
                 case Polar: {
                     t = polar_params.tMaxTheta;
                     current_voxel_ID_theta =
-                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarVoxels();
+                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarSections();
                     break;
                 }
                 case Azimuthal: {
                     t = azimuthal_params.tMaxPhi;
                     current_voxel_ID_phi =
-                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
+                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalSections();
                     break;
                 }
                 case RadialPolar: {
                     t = radial_params.tMaxR;
                     current_voxel_ID_r += radial_params.tStepR;
                     current_voxel_ID_theta =
-                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarVoxels();
+                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarSections();
                     break;
                 }
                 case RadialAzimuthal: {
                     t = radial_params.tMaxR;
                     current_voxel_ID_r += radial_params.tStepR;
                     current_voxel_ID_phi =
-                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
+                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalSections();
                     break;
                 }
                 case PolarAzimuthal: {
                     t = polar_params.tMaxTheta;
                     current_voxel_ID_theta =
-                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarVoxels();
+                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarSections();
                     current_voxel_ID_phi =
-                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
+                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalSections();
                     break;
                 }
                 case RadialPolarAzimuthal: {
                     t = radial_params.tMaxR;
                     current_voxel_ID_r += radial_params.tStepR;
                     current_voxel_ID_theta =
-                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarVoxels();
+                            (current_voxel_ID_theta + polar_params.tStepTheta) % grid.numPolarSections();
                     current_voxel_ID_phi =
-                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalVoxels();
+                            (current_voxel_ID_phi + azimuthal_params.tStepPhi) % grid.numAzimuthalSections();
                     break;
                 }
                 case None: {
