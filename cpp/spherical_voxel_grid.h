@@ -45,10 +45,7 @@ namespace svr {
                 sphere_max_radius_(max_bound.radial),
                 delta_radius_((max_bound.radial - min_bound.radial) / num_radial_voxels),
                 delta_theta_((max_bound.polar - min_bound.polar) / num_polar_voxels),
-                delta_phi_((max_bound.azimuthal - min_bound.azimuthal) / num_azimuthal_voxels),
-                inverse_delta_radius_(1.0 / delta_radius_),
-                inverse_delta_theta_(1.0 / delta_theta_),
-                inverse_delta_phi_(1.0 / delta_phi_) {
+                delta_phi_((max_bound.azimuthal - min_bound.azimuthal) / num_azimuthal_voxels) {
 
             delta_radii_.resize(num_radial_voxels + 1);
             double current_delta_radius = delta_radius_ * num_radial_voxels;

@@ -550,11 +550,11 @@ namespace svr {
 
         int current_voxel_ID_theta = initializeAngularVoxelID(grid, grid.numPolarVoxels(), ray_sphere, P_polar,
                                                               ray_sphere.y(), grid.sphereCenter().y(), entry_radius);
-        if (current_voxel_ID_theta == grid.numPolarVoxels()) { return {}; }
+        if (static_cast<std::size_t>(current_voxel_ID_theta) == grid.numPolarVoxels()) { return {}; }
 
         int current_voxel_ID_phi = initializeAngularVoxelID(grid, grid.numAzimuthalVoxels(), ray_sphere, P_azimuthal,
                                                             ray_sphere.z(), grid.sphereCenter().z(), entry_radius);
-        if (current_voxel_ID_phi == grid.numAzimuthalVoxels()) { return {}; }
+        if (static_cast<std::size_t>(current_voxel_ID_phi) == grid.numAzimuthalVoxels()) { return {}; }
 
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialVoxels() + grid.numPolarVoxels() + grid.numAzimuthalVoxels());

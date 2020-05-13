@@ -40,7 +40,7 @@ set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_SVR.cpp)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 add_executable(${TESTING_BINARY} ${TESTING_SOURCE_FILES})
 target_link_libraries(${TESTING_BINARY} gtest_main gmock_main)
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "cpp/-Wall -Wextra")
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wall -Wextra")
 
 enable_testing()
 
