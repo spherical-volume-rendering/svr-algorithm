@@ -97,6 +97,7 @@ voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, 
 - [Feasibility Study](https://docs.google.com/document/d/1MbGmy5cSSesI0oUCWHxpiwcHEw6kqd79AV1XZW-rEZo/edit)
 - [Progress Report](https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?ts=5e5d6f45#)
 - [Final Report](https://docs.google.com/document/d/1AHyUod23MtOnhCSbB4lvm5ZKAX3HhVL5KglLV-IlIlc/edit#heading=h.93f22ixpbzrf)
+- [Final Handover Package](https://docs.google.com/document/d/1cNCUepAqEg_i76zvOSb8QUndCqFi2kTLEnqdrCjhu9g/edit?ts=5ebc9bdd#)
 
 ### References
 - John Amanatides and Andrew Woo. A fast voxel traversal algorithm for ray tracing. In Eurographics ’87, pages 3–10, 1987.
