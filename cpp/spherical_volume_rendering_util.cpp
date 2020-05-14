@@ -87,7 +87,7 @@ namespace svr {
 
         inline double v() const noexcept { return v_; }
 
-        inline double rsvdMinusVSquared() const noexcept { return rsvd_minus_v_squared_;}
+        inline double rsvdMinusVSquared() const noexcept { return rsvd_minus_v_squared_; }
 
         inline bool transitionFlag() const noexcept { return transition_flag_; }
 
@@ -253,8 +253,8 @@ namespace svr {
         // To find the next radius, we need to check the previous_transition_flag:
         // In the case that the ray has sequential hits with equal radii, e.g.
         // the innermost radial disc, this ensures that the proper radii are being checked.
-        const double transition_radii[] = {grid.deltaRadiiSquared( std::min(voxel_idx - 1, std::size_t{0}) ),
-                                           grid.deltaRadiiSquared( voxel_idx ) };
+        const double transition_radii[] = {grid.deltaRadiiSquared(std::min(voxel_idx - 1, std::size_t{0})),
+                                           grid.deltaRadiiSquared(voxel_idx)};
         const double r_b = transition_radii[rh_data.transitionFlag()];
         if (r_b >= rh_data.rsvdMinusVSquared()) {
             const double d_b = std::sqrt(r_b - rh_data.rsvdMinusVSquared());
@@ -276,7 +276,7 @@ namespace svr {
                                                        });
         if (intersection_time_it == intersection_times.cend()) {
             return {.tMaxR=std::numeric_limits<double>::max(), .tStepR=0,
-                    .previous_transition_flag=false, .within_bounds=false };
+                    .previous_transition_flag=false, .within_bounds=false};
         }
 
         const double intersection_time = *intersection_time_it;
@@ -331,15 +331,15 @@ namespace svr {
         const bool t_max_within_bounds = lessThan(t, t_max) && lessThan(t_max, t_end);
         const bool t_min_within_bounds = lessThan(t, t_min) && lessThan(t_min, t_end);
         if (!t_max_within_bounds && !t_min_within_bounds) {
-            return { .tMax = std::numeric_limits<double>::max(), .tStep = 0, .within_bounds = false };
+            return {.tMax = std::numeric_limits<double>::max(), .tStep = 0, .within_bounds = false};
         }
 
 
         if (is_intersect_max && !is_intersect_min && !is_collinear_min) {
-            return { .tMax = t_max, .tStep = 1, .within_bounds = t_max_within_bounds };
+            return {.tMax = t_max, .tStep = 1, .within_bounds = t_max_within_bounds};
         }
         if (is_intersect_min && !is_intersect_max && !is_collinear_max) {
-            return { .tMax = t_min, .tStep = -1, .within_bounds = t_min_within_bounds };
+            return {.tMax = t_min, .tStep = -1, .within_bounds = t_min_within_bounds};
         }
         if ((is_intersect_min && is_intersect_max) ||
             (is_intersect_min && is_collinear_max) ||
@@ -359,13 +359,13 @@ namespace svr {
                 };
             }
             if (t_min_within_bounds && (lessThan(t_min, t_max) || isEqual(t, t_max))) {
-                return { .tMax = t_min, .tStep = -1, .within_bounds = true };
+                return {.tMax = t_min, .tStep = -1, .within_bounds = true};
             }
             if (t_max_within_bounds && (lessThan(t_max, t_min) || isEqual(t, t_min))) {
-                return { .tMax = t_max, .tStep = 1, .within_bounds = true };
+                return {.tMax = t_max, .tStep = 1, .within_bounds = true};
             }
         }
-        return { .tMax = std::numeric_limits<double>::max(), .tStep = 0, .within_bounds = false };
+        return {.tMax = std::numeric_limits<double>::max(), .tStep = 0, .within_bounds = false};
     }
 
     // Determines whether a polar hit occurs for the given ray. A polar hit is considered an intersection with
@@ -516,7 +516,7 @@ namespace svr {
         const double rsvd_begin = rsv.dot(rsv);
         std::size_t idx = grid.numRadialSections();
         const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, grid.deltaRadiiSquared().crend(),
-                                     [rsvd_begin, &idx](double dR_squared)-> bool {
+                                     [rsvd_begin, &idx](double dR_squared) -> bool {
                                          --idx;
                                          return rsvd_begin <= dR_squared;
                                      });
@@ -538,7 +538,7 @@ namespace svr {
         const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
 
         if ((t_sphere_entrance < t_begin && t_sphere_exit < t_begin) ||
-             isEqual(t_sphere_entrance, t_sphere_exit)) { return {}; }
+            isEqual(t_sphere_entrance, t_sphere_exit)) { return {}; }
         int current_voxel_ID_r = idx + 1;
 
         std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
@@ -547,8 +547,8 @@ namespace svr {
 
         const FreeVec3 ray_sphere = ray_origin_is_outside_grid ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_sphere_entrance) :
-                                    isEqual(rsv, Vec3(0.0, 0.0, 0.0))                             ?
-                                    grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)     :   rsv;
+                                    isEqual(rsv, Vec3(0.0, 0.0, 0.0)) ?
+                                    grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1) : rsv;
 
         int current_voxel_ID_theta = initializeAngularVoxelID(grid, grid.numPolarSections(), ray_sphere, P_polar,
                                                               ray_sphere.y(), grid.sphereCenter().y(), entry_radius);
@@ -648,27 +648,25 @@ namespace svr {
     }
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(double *ray_origin, double *ray_direction,
-                                                         double* min_bound, double* max_bound,
+                                                         double *min_bound, double *max_bound,
                                                          std::size_t num_radial_voxels,
                                                          std::size_t num_polar_voxels,
                                                          std::size_t num_azimuthal_voxels,
                                                          double *sphere_center, double t_begin, double t_end) noexcept {
         return svr::walkSphericalVolume(Ray(BoundVec3(ray_origin[0], ray_origin[1], ray_origin[2]),
-                                            FreeVec3(ray_direction[0], ray_direction[1], ray_direction[2])
-                                        ),
+                                            FreeVec3(ray_direction[0], ray_direction[1], ray_direction[2])),
                                         svr::SphericalVoxelGrid(svr::SphereBound{.radial=min_bound[0],
-                                                                                 .polar=min_bound[1],
-                                                                                 .azimuthal=min_bound[2]},
+                                                                        .polar=min_bound[1],
+                                                                        .azimuthal=min_bound[2]},
                                                                 svr::SphereBound{.radial=max_bound[0],
-                                                                                 .polar=max_bound[1],
-                                                                                 .azimuthal=max_bound[2]},
+                                                                        .polar=max_bound[1],
+                                                                        .azimuthal=max_bound[2]},
                                                                 num_radial_voxels,
                                                                 num_polar_voxels,
                                                                 num_azimuthal_voxels,
                                                                 BoundVec3(sphere_center[0],
                                                                           sphere_center[1],
-                                                                          sphere_center[2])
-                                        ), t_begin, t_end);
+                                                                          sphere_center[2])), t_begin, t_end);
     }
 
 } // namespace svr

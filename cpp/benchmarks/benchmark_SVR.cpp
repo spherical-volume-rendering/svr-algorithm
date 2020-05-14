@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 #include "../spherical_volume_rendering_util.h"
 
-# define DEBUG 1
+# define DEBUG 0
 
 // Benchmarking for the spherical coordinate voxel traversal algorithm.
 // Utilises the Google Benchmark library.
