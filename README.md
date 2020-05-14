@@ -14,12 +14,12 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 ## Initial Benchmarks*
 | # Rays 	| # Voxels 	| CPU Mean (ms) 	| CPU Median (ms) 	| CPU Std Dev (ms) 	|
 |--------	|----------	|---------------	|-----------------	|------------------	|
-| 128^2  	| 64^3     	| 233           	| 233             	| 1.0              	|
-| 256^2  	| 64^3     	| 928           	| 926             	| 4.5              	|
-| 512^2  	| 64^3    	| 3717          	| 3713            	| 24.1            	|
-| 128^2  	| 128^3    	| 463           	| 462             	| 2.2              	|
-| 256^2  	| 128^3    	| 1838          	| 1833            	| 12.0             	|
-| 512^2  	| 128^3    	| 7346          	| 7324            	| 16.9            	|
+| 128^2  	| 64^3     	| 216           	| 215             	| 2.6              	|
+| 256^2  	| 64^3     	| 865           	| 861             	| 14.0             	|
+| 512^2  	| 64^3    	| 3496          	| 3496           	  | 11.7            	|
+| 128^2  	| 128^3    	| 430           	| 429             	| 3.4              	|
+| 256^2  	| 128^3    	| 1713          	| 1713            	| 6.0             	|
+| 512^2  	| 128^3    	| 6844          	| 6828            	| 42.8            	|
 
 <sup>\*Run on (4 X 1600 MHz CPUs). </sup>
 <sup>CPU Caches: L1 Data 32 KiB (x2), L1 Instruction 32 KiB (x2), L2 Unified 256 KiB (x2), L3 Unified 3072 KiB (x1)</sup>
@@ -97,6 +97,7 @@ voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, 
 - [Feasibility Study](https://docs.google.com/document/d/1MbGmy5cSSesI0oUCWHxpiwcHEw6kqd79AV1XZW-rEZo/edit)
 - [Progress Report](https://docs.google.com/document/d/1ixD7XNu39kwwXhvQooMNb79x18-GsyMPLodzvwC3X-E/edit?ts=5e5d6f45#)
 - [Final Report](https://docs.google.com/document/d/1AHyUod23MtOnhCSbB4lvm5ZKAX3HhVL5KglLV-IlIlc/edit#heading=h.93f22ixpbzrf)
+- [Final Handover Package](https://docs.google.com/document/d/1cNCUepAqEg_i76zvOSb8QUndCqFi2kTLEnqdrCjhu9g/edit?ts=5ebc9bdd#)
 
 ### References
 - John Amanatides and Andrew Woo. A fast voxel traversal algorithm for ray tracing. In Eurographics ’87, pages 3–10, 1987.
