@@ -89,7 +89,6 @@ namespace svr {
                 }
                 return;
             }
-
             double radians = 0.0;
             polar_trig_values_.resize(num_polar_sections + 1);
             std::generate(polar_trig_values_.begin(), polar_trig_values_.end(), [&]() -> TrigonometricValues {
