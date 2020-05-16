@@ -36,7 +36,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 #endif ()
 
 set(TESTING_BINARY test_${CMAKE_PROJECT_NAME})
-set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_SVR.cpp)
+set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_SVR.cpp ../floating_point_comparison_util.h)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 add_executable(${TESTING_BINARY} ${TESTING_SOURCE_FILES})
 target_link_libraries(${TESTING_BINARY} gtest_main gmock_main)

@@ -617,7 +617,7 @@ namespace {
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
-    TEST(SphericalCoordinateTraversal, NumberOfAngularAndAzimuthalSectionsEqualsOne) {
+    TEST(SphericalCoordinateTraversal, TangentialHitNoDoubleIntersectionWithSameVoxel) {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
@@ -632,9 +632,9 @@ namespace {
         const double t_begin = 0.0;
         const double t_end = 30.0;
         const auto actual_voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
-        const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 2, 1};
-        const std::vector<int> expected_theta_voxels = {0, 0, 0, 0, 0, 0};
-        const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 0, 0};
+        const std::vector<int> expected_radial_voxels = {1, 2, 3, 2, 1};
+        const std::vector<int> expected_theta_voxels = {0, 0, 0, 0, 0};
+        const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 0};
         expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
