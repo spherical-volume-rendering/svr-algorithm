@@ -33,8 +33,7 @@ namespace svr {
         bool within_bounds;
     };
 
-    // A lot of calculations are conducted in the initialization phase already. To mitigate these from occurring again,
-    // This structure allows the calculations to be saved for use during radialHit().
+    // Metadata for the radial hit parameters.
     struct RadialHitMetadata {
     public:
         inline bool radialTransitionOccurred() const noexcept { return transition_flag_; }
@@ -68,8 +67,8 @@ namespace svr {
     // voxel boundary.
     struct RaySegment {
     public:
-        inline RaySegment(double t_end, const Ray &ray) :
-        P2_(ray.pointAtParameter(t_end)), NZDI_(ray.NonZeroDirectionIndex()) {}
+        inline RaySegment(double t_end, const Ray &ray) : P2_(ray.pointAtParameter(t_end)),
+                                                          NZDI_(ray.NonZeroDirectionIndex()) {}
 
         // Updates the point P1 with the new time traversal time t. Similarly, updates the
         // segment denoted by P2 - P1.
