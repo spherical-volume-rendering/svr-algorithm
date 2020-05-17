@@ -224,9 +224,11 @@ namespace svr {
                              double ray_direction_2, double sphere_center_2,
                              const std::vector<svr::LineSegment> &P_max, int current_voxel) noexcept {
         const bool is_parallel_min = svr::isEqual(perp_uv_min, 0.0);
-        const bool is_collinear_min = is_parallel_min && svr::isEqual(perp_uw_min, 0.0) && svr::isEqual(perp_vw_min, 0.0);
+        const bool is_collinear_min = is_parallel_min && svr::isEqual(perp_uw_min, 0.0) &&
+                                      svr::isEqual(perp_vw_min, 0.0);
         const bool is_parallel_max = svr::isEqual(perp_uv_max, 0.0);
-        const bool is_collinear_max = is_parallel_max && svr::isEqual(perp_uw_max, 0.0) && svr::isEqual(perp_vw_max, 0.0);
+        const bool is_collinear_max = is_parallel_max && svr::isEqual(perp_uw_max, 0.0) &&
+                                      svr::isEqual(perp_vw_max, 0.0);
         double a, b;
         double t_min = collinear_times[is_collinear_min];
         bool is_intersect_min = false;
