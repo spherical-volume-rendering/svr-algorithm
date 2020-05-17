@@ -677,14 +677,14 @@ class TestWalkSphericalVolume(unittest.TestCase):
         num_polar_sections = 128
         num_azimuthal_sections = 128
         t_begin = 0.0
-        t_end = 35.0
+        t_end = sphere_max_radius * 3
         min_bound = np.array([0.0, 0.0, 0.0])
         max_bound = np.array([sphere_max_radius, 2 * np.pi, np.pi])
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound,
                                                   num_radial_sections, num_polar_sections, num_azimuthal_sections,
                                                   sphere_center, t_begin, t_end)
-        last_idx = voxels.size - 1
-        assert(voxels[last_idx].radial != 0)
+        last_radial_voxel = voxels[voxels[0].size - 1][0]
+        assert(last_radial_voxel != 0)
 
 if __name__ == '__main__':
     unittest.main()
