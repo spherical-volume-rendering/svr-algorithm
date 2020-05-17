@@ -29,7 +29,7 @@ namespace {
     // Since the maximum sphere radius is 10e4, this ensures all rays will intersect.
     void inline orthographicTraverseXSquaredRaysinYCubedVoxels(const std::size_t X, const std::size_t Y) noexcept {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
-        const double sphere_max_radius = 10e2;
+        const double sphere_max_radius = 10e4;
         const std::size_t num_radial_sections = Y;
         const std::size_t num_polar_sections = Y;
         const std::size_t num_azimuthal_sections = Y;
