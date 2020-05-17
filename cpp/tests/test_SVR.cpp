@@ -29,11 +29,11 @@ namespace {
         std::vector<int> theta_voxels(num_voxels);
         std::vector<int> phi_voxels(num_voxels);
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), radial_voxels.begin(),
-                       [](const svr::SphericalVoxel &sv) -> int { return sv.radial_voxel; });
+                       [](const svr::SphericalVoxel &sv) -> int { return sv.radial; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), theta_voxels.begin(),
-                       [](const svr::SphericalVoxel &sv) -> int { return sv.polar_voxel; });
+                       [](const svr::SphericalVoxel &sv) -> int { return sv.polar; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), phi_voxels.begin(),
-                       [](const svr::SphericalVoxel &sv) -> int { return sv.azimuthal_voxel; });
+                       [](const svr::SphericalVoxel &sv) -> int { return sv.azimuthal; });
         EXPECT_THAT(radial_voxels, testing::ContainerEq(expected_radial_voxels));
         EXPECT_THAT(theta_voxels, testing::ContainerEq(expected_theta_voxels));
         EXPECT_THAT(phi_voxels, testing::ContainerEq(expected_phi_voxels));

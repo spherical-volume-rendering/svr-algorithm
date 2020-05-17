@@ -478,10 +478,9 @@ namespace svr {
 
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialSections() + grid.numPolarSections() + grid.numAzimuthalSections());
-        voxels.push_back({.radial_voxel=current_radial_voxel,
-                                 .polar_voxel=current_polar_voxel,
-                                 .azimuthal_voxel=current_azimuthal_voxel});
-
+        voxels.push_back({.radial=current_radial_voxel,
+                          .polar=current_polar_voxel,
+                          .azimuthal=current_azimuthal_voxel});
         double t;
         if (ray_origin_is_outside_grid) {
             t = t_sphere_entrance;
@@ -492,7 +491,7 @@ namespace svr {
             t_end = std::min(t_end, std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d)));
         }
 
-        // Initialize the time in case of collinear min or collinear max for generalized plane hits.
+        // Initialize the time in case of collinear min or collinear max for angular plane hits.
         const std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
         RadialHitMetadata rh_metadata;
@@ -554,9 +553,9 @@ namespace svr {
                     return voxels;
                 }
             }
-            voxels.push_back({.radial_voxel=current_radial_voxel,
-                                     .polar_voxel=current_polar_voxel,
-                                     .azimuthal_voxel=current_azimuthal_voxel});
+            voxels.push_back({.radial=current_radial_voxel,
+                              .polar=current_polar_voxel,
+                              .azimuthal=current_azimuthal_voxel});
         }
     }
 

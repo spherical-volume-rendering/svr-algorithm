@@ -10,9 +10,9 @@ namespace svr {
 
     // Represents a spherical voxel coordinate.
     struct SphericalVoxel {
-        int radial_voxel;
-        int polar_voxel;
-        int azimuthal_voxel;
+        int radial;
+        int polar;
+        int azimuthal;
     };
 
     // A spherical coordinate voxel traversal algorithm. The algorithm traces the ray over the spherical voxel grid
