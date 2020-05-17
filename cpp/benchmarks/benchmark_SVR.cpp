@@ -18,18 +18,18 @@
 
 namespace {
 
-    // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10e6.
+    // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10e4.
     // The set up is the following:
     // This traversal is orthographic in nature, and all rays will intersect the sphere.
-    // In the X plane: Ray origin moves incrementally from [-10,000.0, 10,000.0].
-    // In the Y plane: Ray origin moves incrementally from [-10,000.0, 10,000.0].
-    // In the Z plane: Ray origin begins at -(10e6 + 1.0). It does not move in the Z plane.
+    // In the X plane: Ray origin moves incrementally from [-1,000.0, 1,000.0].
+    // In the Y plane: Ray origin moves incrementally from [-1,000.0, 1,000.0].
+    // In the Z plane: Ray origin begins at -(10e4 + 1.0). It does not move in the Z plane.
     // From this, one can infer that the ray moves incrementally in the XY plane from
-    // (-10,000.0, -10,000.0) -> (10,000.0, 10,000.0) while remaining outside the sphere in the Z plane.
-    // Since the maximum sphere radius is 10e6, this ensures all rays will intersect.
+    // (-1,000.0, -1,000.0) -> (1,000.0, 1,000.0) while remaining outside the sphere in the Z plane.
+    // Since the maximum sphere radius is 10e4, this ensures all rays will intersect.
     void inline orthographicTraverseXSquaredRaysinYCubedVoxels(const std::size_t X, const std::size_t Y) noexcept {
         const BoundVec3 sphere_center(0.0, 0.0, 0.0);
-        const double sphere_max_radius = 10e6;
+        const double sphere_max_radius = 10e3;
         const std::size_t num_radial_sections = Y;
         const std::size_t num_polar_sections = Y;
         const std::size_t num_azimuthal_sections = Y;
@@ -40,29 +40,30 @@ namespace {
         const double t_begin = 0.0;
         const double t_end = sphere_max_radius * 3;
 
-        double ray_origin_x = -10000.0;
-        double ray_origin_y = -10000.0;
+        double ray_origin_x = -1000.0;
+        double ray_origin_y = -1000.0;
         const double ray_origin_z = -(sphere_max_radius + 1.0);
 
-        const double ray_origin_plane_movement = 20000.0 / X;
+        const double ray_origin_plane_movement = 2000.0 / X;
         for (std::size_t i = 0; i < X; ++i) {
             for (std::size_t j = 0; j < X; ++j) {
                 const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
                 const FreeVec3  ray_direction(0.0, 0.0, 1.0);
                 const auto actual_voxels = walkSphericalVolume(Ray(ray_origin, ray_direction), grid, t_begin, t_end);
                 #if DEBUG
-                const std::size_t last = actual_voxels.size() - 1;
-                if (actual_voxels[0].radial_voxel != 1 || actual_voxels[last].radial_voxel != 1) {
+                const std::size_t last = actual_voxels.size() == 0 ? 0 : actual_voxels.size() - 1;
+                if (actual_voxels[0].radial != 1 || actual_voxels[last].radial != 1 || actual_voxels.size() < 2) {
                     printf("\nDid not complete entire traversal.");
                     const auto first_voxel = actual_voxels[0];
                     const auto last_voxel = actual_voxels[last];
                     printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y, ray_origin_z);
                     printf("\nEntrance Voxel: {%d, %d, %d} ... Exit Voxel: {%d, %d, %d}",
-                           first_voxel.radial_voxel, first_voxel.polar_voxel, first_voxel.azimuthal_voxel,
-                           last_voxel.radial_voxel, last_voxel.polar_voxel, last_voxel.azimuthal_voxel);
+                           first_voxel.radial, first_voxel.polar, first_voxel.azimuthal,
+                           last_voxel.radial, last_voxel.polar, last_voxel.azimuthal);
+                    for (const auto v : actual_voxels) printf("{%d, %d, %d} , ", v.radial, v.polar, v.azimuthal);
                 }
                 # endif
-                ray_origin_y = (j == X - 1) ? -10000.0 : ray_origin_y + ray_origin_plane_movement;
+                ray_origin_y = (j == X - 1) ? -1000.0 : ray_origin_y + ray_origin_plane_movement;
             }
             ray_origin_x += ray_origin_plane_movement;
         }

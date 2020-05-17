@@ -60,6 +60,26 @@ class TestWalkSphericalVolume(unittest.TestCase):
         expected_phi_voxels = [2,2,2,2,0,0,0,0]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
+    def test_sphere_center_not_at_origin(self):
+        ray_origin = np.array([-11.0, -11.0, -11.0])
+        ray_direction = np.array([1.0, 1.0, 1.0])
+        sphere_center = np.array([2.0, 2.0, 2.0])
+        sphere_max_radius = 10.0
+        num_radial_sections = 4
+        num_polar_sections = 4
+        num_azimuthal_sections = 4
+        t_begin = 0.0
+        t_end = 30.0
+        min_bound = np.array([0.0, 0.0, 0.0])
+        max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
+        voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound,
+                                                  num_radial_sections, num_polar_sections, num_azimuthal_sections,
+                                                  sphere_center, t_begin, t_end)
+        expected_radial_voxels = [1,2,3,4,4,3,2,1]
+        expected_theta_voxels = [2,2,2,2,0,0,0,0]
+        expected_phi_voxels = [2,2,2,2,0,0,0,0]
+        self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
+
     def test_ray_begins_within_sphere(self):
         ray_origin = np.array([-3.0, 4.0, 5.0])
         ray_direction = np.array([1.0, -1.0, -1.0])
@@ -647,6 +667,24 @@ class TestWalkSphericalVolume(unittest.TestCase):
                                                   num_radial_sections, num_polar_sections, num_azimuthal_sections,
                                                   sphere_center, t_begin, t_end)
         assert voxels.size == 0
+
+    def test_avoid_ray_stepping_to_radial_voxel_zero(self):
+        ray_origin = np.array([-984.375, 250.0, -10001.0])
+        ray_direction = np.array([0.0, 0.0, 1.0])
+        sphere_center = np.array([0.0, 0.0, 0.0])
+        sphere_max_radius = 10e3
+        num_radial_sections = 128
+        num_polar_sections = 128
+        num_azimuthal_sections = 128
+        t_begin = 0.0
+        t_end = 35.0
+        min_bound = np.array([0.0, 0.0, 0.0])
+        max_bound = np.array([sphere_max_radius, 2 * np.pi, np.pi])
+        voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound,
+                                                  num_radial_sections, num_polar_sections, num_azimuthal_sections,
+                                                  sphere_center, t_begin, t_end)
+        last_idx = voxels.size - 1
+        assert(voxels[last_idx].radial != 0)
 
 if __name__ == '__main__':
     unittest.main()

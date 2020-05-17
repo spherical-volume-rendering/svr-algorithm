@@ -6,9 +6,6 @@
 #include <limits>
 
 namespace svr {
-    // Represents an invalid time. At no point should the time be a negative number.
-    constexpr double INVALID_TIME = -1.0;
-
     // The type corresponding to the voxel(s) with the minimum tMax value for a given traversal.
     enum VoxelIntersectionType {
         None = 0,
@@ -33,13 +30,14 @@ namespace svr {
         bool within_bounds;
     };
 
-    // Metadata for the radial hit parameters.
+    // Metadata for the radial hit parameters. There are two main components of the metadata: the transition flag and
+    // the previous radial voxel. The transition flag is necessary to determine when tStepR's sign changes, and
+    // the previous radial voxel ensures we do not hit the same voxel twice in the case of a tangential hit.
     struct RadialHitMetadata {
     public:
-        inline bool radialTransitionOccurred() const noexcept { return transition_flag_; }
+        inline bool radialTransitionHasOccurred() const noexcept { return transition_flag_; }
 
-        // Once a radial transition has occurred, it follows that all radial intersections will have the same flag.
-        inline void isRadialTransition(bool b) noexcept { transition_flag_ |= b; }
+        inline void isRadialTransition(bool b) noexcept { transition_flag_ = b; }
 
         inline int previousRadialVoxel() const noexcept { return previous_radial_voxel_; }
 
@@ -76,7 +74,7 @@ namespace svr {
         }
 
         // Calculates the updated ray segment intersection point given an intersect parameter.
-        // More information on this use case can be found at:
+        // More information on the use case can be found at:
         // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
         inline double intersectionTimeAt(double intersect_parameter, const Ray &ray) const noexcept {
             return (P1_[NZDI_] + ray_segment_[NZDI_] * intersect_parameter - ray.origin()[NZDI_])
@@ -87,7 +85,7 @@ namespace svr {
 
         inline const BoundVec3 &P2() const noexcept { return P2_; }
 
-        inline const FreeVec3 &raySegment() const noexcept { return ray_segment_; }
+        inline const FreeVec3 &vector() const noexcept { return ray_segment_; }
 
     private:
         // The end point of the ray segment.
@@ -99,7 +97,7 @@ namespace svr {
         // The begin point of the ray segment.
         BoundVec3 P1_;
 
-        // P2 - P1.
+        // The free vector represented by P2 - P1.
         FreeVec3 ray_segment_;
     };
 
@@ -162,53 +160,55 @@ namespace svr {
     inline HitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                    RadialHitMetadata &rh_metadata, int current_radial_voxel,
                                    double v, double rsvd_minus_v_squared, double t, double t_end) noexcept {
-        rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
-        const std::size_t voxel_idx = current_radial_voxel - 1;
-        const double current_radius = grid.deltaRadii(voxel_idx);
+        const std::size_t previous_idx = std::min(static_cast<std::size_t>(current_radial_voxel),
+                                                  grid.numRadialSections() - 1);
+        if (!rh_metadata.radialTransitionHasOccurred()) {
+            rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
+            const double r_a = grid.deltaRadiiSquared(previous_idx -
+                                                      (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
+            const double d_a = std::sqrt(r_a - rsvd_minus_v_squared);
+            const double intersection_t1 = ray.timeOfIntersectionAt(v - d_a);
+            const double intersection_t2 = ray.timeOfIntersectionAt(v + d_a);
 
-        // Find the intersection times for the ray and the previous radial disc.
-        const std::size_t previous_idx = std::min(voxel_idx + 1, grid.numRadialSections() - 1);
-        const double r_a = grid.deltaRadiiSquared(previous_idx -
-                                                  (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
-        const double d_a = std::sqrt(r_a - rsvd_minus_v_squared);
+            const double t1_gt_t = intersection_t1 > t;
+            if (t1_gt_t && intersection_t1 == intersection_t2) {
+                // Tangential hit. Every tangential hit leads to a radial transition.
+                rh_metadata.isRadialTransition(true);
+                return {.tMax=intersection_t1, .tStep=0, .within_bounds=true };
+            }
+            if (t1_gt_t && intersection_t1 < t_end) {
+                return {.tMax=intersection_t1, .tStep=1, .within_bounds=true };
+            }
 
-        std::array<double, 4> intersection_times;
-        intersection_times[0] = ray.timeOfIntersectionAt(v - d_a);
-        intersection_times[1] = ray.timeOfIntersectionAt(v + d_a);
+            if (t < intersection_t2 && intersection_t2 < t_end) {
+                // The time represented is with the further point of intersection of the current sphere.
+                // Since t1 is not within our time bounds, it must be true that this is a radial transition.
+                rh_metadata.isRadialTransition(true);
+                return {.tMax=intersection_t2, .tStep=-1, .within_bounds=true };
+            }
 
-        // To find the next radius, we need to check the previous_transition_flag:
-        // In the case that the ray has sequential hits with equal radii, e.g.
-        // the innermost radial disc, this ensures that the proper radii are being checked.
-        const double transition_radii[] = {grid.deltaRadiiSquared(std::min(voxel_idx - 1, std::size_t{0})),
-                                           grid.deltaRadiiSquared(voxel_idx)};
-        const double r_b = transition_radii[rh_metadata.radialTransitionOccurred()];
-        if (r_b >= rsvd_minus_v_squared) {
-            const double d_b = std::sqrt(r_b - rsvd_minus_v_squared);
-            intersection_times[2] = ray.timeOfIntersectionAt(v - d_b);
-            intersection_times[3] = ray.timeOfIntersectionAt(v + d_b);
-        }
-        const auto intersection_time_it = std::find_if(intersection_times.cbegin(), intersection_times.cend(),
-                                                       [t, t_end](double intersection_time) -> double {
-                                                           return intersection_time > t && intersection_time < t_end;
-                                                       });
-        if (intersection_time_it == intersection_times.cend()) {
+            // There does not exist an intersection time X such that t < X < t_end.
             return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
         }
-        if (intersection_times[0] > t && svr::isEqual(intersection_times[0], intersection_times[1])) {
-            rh_metadata.isRadialTransition(true);
-            return {.tMax=intersection_times[0],
-                    .tStep=0,
+
+        const double d_a = std::sqrt(grid.deltaRadiiSquared(previous_idx) - rsvd_minus_v_squared);
+        const double intersection_t1 = ray.timeOfIntersectionAt(v + d_a);
+        if (t < intersection_t1 && intersection_t1 < t_end) {
+            return {.tMax=intersection_t1,
+                    .tStep=-1,
                     .within_bounds=true
             };
         }
-        const double intersection_time = *intersection_time_it;
-        const double r_new = (ray.pointAtParameter(intersection_time) - grid.sphereCenter()).length();
-        rh_metadata.isRadialTransition(svr::isEqual(r_new, current_radius));
-        const int step[] = {-1, 1};
-        return {.tMax=intersection_time,
-                .tStep=step[(!rh_metadata.radialTransitionOccurred() && r_new < current_radius)],
-                .within_bounds=true
-        };
+        const double d_b = std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) - rsvd_minus_v_squared);
+        const double intersection_t2 = ray.timeOfIntersectionAt(v + d_b);
+        if (t < intersection_t2 && intersection_t2 < t_end) {
+            return {.tMax=intersection_t2,
+                    .tStep=-1,
+                    .within_bounds=true
+            };
+        }
+        // There does not exist an intersection time X such that t < X < t_end.
+        return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
     }
 
     // A generalized version of the latter half of the polar and azimuthal hit parameters. Since the only difference
@@ -217,7 +217,7 @@ namespace svr {
     // Reference: http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
     HitParameters angularHit(const svr::SphericalVoxelGrid &grid, const Ray &ray, double perp_uv_min,
                              double perp_uv_max, double perp_uw_min, double perp_uw_max, double perp_vw_min,
-                             double perp_vw_max, const RaySegment &RS,
+                             double perp_vw_max, const RaySegment &ray_segment,
                              const std::array<double, 2> &collinear_times, double t, double t_end,
                              double ray_direction_2, double sphere_center_2,
                              const std::vector<svr::LineSegment> &P_max, int current_voxel) noexcept {
@@ -236,7 +236,7 @@ namespace svr {
             b = perp_uw_min * inv_perp_uv_min;
             if (!((svr::lessThan(a, 0.0) || svr::lessThan(1.0, a)) || svr::lessThan(b, 0.0) || svr::lessThan(1.0, b))) {
                 is_intersect_min = true;
-                t_min = RS.intersectionTimeAt(b, ray);
+                t_min = ray_segment.intersectionTimeAt(b, ray);
             }
         }
         double t_max = collinear_times[is_collinear_max];
@@ -247,7 +247,7 @@ namespace svr {
             b = perp_uw_max * inv_perp_uv_max;
             if (!((svr::lessThan(a, 0.0) || svr::lessThan(1.0, a)) || svr::lessThan(b, 0.0) || svr::lessThan(1.0, b))) {
                 is_intersect_max = true;
-                t_max = RS.intersectionTimeAt(b, ray);
+                t_max = ray_segment.intersectionTimeAt(b, ray);
             }
         }
 
@@ -293,7 +293,7 @@ namespace svr {
     // Determines whether a polar hit occurs for the given ray. A polar hit is considered an intersection with
     // the ray and a polar section. The polar sections live in the XY plane.
     inline HitParameters polarHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
-                                  const RaySegment &RS, const std::array<double, 2> &collinear_times,
+                                  const RaySegment &ray_segment, const std::array<double, 2> &collinear_times,
                                   int current_polar_voxel, double t, double t_end) noexcept {
         // Calculate the voxel boundary vectors.
         const FreeVec3 p_one(grid.pMaxPolar(current_polar_voxel).P1,
@@ -302,16 +302,16 @@ namespace svr {
                              grid.pMaxPolar(current_polar_voxel + 1).P2, 0.0);
         const BoundVec3 u_min(grid.centerToPolarBound(current_polar_voxel));
         const BoundVec3 u_max(grid.centerToPolarBound(current_polar_voxel + 1));
-        const FreeVec3 w_min = p_one - FreeVec3(RS.P1());
-        const FreeVec3 w_max = p_two - FreeVec3(RS.P1());
-        const double perp_uv_min = u_min.x() * RS.raySegment().y() - u_min.y() * RS.raySegment().x();
-        const double perp_uv_max = u_max.x() * RS.raySegment().y() - u_max.y() * RS.raySegment().x();
+        const FreeVec3 w_min = p_one - FreeVec3(ray_segment.P1());
+        const FreeVec3 w_max = p_two - FreeVec3(ray_segment.P1());
+        const double perp_uv_min = u_min.x() * ray_segment.vector().y() - u_min.y() * ray_segment.vector().x();
+        const double perp_uv_max = u_max.x() * ray_segment.vector().y() - u_max.y() * ray_segment.vector().x();
         const double perp_uw_min = u_min.x() * w_min.y() - u_min.y() * w_min.x();
         const double perp_uw_max = u_max.x() * w_max.y() - u_max.y() * w_max.x();
-        const double perp_vw_min = RS.raySegment().x() * w_min.y() - RS.raySegment().y() * w_min.x();
-        const double perp_vw_max = RS.raySegment().x() * w_max.y() - RS.raySegment().y() * w_max.x();
+        const double perp_vw_min = ray_segment.vector().x() * w_min.y() - ray_segment.vector().y() * w_min.x();
+        const double perp_vw_max = ray_segment.vector().x() * w_max.y() - ray_segment.vector().y() * w_max.x();
         return angularHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,
-                          perp_uw_max, perp_vw_min, perp_vw_max, RS,
+                          perp_uw_max, perp_vw_min, perp_vw_max, ray_segment,
                           collinear_times, t, t_end, ray.direction().y(),
                           grid.sphereCenter().y(), grid.pMaxPolar(),
                           current_polar_voxel);
@@ -321,7 +321,7 @@ namespace svr {
     // considered an intersection with the ray and an azimuthal section.
     // The azimuthal sections live in the XZ plane.
     inline HitParameters azimuthalHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
-                                      const RaySegment &RS, const std::array<double, 2> &collinear_times,
+                                      const RaySegment &ray_segment, const std::array<double, 2> &collinear_times,
                                       int current_azimuthal_voxel, double t, double t_end) noexcept {
         // Calculate the voxel boundary vectors.
         const FreeVec3 p_one(grid.pMaxAzimuthal(current_azimuthal_voxel).P1, 0.0,
@@ -330,16 +330,16 @@ namespace svr {
                              grid.pMaxAzimuthal(current_azimuthal_voxel + 1).P2);
         const BoundVec3 *u_min = &grid.centerToAzimuthalBound(current_azimuthal_voxel);
         const BoundVec3 *u_max = &grid.centerToAzimuthalBound(current_azimuthal_voxel + 1);
-        const FreeVec3 w_min = p_one - FreeVec3(RS.P1());
-        const FreeVec3 w_max = p_two - FreeVec3(RS.P1());
-        const double perp_uv_min = u_min->x() * RS.raySegment().z() - u_min->z() * RS.raySegment().x();
-        const double perp_uv_max = u_max->x() * RS.raySegment().z() - u_max->z() * RS.raySegment().x();
+        const FreeVec3 w_min = p_one - FreeVec3(ray_segment.P1());
+        const FreeVec3 w_max = p_two - FreeVec3(ray_segment.P1());
+        const double perp_uv_min = u_min->x() * ray_segment.vector().z() - u_min->z() * ray_segment.vector().x();
+        const double perp_uv_max = u_max->x() * ray_segment.vector().z() - u_max->z() * ray_segment.vector().x();
         const double perp_uw_min = u_min->x() * w_min.z() - u_min->z() * w_min.x();
         const double perp_uw_max = u_max->x() * w_max.z() - u_max->z() * w_max.x();
-        const double perp_vw_min = RS.raySegment().x() * w_min.z() - RS.raySegment().z() * w_min.x();
-        const double perp_vw_max = RS.raySegment().x() * w_max.z() - RS.raySegment().z() * w_max.x();
+        const double perp_vw_min = ray_segment.vector().x() * w_min.z() - ray_segment.vector().z() * w_min.x();
+        const double perp_vw_max = ray_segment.vector().x() * w_max.z() - ray_segment.vector().z() * w_max.x();
         return angularHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,
-                          perp_uw_max, perp_vw_min, perp_vw_max, RS,
+                          perp_uw_max, perp_vw_min, perp_vw_max, ray_segment,
                           collinear_times, t, t_end, ray.direction().z(),
                           grid.sphereCenter().z(), grid.pMaxAzimuthal(),
                           current_azimuthal_voxel);
@@ -492,7 +492,8 @@ namespace svr {
         }
 
         // Initialize the time in case of collinear min or collinear max for angular plane hits.
-        const std::array<double, 2> collinear_times = {INVALID_TIME, ray.timeOfIntersectionAt(grid.sphereCenter())};
+        // In the case where the hit is not collinear, a time of 0.0 is inputted.
+        const std::array<double, 2> collinear_times = {0.0, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
         RadialHitMetadata rh_metadata;
         rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
@@ -501,6 +502,7 @@ namespace svr {
         while (true) {
             const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
                                           v, rsvd_minus_v_squared, t, t_end);
+            if (current_radial_voxel + radial.tStep == 0) { return voxels; }
             ray_segment.updateAtTime(t, ray);
             const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
                                         current_polar_voxel, t, t_end);
@@ -549,9 +551,7 @@ namespace svr {
                     current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) % grid.numAzimuthalSections();
                     break;
                 }
-                case None: {
-                    return voxels;
-                }
+                case None: { return voxels; }
             }
             voxels.push_back({.radial=current_radial_voxel,
                               .polar=current_polar_voxel,
