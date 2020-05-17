@@ -413,12 +413,13 @@ namespace svr {
 
         const double rsvd_begin = rsv_begin.dot(rsv_begin);
         std::size_t idx = grid.numRadialSections();
-        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, grid.deltaRadiiSquared().crend(),
+        const auto outermost_radius_it = grid.deltaRadiiSquared().crend();
+        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, outermost_radius_it,
                                      [rsvd_begin, &idx](double dR_squared) -> bool {
                                          --idx;
                                          return rsvd_begin <= dR_squared;
                                      });
-        const bool ray_origin_is_outside_grid = (it == grid.deltaRadiiSquared().crend());
+        const bool ray_origin_is_outside_grid = (it == outermost_radius_it);
         const double max_radius_squared = grid.deltaRadiiSquared()[0];
         const double entry_radius_squared = ray_origin_is_outside_grid ? max_radius_squared : *it;
         const double entry_radius = grid.deltaRadii()[idx];
