@@ -160,6 +160,26 @@ class TestWalkSphericalVolume(unittest.TestCase):
         expected_phi_voxels = [1,1,1,0,0]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
+    def test_ray_begins_and_ends_within_sphere_not_centered_at_origin(self):
+        ray_origin = np.array([-1.0, 7.0, 7.0])
+        ray_direction = np.array([1.0, -1.0, -1.0])
+        sphere_center = np.array([2.0, 3.0, 2.0])
+        sphere_max_radius = 10.0
+        num_radial_sections = 4
+        num_polar_sections = 4
+        num_azimuthal_sections = 4
+        t_begin = 0.0
+        t_end = 5.0
+        min_bound = np.array([0.0, 0.0, 0.0])
+        max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
+        voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound,
+                                                  num_radial_sections, num_polar_sections, num_azimuthal_sections,
+                                                  sphere_center, t_begin, t_end)
+        expected_radial_voxels = [2,3,4,4,4]
+        expected_theta_voxels = [1,1,1,0,3]
+        expected_phi_voxels = [1,1,1,0,0]
+        self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
+
     def test_ray_slight_offset_in_XY_plane(self):
         ray_origin = np.array([-13.0, -13.0, -13.0])
         ray_direction = np.array([1.0, 1.5, 1.0])
