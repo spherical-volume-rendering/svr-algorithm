@@ -281,14 +281,14 @@ namespace svr {
                              grid.pMaxPolar(current_polar_voxel).P2, 0.0);
         const FreeVec3 p_two(grid.pMaxPolar(current_polar_voxel + 1).P1,
                              grid.pMaxPolar(current_polar_voxel + 1).P2, 0.0);
-        const BoundVec3 u_min(grid.centerToPolarBound(current_polar_voxel));
-        const BoundVec3 u_max(grid.centerToPolarBound(current_polar_voxel + 1));
+        const BoundVec3 *u_min = &grid.centerToPolarBound(current_polar_voxel);
+        const BoundVec3 *u_max = &grid.centerToPolarBound(current_polar_voxel + 1);
         const FreeVec3 w_min = p_one - FreeVec3(ray_segment.P1());
         const FreeVec3 w_max = p_two - FreeVec3(ray_segment.P1());
-        const double perp_uv_min = u_min.x() * ray_segment.vector().y() - u_min.y() * ray_segment.vector().x();
-        const double perp_uv_max = u_max.x() * ray_segment.vector().y() - u_max.y() * ray_segment.vector().x();
-        const double perp_uw_min = u_min.x() * w_min.y() - u_min.y() * w_min.x();
-        const double perp_uw_max = u_max.x() * w_max.y() - u_max.y() * w_max.x();
+        const double perp_uv_min = u_min->x() * ray_segment.vector().y() - u_min->y() * ray_segment.vector().x();
+        const double perp_uv_max = u_max->x() * ray_segment.vector().y() - u_max->y() * ray_segment.vector().x();
+        const double perp_uw_min = u_min->x() * w_min.y() - u_min->y() * w_min.x();
+        const double perp_uw_max = u_max->x() * w_max.y() - u_max->y() * w_max.x();
         const double perp_vw_min = ray_segment.vector().x() * w_min.y() - ray_segment.vector().y() * w_min.x();
         const double perp_vw_max = ray_segment.vector().x() * w_max.y() - ray_segment.vector().y() * w_max.x();
         return angularHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,
