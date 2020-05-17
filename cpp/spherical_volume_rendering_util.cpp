@@ -160,16 +160,11 @@ namespace svr {
         if (rh_metadata.radialStepTransitionHasOccurred()) {
             const double d_b = std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) - rsvd_minus_v_squared);
             const double intersection_t = ray.timeOfIntersectionAt(v + d_b);
-            if (intersection_t < t_end) {
-                return {.tMax=intersection_t,
-                        .tStep=-1,
-                        .within_bounds=true
-                };
-            }
+            if (intersection_t < t_end) { return {.tMax=intersection_t, .tStep=-1, .within_bounds=true }; }
+
             // There does not exist an intersection time X such that t < X < t_end.
             return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
         }
-
         const std::size_t previous_idx = std::min(static_cast<std::size_t>(current_radial_voxel),
                                                   grid.numRadialSections() - 1);
         rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
@@ -189,7 +184,7 @@ namespace svr {
             return {.tMax=intersection_t1, .tStep=1, .within_bounds=true };
         }
 
-        if (t < intersection_t2 && intersection_t2 < t_end) {
+        if (intersection_t2 < t_end) {
             // t2 is the "further" point of intersection of the current sphere.
             // Since t1 is not within our time bounds, it must be true that this is a radial transition.
             rh_metadata.isRadialStepTransition(true);
