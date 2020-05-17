@@ -35,21 +35,18 @@ namespace svr {
     // the previous radial voxel ensures we do not hit the same voxel twice in the case of a tangential hit.
     struct RadialHitMetadata {
     public:
-        inline bool radialTransitionHasOccurred() const noexcept { return transition_flag_; }
+        inline bool radialStepTransitionHasOccurred() const noexcept { return transition_flag_; }
 
-        inline void isRadialTransition(bool b) noexcept { transition_flag_ = b; }
+        inline void isRadialStepTransition(bool b) noexcept { transition_flag_ = b; }
 
         inline int previousRadialVoxel() const noexcept { return previous_radial_voxel_; }
 
         inline void updatePreviousRadialVoxel(int radial_voxel) noexcept { previous_radial_voxel_ = radial_voxel; }
 
     private:
-        // Determine whether the current voxel traversal was a 'transition'. This is necessary to determine when
-        // The radial steps should go from negative to positive or vice-versa,
-        // since the radial voxels go from 1..N, where N is the number of radial sections.
-        // The current state of the previous_transition_flag. It marks if we've made a transition
-        // in sign for radial steps, i.e. + => - or - => +.
-        // This transition occurs once.
+        // Determine whether the current voxel traversal was a ' radial step transition'.
+        // This is necessary to determine when the radial steps should go from negative to positive or vice-versa,
+        // since the radial voxels go from 1..N..1, where N is the number of radial sections.
         bool transition_flag_ = false;
 
         // The previous radial voxel ID. This is necessary to maintain in the case of a tangential hit. If the current
@@ -160,53 +157,45 @@ namespace svr {
     inline HitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                    RadialHitMetadata &rh_metadata, int current_radial_voxel,
                                    double v, double rsvd_minus_v_squared, double t, double t_end) noexcept {
-        const std::size_t previous_idx = std::min(static_cast<std::size_t>(current_radial_voxel),
-                                                  grid.numRadialSections() - 1);
-        if (!rh_metadata.radialTransitionHasOccurred()) {
-            rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
-            const double r_a = grid.deltaRadiiSquared(previous_idx -
-                                                      (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
-            const double d_a = std::sqrt(r_a - rsvd_minus_v_squared);
-            const double intersection_t1 = ray.timeOfIntersectionAt(v - d_a);
-            const double intersection_t2 = ray.timeOfIntersectionAt(v + d_a);
-
-            const double t1_gt_t = intersection_t1 > t;
-            if (t1_gt_t && intersection_t1 == intersection_t2) {
-                // Tangential hit. Every tangential hit leads to a radial transition.
-                rh_metadata.isRadialTransition(true);
-                return {.tMax=intersection_t1, .tStep=0, .within_bounds=true };
+        if (rh_metadata.radialStepTransitionHasOccurred()) {
+            const double d_b = std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) - rsvd_minus_v_squared);
+            const double intersection_t = ray.timeOfIntersectionAt(v + d_b);
+            if (intersection_t < t_end && current_radial_voxel != 1) {
+                return {.tMax=intersection_t,
+                        .tStep=-1,
+                        .within_bounds=true
+                };
             }
-            if (t1_gt_t && intersection_t1 < t_end) {
-                return {.tMax=intersection_t1, .tStep=1, .within_bounds=true };
-            }
-
-            if (t < intersection_t2 && intersection_t2 < t_end) {
-                // The time represented is with the further point of intersection of the current sphere.
-                // Since t1 is not within our time bounds, it must be true that this is a radial transition.
-                rh_metadata.isRadialTransition(true);
-                return {.tMax=intersection_t2, .tStep=-1, .within_bounds=true };
-            }
-
-            // There does not exist an intersection time X such that t < X < t_end.
+            // There does not exist an intersection time X such that t < X < t_end or the next radial voxel is 0.
             return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
         }
 
-        const double d_a = std::sqrt(grid.deltaRadiiSquared(previous_idx) - rsvd_minus_v_squared);
-        const double intersection_t1 = ray.timeOfIntersectionAt(v + d_a);
-        if (t < intersection_t1 && intersection_t1 < t_end) {
-            return {.tMax=intersection_t1,
-                    .tStep=-1,
-                    .within_bounds=true
-            };
+        const std::size_t previous_idx = std::min(static_cast<std::size_t>(current_radial_voxel),
+                                                  grid.numRadialSections() - 1);
+        rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
+        const double r_a = grid.deltaRadiiSquared(previous_idx -
+                                                  (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
+        const double d_a = std::sqrt(r_a - rsvd_minus_v_squared);
+        const double intersection_t1 = ray.timeOfIntersectionAt(v - d_a);
+        const double intersection_t2 = ray.timeOfIntersectionAt(v + d_a);
+
+        const double t1_gt_t = intersection_t1 > t;
+        if (t1_gt_t && intersection_t1 == intersection_t2) {
+            // Tangential hit. Every tangential hit leads to a radial transition.
+            rh_metadata.isRadialStepTransition(true);
+            return {.tMax=intersection_t1, .tStep=0, .within_bounds=true };
         }
-        const double d_b = std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) - rsvd_minus_v_squared);
-        const double intersection_t2 = ray.timeOfIntersectionAt(v + d_b);
+        if (t1_gt_t && intersection_t1 < t_end) {
+            return {.tMax=intersection_t1, .tStep=1, .within_bounds=true };
+        }
+
         if (t < intersection_t2 && intersection_t2 < t_end) {
-            return {.tMax=intersection_t2,
-                    .tStep=-1,
-                    .within_bounds=true
-            };
+            // t2 is the "further" point of intersection of the current sphere.
+            // Since t1 is not within our time bounds, it must be true that this is a radial transition.
+            rh_metadata.isRadialStepTransition(true);
+            return {.tMax=intersection_t2, .tStep=-1, .within_bounds=true };
         }
+
         // There does not exist an intersection time X such that t < X < t_end.
         return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
     }
@@ -502,7 +491,6 @@ namespace svr {
         while (true) {
             const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
                                           v, rsvd_minus_v_squared, t, t_end);
-            if (current_radial_voxel + radial.tStep == 0) { return voxels; }
             ray_segment.updateAtTime(t, ray);
             const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
                                         current_polar_voxel, t, t_end);
