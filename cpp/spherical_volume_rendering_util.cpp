@@ -160,13 +160,13 @@ namespace svr {
         if (rh_metadata.radialStepTransitionHasOccurred()) {
             const double d_b = std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) - rsvd_minus_v_squared);
             const double intersection_t = ray.timeOfIntersectionAt(v + d_b);
-            if (intersection_t < t_end && current_radial_voxel != 1) {
+            if (intersection_t < t_end) {
                 return {.tMax=intersection_t,
                         .tStep=-1,
                         .within_bounds=true
                 };
             }
-            // There does not exist an intersection time X such that t < X < t_end or the next radial voxel is 0.
+            // There does not exist an intersection time X such that t < X < t_end.
             return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
         }
 
@@ -491,6 +491,7 @@ namespace svr {
         while (true) {
             const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
                                           v, rsvd_minus_v_squared, t, t_end);
+            if (current_radial_voxel == 0) { return voxels; }
             ray_segment.updateAtTime(t, ray);
             const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
                                         current_polar_voxel, t, t_end);
