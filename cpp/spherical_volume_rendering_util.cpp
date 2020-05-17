@@ -427,10 +427,10 @@ namespace svr {
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                                          double t_begin, double t_end) noexcept {
-        const FreeVec3 rsv = grid.sphereCenter() - ray.pointAtParameter(t_begin);   // Ray Sphere Vector.
-        const FreeVec3 rsv_tz = (t_begin == 0.0) ? rsv : grid.sphereCenter() - ray.pointAtParameter(0.0);
+        const FreeVec3 rsv_begin = grid.sphereCenter() - ray.pointAtParameter(t_begin);   // Ray Sphere Vector.
+        const FreeVec3 rsv = (t_begin == 0.0) ? rsv_begin : grid.sphereCenter() - ray.pointAtParameter(0.0);
 
-        const double rsvd_begin = rsv.dot(rsv);
+        const double rsvd_begin = rsv_begin.dot(rsv_begin);
         std::size_t idx = grid.numRadialSections();
         const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, grid.deltaRadiiSquared().crend(),
                                      [rsvd_begin, &idx](double dR_squared) -> bool {
@@ -444,8 +444,8 @@ namespace svr {
 
         // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
         // This will determine if the ray intersects the sphere.
-        const double rsvd = rsv_tz.dot(rsv_tz); // Ray Sphere Vector Dot product at time zero.
-        const double v = rsv_tz.dot(ray.unitDirection().to_free());
+        const double rsvd = rsv.dot(rsv); // Ray Sphere Vector Dot product at time zero.
+        const double v = rsv.dot(ray.unitDirection().to_free());
         const double rsvd_minus_v_squared = rsvd - v * v;
 
         if (entry_radius_squared <= rsvd_minus_v_squared) { return {}; }
@@ -464,8 +464,8 @@ namespace svr {
 
         const FreeVec3 ray_sphere = ray_origin_is_outside_grid ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_sphere_entrance) :
-                                    svr::isEqual(rsv, Vec3(0.0, 0.0, 0.0)) ?
-                                    grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1) : rsv;
+                                    svr::isEqual(rsv_begin, Vec3(0.0, 0.0, 0.0)) ?
+                                    grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1) : rsv_begin;
 
         int current_polar_voxel = initializeAngularVoxelID(grid, grid.numPolarSections(), ray_sphere, P_polar,
                                                            ray_sphere.y(), grid.sphereCenter().y(), entry_radius);
@@ -500,62 +500,54 @@ namespace svr {
         RaySegment ray_segment(t_end, ray);
 
         while (true) {
-            const auto radial_params = radialHit(ray, grid, rh_metadata, current_radial_voxel,
-                                                 v, rsvd_minus_v_squared, t, t_end);
+            const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
+                                          v, rsvd_minus_v_squared, t, t_end);
             ray_segment.updateAtTime(t, ray);
-            const auto polar_params = polarHit(ray, grid, ray_segment, collinear_times,
-                                               current_polar_voxel, t, t_end);
-            const auto azimuthal_params = azimuthalHit(ray, grid, ray_segment, collinear_times,
-                                                       current_azimuthal_voxel, t, t_end);
-            const auto voxel_intersection = minimumIntersection(radial_params, polar_params, azimuthal_params);
+            const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
+                                        current_polar_voxel, t, t_end);
+            const auto azimuthal = azimuthalHit(ray, grid, ray_segment, collinear_times,
+                                                current_azimuthal_voxel, t, t_end);
+            const auto voxel_intersection = minimumIntersection(radial, polar, azimuthal);
             switch (voxel_intersection) {
                 case Radial: {
-                    t = radial_params.tMax;
-                    current_radial_voxel += radial_params.tStep;
+                    t = radial.tMax;
+                    current_radial_voxel += radial.tStep;
                     if (rh_metadata.previousRadialVoxel() == current_radial_voxel) { continue; }
                     break;
                 }
                 case Polar: {
-                    t = polar_params.tMax;
-                    current_polar_voxel =
-                            (current_polar_voxel + polar_params.tStep) % grid.numPolarSections();
+                    t = polar.tMax;
+                    current_polar_voxel = (current_polar_voxel + polar.tStep) % grid.numPolarSections();
                     break;
                 }
                 case Azimuthal: {
-                    t = azimuthal_params.tMax;
-                    current_azimuthal_voxel =
-                            (current_azimuthal_voxel + azimuthal_params.tStep) % grid.numAzimuthalSections();
+                    t = azimuthal.tMax;
+                    current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) % grid.numAzimuthalSections();
                     break;
                 }
                 case RadialPolar: {
-                    t = radial_params.tMax;
-                    current_radial_voxel += radial_params.tStep;
-                    current_polar_voxel =
-                            (current_polar_voxel + polar_params.tStep) % grid.numPolarSections();
+                    t = radial.tMax;
+                    current_radial_voxel += radial.tStep;
+                    current_polar_voxel = (current_polar_voxel + polar.tStep) % grid.numPolarSections();
                     break;
                 }
                 case RadialAzimuthal: {
-                    t = radial_params.tMax;
-                    current_radial_voxel += radial_params.tStep;
-                    current_azimuthal_voxel =
-                            (current_azimuthal_voxel + azimuthal_params.tStep) % grid.numAzimuthalSections();
+                    t = radial.tMax;
+                    current_radial_voxel += radial.tStep;
+                    current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) % grid.numAzimuthalSections();
                     break;
                 }
                 case PolarAzimuthal: {
-                    t = polar_params.tMax;
-                    current_polar_voxel =
-                            (current_polar_voxel + polar_params.tStep) % grid.numPolarSections();
-                    current_azimuthal_voxel =
-                            (current_azimuthal_voxel + azimuthal_params.tStep) % grid.numAzimuthalSections();
+                    t = polar.tMax;
+                    current_polar_voxel = (current_polar_voxel + polar.tStep) % grid.numPolarSections();
+                    current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) % grid.numAzimuthalSections();
                     break;
                 }
                 case RadialPolarAzimuthal: {
-                    t = radial_params.tMax;
-                    current_radial_voxel += radial_params.tStep;
-                    current_polar_voxel =
-                            (current_polar_voxel + polar_params.tStep) % grid.numPolarSections();
-                    current_azimuthal_voxel =
-                            (current_azimuthal_voxel + azimuthal_params.tStep) % grid.numAzimuthalSections();
+                    t = radial.tMax;
+                    current_radial_voxel += radial.tStep;
+                    current_polar_voxel = (current_polar_voxel + polar.tStep) % grid.numPolarSections();
+                    current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) % grid.numAzimuthalSections();
                     break;
                 }
                 case None: {
