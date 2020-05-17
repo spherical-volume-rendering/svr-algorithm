@@ -161,36 +161,33 @@ namespace svr {
             const double d_b = std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) - rsvd_minus_v_squared);
             const double intersection_t = ray.timeOfIntersectionAt(v + d_b);
             if (intersection_t < t_end) { return {.tMax=intersection_t, .tStep=-1, .within_bounds=true }; }
+        } else {
+            const std::size_t previous_idx = std::min(static_cast<std::size_t>(current_radial_voxel),
+                                                      grid.numRadialSections() - 1);
+            rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
+            const double r_a = grid.deltaRadiiSquared(previous_idx -
+                                                      (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
+            const double d_a = std::sqrt(r_a - rsvd_minus_v_squared);
+            const double intersection_t1 = ray.timeOfIntersectionAt(v - d_a);
+            const double intersection_t2 = ray.timeOfIntersectionAt(v + d_a);
 
-            // There does not exist an intersection time X such that t < X < t_end.
-            return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
-        }
-        const std::size_t previous_idx = std::min(static_cast<std::size_t>(current_radial_voxel),
-                                                  grid.numRadialSections() - 1);
-        rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
-        const double r_a = grid.deltaRadiiSquared(previous_idx -
-                                                  (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
-        const double d_a = std::sqrt(r_a - rsvd_minus_v_squared);
-        const double intersection_t1 = ray.timeOfIntersectionAt(v - d_a);
-        const double intersection_t2 = ray.timeOfIntersectionAt(v + d_a);
+            const double t1_gt_t = intersection_t1 > t;
+            if (t1_gt_t && intersection_t1 == intersection_t2) {
+                // Tangential hit.
+                rh_metadata.isRadialStepTransition(true);
+                return {.tMax=intersection_t1, .tStep=0, .within_bounds=true};
+            }
+            if (t1_gt_t && intersection_t1 < t_end) {
+                return {.tMax=intersection_t1, .tStep=1, .within_bounds=true};
+            }
 
-        const double t1_gt_t = intersection_t1 > t;
-        if (t1_gt_t && intersection_t1 == intersection_t2) {
-            // Tangential hit. Every tangential hit leads to a radial transition.
-            rh_metadata.isRadialStepTransition(true);
-            return {.tMax=intersection_t1, .tStep=0, .within_bounds=true };
+            if (intersection_t2 < t_end) {
+                // t2 is the "further" point of intersection of the current sphere.
+                // Since t1 is not within our time bounds, it must be true that this is a radial transition.
+                rh_metadata.isRadialStepTransition(true);
+                return {.tMax=intersection_t2, .tStep=-1, .within_bounds=true};
+            }
         }
-        if (t1_gt_t && intersection_t1 < t_end) {
-            return {.tMax=intersection_t1, .tStep=1, .within_bounds=true };
-        }
-
-        if (intersection_t2 < t_end) {
-            // t2 is the "further" point of intersection of the current sphere.
-            // Since t1 is not within our time bounds, it must be true that this is a radial transition.
-            rh_metadata.isRadialStepTransition(true);
-            return {.tMax=intersection_t2, .tStep=-1, .within_bounds=true };
-        }
-
         // There does not exist an intersection time X such that t < X < t_end.
         return {.tMax=std::numeric_limits<double>::max(), .tStep=0, .within_bounds=false};
     }
