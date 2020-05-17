@@ -8,11 +8,11 @@
 // A number of floating point comparison algorithms written for the spherical volume rendering algorithm.
 
 namespace svr {
-    // Epsilon used for floating point comparisons in Knuth's algorithm.
+    // Epsilons used for floating point comparisons in Knuth's algorithm.
     constexpr double ABS_EPSILON = 1e-12;
     constexpr double REL_EPSILON = 1e-8;
 
-    // Determines equality between two floating point numbers using an absolute epsilon.
+    // Determines equality between two floating point numbers using a defaulted absolute and relative epsilon.
     // Related Boost document:
     //        https://www.boost.org/doc/libs/1_61_0/libs/test/doc/html/boost_test/testing_tools/extended_comparison/
     //        floating_point/floating_points_comparison_theory.html#equ1
@@ -36,7 +36,7 @@ namespace svr {
                diff_z <= std::max(std::abs(a.z()), std::abs(b.z())) * REL_EPSILON;
     }
 
-    // Checks to see if a is strictly less than b with an absolute epsilon.
+    // Checks to see if a is strictly less than b using Knuth's algorithm.
     inline bool lessThan(double a, double b) noexcept {
         return a < b && !isEqual(a, b);
     }
