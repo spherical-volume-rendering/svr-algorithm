@@ -41,7 +41,7 @@ namespace svr {
         // Once a radial transition has occurred, it follows that all radial intersections will have the same flag.
         inline void isRadialTransition(bool b) noexcept { transition_flag_ |= b; }
 
-        inline int previousRadialVoxel() const noexcept  { return previous_radial_voxel_; }
+        inline int previousRadialVoxel() const noexcept { return previous_radial_voxel_; }
 
         inline void updatePreviousRadialVoxel(int radial_voxel) noexcept { previous_radial_voxel_ = radial_voxel; }
 
@@ -60,11 +60,9 @@ namespace svr {
         int previous_radial_voxel_ = -1;
     };
 
-    // Pre-calculated information for the generalized plane hit function, which generalizes azimuthal and polar
+    // Pre-calculated information for the generalized angular hit function, which generalizes azimuthal and polar
     // hits. Since the ray segment is dependent solely on time, this is unnecessary to calculate twice for each
     // plane hit function. Here, ray_segment is the difference between P2 and P1.
-    // The collinear times are the two times possible for t, dependent on if the ray is collinear to the given
-    // voxel boundary.
     struct RaySegment {
     public:
         inline RaySegment(double t_end, const Ray &ray) : P2_(ray.pointAtParameter(t_end)),
@@ -122,8 +120,8 @@ namespace svr {
     // intersection points along the circle of max radius is obtuse. Equality represents the case when the point lies
     // on an polar boundary. This is similar for azimuthal boundaries. Since both cases use points in a plane
     // (XY for polar, XZ for azimuthal), this can be generalized to a single function.
-    inline int calculateVoxelIDFromPoints(const std::vector<LineSegment> &angular_max,
-                                          const double p1, double p2) noexcept {
+    inline int calculateAngularVoxelIDFromPoints(const std::vector<LineSegment> &angular_max,
+                                                 const double p1, double p2) noexcept {
         return index_adjacent_find_until(angular_max.cbegin(), angular_max.cend(),
                                          [p1, p2](const LineSegment &LS1, const LineSegment &LS2) -> bool {
                                              const double X_diff = LS1.P1 - LS2.P1;
@@ -153,7 +151,7 @@ namespace svr {
         const double r = entry_radius / std::sqrt(SED);
         const double p1 = grid.sphereCenter().x() - ray_sphere.x() * r;
         const double p2 = grid_sphere_2 - ray_sphere_2 * r;
-        return calculateVoxelIDFromPoints(angular_max, p1, p2);
+        return calculateAngularVoxelIDFromPoints(angular_max, p1, p2);
     }
 
     // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
@@ -275,7 +273,7 @@ namespace svr {
                 const double max_radius_over_plane_length = grid.sphereMaxRadius() / std::sqrt(a * a + b * b);
                 const double p1 = grid.sphereCenter().x() - max_radius_over_plane_length * a;
                 const double p2 = sphere_center_2 - max_radius_over_plane_length * b;
-                const int next_step = std::abs(current_voxel - calculateVoxelIDFromPoints(P_max, p1, p2));
+                const int next_step = std::abs(current_voxel - calculateAngularVoxelIDFromPoints(P_max, p1, p2));
                 return {.tMax = t_max,
                         .tStep = (svr::lessThan(ray_direction_2, 0.0) || svr::lessThan(ray.direction().x(), 0.0)) ?
                                  next_step : -next_step,
@@ -457,7 +455,7 @@ namespace svr {
         const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
 
         if ((t_sphere_entrance < t_begin && t_sphere_exit < t_begin) ||
-                svr::isEqual(t_sphere_entrance, t_sphere_exit)) { return {}; }
+            svr::isEqual(t_sphere_entrance, t_sphere_exit)) { return {}; }
         int current_radial_voxel = idx + 1;
 
         std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
@@ -481,8 +479,8 @@ namespace svr {
         std::vector<svr::SphericalVoxel> voxels;
         voxels.reserve(grid.numRadialSections() + grid.numPolarSections() + grid.numAzimuthalSections());
         voxels.push_back({.radial_voxel=current_radial_voxel,
-                          .polar_voxel=current_polar_voxel,
-                          .azimuthal_voxel=current_azimuthal_voxel});
+                                 .polar_voxel=current_polar_voxel,
+                                 .azimuthal_voxel=current_azimuthal_voxel});
 
         double t;
         if (ray_origin_is_outside_grid) {
@@ -557,8 +555,8 @@ namespace svr {
                 }
             }
             voxels.push_back({.radial_voxel=current_radial_voxel,
-                              .polar_voxel=current_polar_voxel,
-                              .azimuthal_voxel=current_azimuthal_voxel});
+                                     .polar_voxel=current_polar_voxel,
+                                     .azimuthal_voxel=current_azimuthal_voxel});
         }
     }
 
