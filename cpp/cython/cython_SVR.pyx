@@ -7,7 +7,7 @@ from libcpp.vector cimport vector
 
 cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
     cdef cppclass SphericalVoxel:
-        int radial_voxel, polar_voxel, azimuthal_voxel
+        int radial, polar, azimuthal
     cdef cppclass SphereBound:
         double radial, polar, azimuthal
 
@@ -68,7 +68,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
                                                              t_begin, t_end)
     cdef np.ndarray cyVoxels = np.empty((voxels.size(), 3), dtype=int)
     for i in range(voxels.size()):
-        cyVoxels[i,0] = voxels[i].radial_voxel
-        cyVoxels[i,1] = voxels[i].polar_voxel
-        cyVoxels[i,2] = voxels[i].azimuthal_voxel
+        cyVoxels[i,0] = voxels[i].radial
+        cyVoxels[i,1] = voxels[i].polar
+        cyVoxels[i,2] = voxels[i].azimuthal
     return cyVoxels

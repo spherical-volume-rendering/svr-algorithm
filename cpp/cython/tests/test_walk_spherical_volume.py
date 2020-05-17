@@ -571,7 +571,7 @@ class TestWalkSphericalVolume(unittest.TestCase):
         expected_phi_voxels = [1, 1, 1, 2, 2, 2]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
-    def test_num_angular_sections_is_one(self):
+    def test_tangential_hit_no_double_intersection_with_same_voxel(self):
         ray_origin = np.array([-2.5, 0.0, 10.0])
         ray_direction = np.array([0.0, 0.0, -1.0])
         sphere_center = np.array([0.0, 0.0, 0.0])
@@ -586,9 +586,9 @@ class TestWalkSphericalVolume(unittest.TestCase):
         voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound,
                                                   num_radial_sections, num_polar_sections, num_azimuthal_sections,
                                                   sphere_center, t_begin, t_end)
-        expected_radial_voxels = [1, 2, 3, 3, 2, 1]
-        expected_theta_voxels = [0, 0, 0, 0, 0, 0]
-        expected_phi_voxels = [0, 0, 0, 0, 0, 0]
+        expected_radial_voxels = [1, 2, 3, 2, 1]
+        expected_theta_voxels = [0, 0, 0, 0, 0]
+        expected_phi_voxels = [0, 0, 0, 0, 0]
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
     def test_nearly_tangential_hit(self):
