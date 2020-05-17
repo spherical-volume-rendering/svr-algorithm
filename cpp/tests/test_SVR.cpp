@@ -20,7 +20,7 @@ namespace {
     constexpr svr::SphereBound MIN_BOUND = {.radial=0.0, .polar=0.0, .azimuthal=0.0};
 
     // Determines equality amongst actual spherical voxels, and the expected spherical voxels.
-    void expectEqualVoxels(const std::vector<svr::SphericalVoxel> &actual_voxels,
+    void verifyEqualVoxels(const std::vector<svr::SphericalVoxel> &actual_voxels,
                            const std::vector<int> &expected_radial_voxels,
                            const std::vector<int> &expected_theta_voxels,
                            const std::vector<int> &expected_phi_voxels) {
@@ -29,11 +29,11 @@ namespace {
         std::vector<int> theta_voxels(num_voxels);
         std::vector<int> phi_voxels(num_voxels);
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), radial_voxels.begin(),
-                       [](const svr::SphericalVoxel &sv) -> int { return sv.radial; });
+                       [](const svr::SphericalVoxel &voxel) -> int { return voxel.radial; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), theta_voxels.begin(),
-                       [](const svr::SphericalVoxel &sv) -> int { return sv.polar; });
+                       [](const svr::SphericalVoxel &voxel) -> int { return voxel.polar; });
         std::transform(actual_voxels.cbegin(), actual_voxels.cend(), phi_voxels.begin(),
-                       [](const svr::SphericalVoxel &sv) -> int { return sv.azimuthal; });
+                       [](const svr::SphericalVoxel &voxel) -> int { return voxel.azimuthal; });
         EXPECT_THAT(radial_voxels, testing::ContainerEq(expected_radial_voxels));
         EXPECT_THAT(theta_voxels, testing::ContainerEq(expected_theta_voxels));
         EXPECT_THAT(phi_voxels, testing::ContainerEq(expected_phi_voxels));
@@ -76,7 +76,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3, 3, 3, 3, 3};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0, 3, 3, 3, 3};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsWithinSphereAndTimeBeginIsNotZero) {
@@ -97,7 +97,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 3};
         const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayEndsWithinSphere) {
@@ -118,7 +118,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 3};
         const std::vector<int> expected_theta_voxels = {3, 3, 2, 2};
         const std::vector<int> expected_phi_voxels = {0, 0, 1, 1};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsAndEndsWithinSphere) {
@@ -139,7 +139,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, SphereCenteredAtOrigin) {
@@ -160,7 +160,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RaySlightOffsetInXYPlane) {
@@ -181,7 +181,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 3, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 1, 1, 1, 0, 0};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 2, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayTravelsAlongXAxis) {
@@ -202,7 +202,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 3, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayTravelsAlongYAxis) {
@@ -223,7 +223,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {5, 5, 5, 5, 1, 1, 1, 1};
         const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayTravelsAlongZAxis) {
@@ -244,7 +244,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {0, 0, 0, 0, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayParallelToXYPlane) {
@@ -265,7 +265,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayParallelToXZPlane) {
@@ -286,7 +286,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayParallelToYZPlane) {
@@ -307,7 +307,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeXPositiveYZ) {
@@ -328,7 +328,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 2, 2, 1, 1, 1, 1};
         const std::vector<int> expected_phi_voxels = {3, 3, 3, 2, 2, 1, 1, 1, 1};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeYPositiveXZ) {
@@ -349,7 +349,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 3, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 1, 0, 0, 3, 3, 3};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 1, 1, 0, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeZPositiveXY) {
@@ -370,7 +370,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 1, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 1, 1, 0, 0};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayDirectionNegativeXYZ) {
@@ -391,7 +391,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 1, 2, 1, 1};
         const std::vector<int> expected_theta_voxels = {0, 3, 3, 3, 2};
         const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 1};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, OddNumberAngularSections) {
@@ -412,7 +412,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0, 0};
         const std::vector<int> expected_phi_voxels = {2, 2, 1, 1, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, OddNumberAzimuthalSections) {
@@ -433,7 +433,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, LargeNumberOfRadialSections) {
@@ -467,7 +467,7 @@ namespace {
                                                       2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                       0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, LargeNumberOfAngularSections) {
@@ -488,7 +488,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {24, 24, 24, 24, 4, 4, 4, 4};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, LargeNumberOfAzimuthalSections) {
@@ -509,7 +509,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {24, 24, 24, 24, 4, 4, 4, 4};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, TimeBeginIsNotZero) {
@@ -530,7 +530,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 3, 3, 3, 3};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 3, 3, 3, 3};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsInOutermostRadiusAndEndsWithinSphere) {
@@ -551,7 +551,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4};
         const std::vector<int> expected_theta_voxels = {2, 2, 2, 3, 3, 0};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 3, 3, 3};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, RayBeginsAtSphereOrigin) {
@@ -572,7 +572,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {4, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
         const std::vector<int> expected_phi_voxels = {2, 2, 2, 2};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, TangentialHitWithInnerRadialVoxelOne) {
@@ -593,7 +593,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
         const std::vector<int> expected_phi_voxels = {1, 1, 2, 2};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, TangentialHitWithInnerRadialVoxelTwo) {
@@ -614,7 +614,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 1, 1};
         const std::vector<int> expected_phi_voxels = {1, 1, 1, 2, 2, 2};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, TangentialHitNoDoubleIntersectionWithSameVoxel) {
@@ -635,7 +635,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {0, 0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, NearlyTangentialHit) {
@@ -656,7 +656,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 2, 1};
         const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
         const std::vector<int> expected_phi_voxels = {1, 1, 2, 2};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(SphericalCoordinateTraversal, UpperHemisphereHit) {
@@ -675,7 +675,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 4, 4, 3, 3, 2, 1};
         const std::vector<int> expected_theta_voxels = {3, 3, 3, 2, 2, 2, 1, 1, 1, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {3, 3, 3, 3, 3, 2, 1, 0, 0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
 
         const std::vector<BoundVec3> ray_origins = {BoundVec3(-5.0, -5.0, 5.0),
                                                     BoundVec3(-1.0, -1.0, 10.0),
@@ -722,7 +722,7 @@ namespace {
         const std::vector<int> expected_radial_voxels = {1, 2, 3, 4};
         const std::vector<int> expected_theta_voxels = {0, 0, 0, 0};
         const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
-        expectEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
+        verifyEqualVoxels(actual_voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels);
     }
 
     TEST(DISABLED_SphericalCoordinateTraversal, FirstQuadrantMiss) {
