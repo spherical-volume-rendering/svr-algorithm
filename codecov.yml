@@ -1,0 +1,14 @@
+coverage:
+  status:
+    project:
+      unittesting:
+        flags:
+          - unittesting
+        target: 85%
+flags:
+  unittesting:
+    paths:
+      - cpp/
+  tests:
+    paths:
+      - cpp/tests/

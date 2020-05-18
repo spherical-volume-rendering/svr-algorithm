@@ -22,3 +22,6 @@
 /cpp/benchmarks/cmake-build-debug/
 /cpp/benchmarks/bin/
 /cpp/benchmarks/build/
+
+# Coverage
+/coverage.info
