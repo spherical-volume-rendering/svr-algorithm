@@ -434,7 +434,6 @@ namespace svr {
         const double t_sphere_entrance = ray.timeOfIntersectionAt(v - d);
         const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
 
-        if (svr::isEqual(t_sphere_entrance, t_sphere_exit)) printf("{\n\n\n %f, %f }", t_sphere_entrance, t_sphere_exit);
         if (t_sphere_entrance < t_begin && t_sphere_exit < t_begin) { return {}; }
         int current_radial_voxel = idx + 1;
 
