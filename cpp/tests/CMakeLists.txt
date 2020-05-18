@@ -26,18 +26,12 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                  ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
 
-
-# Don't use e.g. GNU extension (like -std=gnu++11) for portability
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# Code Coverage Configuration
-add_library(coverage_config INTERFACE)
-
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
     add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
     add_link_options(-fprofile-instr-generate)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_compile_options(--coverage)
+    link_libraries(gcov)
 endif ()
 
 set(TESTING_BINARY test_${CMAKE_PROJECT_NAME})
