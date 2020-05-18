@@ -59,7 +59,7 @@ namespace {
     }
 
     TEST(SphericalCoordinateTraversal, RayDoesNotEnterSphereTangentialHit) {
-        const BoundVec3 sphere_center(15.0, 15.0, 15.0);
+        const BoundVec3 sphere_center(0.0, 0.0, 0.0);
         const double sphere_max_radius = 10.0;
         const std::size_t num_radial_sections = 4;
         const std::size_t num_polar_sections = 8;

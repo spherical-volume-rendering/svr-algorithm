@@ -40,6 +40,24 @@ class TestWalkSphericalVolume(unittest.TestCase):
                                                   sphere_center, t_begin, t_end)
         assert voxels.size == 0
 
+    def test_ray_does_not_enter_sphere_tangential_hit(self):
+        ray_origin = np.array([-10.0, -10.0, 0.0])
+        ray_direction = np.array([0.0, 1.0, 0.0])
+        sphere_center = np.array([0.0, 0.0, 0.0])
+        sphere_max_radius = 10.0
+        num_radial_sections = 4
+        num_polar_sections = 8
+        num_azimuthal_sections = 4
+        t_begin = 0.0
+        t_end = 15.0
+        min_bound = np.array([0.0, 0.0, 0.0])
+        max_bound = np.array([sphere_max_radius, 2 * np.pi, 2 * np.pi])
+        voxels = cython_SVR.walk_spherical_volume(ray_origin, ray_direction, min_bound, max_bound,
+                                                  num_radial_sections, num_polar_sections, num_azimuthal_sections,
+                                                  sphere_center, t_begin, t_end)
+        assert voxels.size == 0
+
+
     def test_sphere_center_at_origin(self):
         ray_origin = np.array([-13.0, -13.0, -13.0])
         ray_direction = np.array([1.0, 1.0, 1.0])
