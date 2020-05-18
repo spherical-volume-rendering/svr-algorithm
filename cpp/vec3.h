@@ -44,6 +44,10 @@ public:
         return e_[0] * e_[0] + e_[1] * e_[1] + e_[2] * e_[2];
     }
 
+    inline bool operator==(const Vec3 &other) const noexcept {
+        return this->x() == other.x() && this->y() == other.y() && this->z() == other.z();
+    }
+
     inline double operator[](const std::size_t index) const noexcept {
         return e_[index];
   }
@@ -96,6 +100,10 @@ struct FreeVec3 : Vec3 {
         this->z() /= scalar;
         return *this;
     }
+
+    inline bool operator==(const FreeVec3 &other) const noexcept {
+        return this->x() == other.x() && this->y() == other.y() && this->z() == other.z();
+    }
 };
 
 inline FreeVec3 operator+(const FreeVec3 &v) noexcept { return v; }
@@ -142,6 +150,10 @@ struct BoundVec3 : Vec3 {
 
     inline BoundVec3 &operator-=(const FreeVec3 &other) noexcept {
         return *this += (-other);
+    }
+
+    inline bool operator==(const BoundVec3 &other) const noexcept {
+        return this->x() == other.x() && this->y() == other.y() && this->z() == other.z();
     }
 };
 
