@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@1.0.5
 
 jobs:
   build:
@@ -24,3 +27,13 @@ jobs:
       - run:
           name: SVR Unit Testing
           command: 'cd cpp/tests/bin && ./test_SVR'
+      - run:
+          name: Run coverage
+          command: >
+            lcov --directory . --capture --output-file coverage.info &&
+            lcov --remove coverage.info '/usr/*' "${HOME}" '/.cache/*' 'cpp/tests/*' --output-file coverage.info &&
+            lcov --list coverage.info
+
+      - codecov/upload:
+        file: 'coverage.info'
+        flags: unittesting

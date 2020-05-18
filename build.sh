@@ -1,1 +1,0 @@
- cd cpp/tests && mkdir build && cd build && cmake .. && make && cd .. && ./bin/test_SVR
