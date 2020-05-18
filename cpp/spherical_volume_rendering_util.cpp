@@ -150,10 +150,8 @@ namespace svr {
     }
 
     // Determines whether a radial hit occurs for the given ray. A radial hit is considered an intersection with
-    // the ray and a radial section. The struct RadialHitData is used to provide already initialized data structures,
-    // as well as avoiding unnecessary duplicate calculations that have already been done in the initialization phase.
-    // This follows closely the mathematics presented in:
-    // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
+    // the ray and a radial section. To determine line-sphere intersection, this follows closely the mathematics
+    // presented in: http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
     inline HitParameters radialHit(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                    RadialHitMetadata &rh_metadata, int current_radial_voxel,
                                    double v, double rsvd_minus_v_squared, double t, double t_end) noexcept {
@@ -168,24 +166,24 @@ namespace svr {
             const double r_a = grid.deltaRadiiSquared(previous_idx -
                                                       (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
             const double d_a = std::sqrt(r_a - rsvd_minus_v_squared);
-            const double intersection_t1 = ray.timeOfIntersectionAt(v - d_a);
-            const double intersection_t2 = ray.timeOfIntersectionAt(v + d_a);
+            const double t_entrance = ray.timeOfIntersectionAt(v - d_a);
+            const double t_exit = ray.timeOfIntersectionAt(v + d_a);
 
-            const double t1_gt_t = intersection_t1 > t;
-            if (t1_gt_t && intersection_t1 == intersection_t2) {
+            const double t_entrance_gt_t = t_entrance > t;
+            if (t_entrance_gt_t && t_entrance == t_exit) {
                 // Tangential hit.
                 rh_metadata.isRadialStepTransition(true);
-                return {.tMax=intersection_t1, .tStep=0, .within_bounds=true};
+                return {.tMax=t_entrance, .tStep=0, .within_bounds=true};
             }
-            if (t1_gt_t && intersection_t1 < t_end) {
-                return {.tMax=intersection_t1, .tStep=1, .within_bounds=true};
+            if (t_entrance_gt_t && t_entrance < t_end) {
+                return {.tMax=t_entrance, .tStep=1, .within_bounds=true};
             }
 
-            if (intersection_t2 < t_end) {
-                // t2 is the "further" point of intersection of the current sphere.
-                // Since t1 is not within our time bounds, it must be true that this is a radial transition.
+            if (t_exit < t_end) {
+                // t_exit is the "further" point of intersection of the current sphere.
+                // Since t_entrance is not within our time bounds, it must be true that this is a radial transition.
                 rh_metadata.isRadialStepTransition(true);
-                return {.tMax=intersection_t2, .tStep=-1, .within_bounds=true};
+                return {.tMax=t_exit, .tStep=-1, .within_bounds=true};
             }
         }
         // There does not exist an intersection time X such that t < X < t_end.
