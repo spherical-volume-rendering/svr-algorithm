@@ -29,5 +29,5 @@ jobs:
           command: 'cd cpp/tests/bin && ./test_SVR'
 
       - codecov/upload:
-        file: coverage.info
-        flags: unittesting
+          file: coverage.info
+          flags: unittesting
