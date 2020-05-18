@@ -35,10 +35,6 @@ jobs:
           command: 'apt-get update && sudo apt-get install -y lcov'
       - run:
           name: Run Coverage
-          command: 
-            - >-
-              lcov --directory . --capture --output-file coverage.info &&
-              lcov --remove coverage.info '/usr/*' "${HOME}" 'cpp/tests/*' '/.cache/*' --output-file coverage.info &&
-              lcov --list coverage.info
+          command: 'lcov --directory . --capture --output-file coverage.info && lcov --remove coverage.info --output-file coverage.info && lcov --list coverage.info'
       - codecov/upload:
           file: coverage.info
