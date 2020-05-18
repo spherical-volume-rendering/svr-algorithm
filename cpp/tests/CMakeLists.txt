@@ -26,21 +26,25 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
                  ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
                  EXCLUDE_FROM_ALL)
 
-#if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-#    add_link_options(-Wall -fprofile-arcs -ftest-coverage -fprofile-instr-generate)
-#    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
-#elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-#    add_compile_options(--coverage)
-#elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GCC")
-#    add_compile_options(-fprofile-arcs -ftest-coverage)
-#endif ()
+
+# Don't use e.g. GNU extension (like -std=gnu++11) for portability
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Code Coverage Configuration
+add_library(coverage_config INTERFACE)
+
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+    add_link_options(-fprofile-instr-generate)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    add_compile_options(--coverage)
+endif ()
 
 set(TESTING_BINARY test_${CMAKE_PROJECT_NAME})
 set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_SVR.cpp ../floating_point_comparison_util.h)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 add_executable(${TESTING_BINARY} ${TESTING_SOURCE_FILES})
 target_link_libraries(${TESTING_BINARY} gtest_main gmock_main)
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wall -Wextra")
 
 enable_testing()
 

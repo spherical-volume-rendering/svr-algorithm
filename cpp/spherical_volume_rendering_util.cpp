@@ -444,7 +444,7 @@ namespace svr {
 
         const FreeVec3 ray_sphere = ray_origin_is_outside_grid ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_sphere_entrance) :
-                                    svr::isEqual(rsv_begin, Vec3(0.0, 0.0, 0.0)) ?
+                                    rsv_begin == FreeVec3(0.0, 0.0, 0.0) ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1) : rsv_begin;
 
         int current_polar_voxel = initializeAngularVoxelID(grid, grid.numPolarSections(), ray_sphere, P_polar,

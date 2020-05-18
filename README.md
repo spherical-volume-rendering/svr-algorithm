@@ -3,6 +3,7 @@
 
 ## About
 [![spherical-volume-rendering](https://circleci.com/gh/spherical-volume-rendering/svr-algorithm.svg?style=shield)](https://app.circleci.com/pipelines/github/spherical-volume-rendering/svr-algorithm)
+[![codecov](https://codecov.io/gh/cgyurgyik/algorithm-team-collaboration/branch/master/graph/badge.svg)](https://codecov.io/gh/cgyurgyik/algorithm-team-collaboration)
 
 This project extends the [yt](https://yt-project.org/) open-source data analysis and visualization package, providing an enhanced, integrated user interface for data exploration and enabling the visualization of physical data that comes from non-cartesian grids. Currently, yt implements a fast voxel traversal over a cartesian coordinate grid. The objective is to develop a fast voxel traversal over a spherical coordinate grid, based on ideas from Amanatides and Woo’s seminal paper on fast voxel traversal for ray tracing.
 
