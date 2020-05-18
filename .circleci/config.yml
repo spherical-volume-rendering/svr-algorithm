@@ -27,7 +27,13 @@ jobs:
       - run:
           name: SVR Unit Testing
           command: 'cd cpp/tests/bin && ./test_SVR'
-
+      - run:
+          name: Install codecov I
+          command: 'sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test && sudo apt-get update -qq'
+      - run:
+          name: Install codecov II
+          command: 'sudo pip install --user codecov'
+          
       - codecov/upload:
           file: coverage.info
           flags: unittesting
