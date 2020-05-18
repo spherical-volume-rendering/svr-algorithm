@@ -29,7 +29,7 @@ jobs:
           command: 'cd cpp/tests/bin && ./test_SVR'
       - run:
           name: Install Curl
-          command: 'apk update && apk add curl curl-dev bash'
+          command: 'apt-get update && sudo apt install -y curl'
           
       - codecov/upload:
           file: coverage.info
