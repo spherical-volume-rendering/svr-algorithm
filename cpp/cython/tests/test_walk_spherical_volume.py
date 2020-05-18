@@ -590,8 +590,8 @@ class TestWalkSphericalVolume(unittest.TestCase):
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
     def test_ray_begins_past_sphere_origin_one(self):
-        ray_origin = np.array([0.0, 0.0, 0.0])
-        ray_direction = np.array([-3.0, 2.4, -3.0])
+        ray_origin = np.array([-3.0, 2.4, -3.0])
+        ray_direction = np.array([-1.5, 1.2, -1.5])
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
@@ -610,8 +610,8 @@ class TestWalkSphericalVolume(unittest.TestCase):
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
     def test_ray_begins_past_sphere_origin_two(self):
-        ray_origin = np.array([0.0, 0.0, 0.0])
-        ray_direction = np.array([-4.5, 3.6, -4.5])
+        ray_origin = np.array([-4.5, 3.6, -4.5])
+        ray_direction = np.array([-1.5, 1.2, -1.5])
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
@@ -630,8 +630,8 @@ class TestWalkSphericalVolume(unittest.TestCase):
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
     def test_ray_begins_past_sphere_origin_three(self):
-        ray_origin = np.array([0.0, 0.0, 0.0])
-        ray_direction = np.array([-6.0, 4.8, -6.0])
+        ray_origin = np.array([-6.0, 4.8, -6.0])
+        ray_direction = np.array([-1.5, 1.2, -1.5])
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
@@ -650,8 +650,8 @@ class TestWalkSphericalVolume(unittest.TestCase):
         self.verify_voxels(voxels, expected_radial_voxels, expected_theta_voxels, expected_phi_voxels)
 
     def test_ray_begins_past_sphere_origin_four(self):
-        ray_origin = np.array([0.0, 0.0, 0.0])
-        ray_direction = np.array([-7.5, 6.0, -7.5])
+        ray_origin = np.array([-7.5, 6.0, -7.5])
+        ray_direction = np.array([-1.5, 1.2, -1.5])
         sphere_center = np.array([0.0, 0.0, 0.0])
         sphere_max_radius = 10.0
         num_radial_sections = 4
