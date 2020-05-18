@@ -35,5 +35,5 @@ jobs:
             lcov --list coverage.info
 
       - codecov/upload:
-        file: 'coverage.info'
+        file: coverage.info
         flags: unittesting
