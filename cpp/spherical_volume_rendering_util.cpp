@@ -434,8 +434,8 @@ namespace svr {
         const double t_sphere_entrance = ray.timeOfIntersectionAt(v - d);
         const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
 
-        if ((t_sphere_entrance < t_begin && t_sphere_exit < t_begin) ||
-            svr::isEqual(t_sphere_entrance, t_sphere_exit)) { return {}; }
+        if (svr::isEqual(t_sphere_entrance, t_sphere_exit)) printf("{\n\n\n %f, %f }", t_sphere_entrance, t_sphere_exit);
+        if (t_sphere_entrance < t_begin && t_sphere_exit < t_begin) { return {}; }
         int current_radial_voxel = idx + 1;
 
         std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
@@ -482,7 +482,6 @@ namespace svr {
         while (true) {
             const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
                                           v, rsvd_minus_v_squared, t, t_end);
-            if (current_radial_voxel == 0) { return voxels; }
             ray_segment.updateAtTime(t, ray);
             const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
                                         current_polar_voxel, t, t_end);
