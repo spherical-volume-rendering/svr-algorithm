@@ -214,7 +214,7 @@ namespace svr {
             const double inv_perp_uv_min = 1.0 / perp_uv_min;
             a = perp_vw_min * inv_perp_uv_min;
             b = perp_uw_min * inv_perp_uv_min;
-            if (!(a < 0.0 || 1.0 < a || b < 0.0 || 1.0 < b)) {
+            if (!((svr::lessThan(a, 0.0) || svr::lessThan(1.0, a)) || svr::lessThan(b, 0.0) || svr::lessThan(1.0, b))) {
                 is_intersect_min = true;
                 t_min = ray_segment.intersectionTimeAt(b, ray);
             }
@@ -225,7 +225,7 @@ namespace svr {
             const double inv_perp_uv_max = 1.0 / perp_uv_max;
             a = perp_vw_max * inv_perp_uv_max;
             b = perp_uw_max * inv_perp_uv_max;
-            if (!(a < 0.0 || 1.0 < a || b < 0.0 || 1.0 < b)) {
+            if (!((svr::lessThan(a, 0.0) || svr::lessThan(1.0, a)) || svr::lessThan(b, 0.0) || svr::lessThan(1.0, b))) {
                 is_intersect_max = true;
                 t_max = ray_segment.intersectionTimeAt(b, ray);
             }
@@ -246,7 +246,7 @@ namespace svr {
         if ((is_intersect_min && is_intersect_max) ||
             (is_intersect_min && is_collinear_max) ||
             (is_intersect_max && is_collinear_min)) {
-            if (t_min == t_max) {
+            if (svr::isEqual(t_min, t_max)) {
                 const double perturbed_t = 0.1;
                 a = -ray.direction().x() * perturbed_t;
                 b = -ray_direction_2 * perturbed_t;
@@ -259,10 +259,10 @@ namespace svr {
                         .within_bounds = t_min_within_bounds
                 };
             }
-            if (t_min_within_bounds && (t_min < t_max || t == t_max)) {
+            if (t_min_within_bounds && (svr::lessThan(t_min, t_max) || svr::isEqual(t, t_max))) {
                 return {.tMax = t_min, .tStep = -1, .within_bounds = true};
             }
-            if (t_max_within_bounds && (t_max < t_min || t == t_min)) {
+            if (t_max_within_bounds && (svr::lessThan(t_max, t_min) || svr::isEqual(t, t_min))) {
                 return {.tMax = t_max, .tStep = 1, .within_bounds = true};
             }
         }
