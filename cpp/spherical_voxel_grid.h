@@ -47,18 +47,14 @@ namespace svr {
                 delta_theta_((max_bound.polar - min_bound.polar) / num_polar_sections),
                 delta_phi_((max_bound.azimuthal - min_bound.azimuthal) / num_azimuthal_sections) {
 
-            delta_radii_.resize(num_radial_sections + 1);
-            double current_delta_radius = delta_radius_ * num_radial_sections;
-            std::generate(delta_radii_.begin(), delta_radii_.end(),
+            double current_delta_radius = max_bound.radial - min_bound.radial;
+            delta_radii_sq_.resize(num_radial_sections + 1);
+            std::generate(delta_radii_sq_.begin(), delta_radii_sq_.end(),
                           [&]() -> double {
                               const double old_delta_radius = current_delta_radius;
                               current_delta_radius -= delta_radius_;
-                              return old_delta_radius;
+                              return old_delta_radius * old_delta_radius;
                           });
-            delta_radii_sq_.resize(num_radial_sections + 1);
-            std::transform(delta_radii_.cbegin(), delta_radii_.cend(), delta_radii_sq_.begin(),
-                           [](double dR) -> double { return dR * dR; });
-
             P_max_polar_.resize(num_polar_sections + 1);
             P_max_azimuthal_.resize(num_azimuthal_sections + 1);
             center_to_polar_bound_vectors_.reserve(num_polar_sections + 1);
@@ -133,13 +129,9 @@ namespace svr {
 
         inline const BoundVec3 &sphereCenter() const noexcept { return this->sphere_center_; }
 
-        inline double deltaRadii(std::size_t i) const noexcept { return this->delta_radii_[i]; }
+        inline double deltaRadius() const noexcept { return delta_radius_; }
 
         inline double deltaRadiiSquared(std::size_t i) const noexcept { return this->delta_radii_sq_[i]; }
-
-        inline const std::vector<double> &deltaRadii() const noexcept { return this->delta_radii_; }
-
-        inline const std::vector<double> &deltaRadiiSquared() const noexcept { return this->delta_radii_sq_; }
 
         inline const LineSegment &pMaxPolar(std::size_t i) const noexcept { return this->P_max_polar_[i]; }
 
@@ -175,9 +167,6 @@ namespace svr {
 
         // 2 * PI divided by X, where X is the number of polar and number of azimuthal sections respectively.
         const double delta_theta_, delta_phi_;
-
-        // The delta radii ranging from 0...num_radial_voxels.
-        std::vector<double> delta_radii_;
 
         // The delta radii squared ranging from 0...num_radial_voxels.
         std::vector<double> delta_radii_sq_;

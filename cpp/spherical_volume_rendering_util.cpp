@@ -158,7 +158,9 @@ namespace svr {
         if (rh_metadata.radialStepTransitionHasOccurred()) {
             const double d_b = std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) - rsvd_minus_v_squared);
             const double intersection_t = ray.timeOfIntersectionAt(v + d_b);
-            if (intersection_t < t_end) { return {.tMax=intersection_t, .tStep=-1, .within_bounds=true }; }
+            if (intersection_t < t_end) {
+                return {.tMax=intersection_t, .tStep=-1, .within_bounds=true };
+            }
         } else {
             const std::size_t previous_idx = std::min(static_cast<std::size_t>(current_radial_voxel),
                                                       grid.numRadialSections() - 1);
@@ -178,7 +180,6 @@ namespace svr {
             if (t_entrance_gt_t && t_entrance < t_end) {
                 return {.tMax=t_entrance, .tStep=1, .within_bounds=true};
             }
-
             if (t_exit < t_end) {
                 // t_exit is the "further" point of intersection of the current sphere.
                 // Since t_entrance is not within our time bounds, it must be true that this is a radial transition.
@@ -406,24 +407,19 @@ namespace svr {
 
     std::vector<svr::SphericalVoxel> walkSphericalVolume(const Ray &ray, const svr::SphericalVoxelGrid &grid,
                                                          double t_begin, double t_end) noexcept {
-        const FreeVec3 rsv_begin = grid.sphereCenter() - ray.pointAtParameter(t_begin);   // Ray Sphere Vector.
-        const FreeVec3 rsv = (t_begin == 0.0) ? rsv_begin : grid.sphereCenter() - ray.pointAtParameter(0.0);
+        const FreeVec3 rsv_begin = grid.sphereCenter() - ray.pointAtParameter(t_begin); // Ray Sphere Vector.
+        const double SED_from_center = rsv_begin.squared_length();
+        std::size_t radial_entrance_voxel = 0;
+        const double max_radius_squared = grid.deltaRadiiSquared(0);
 
-        const double rsvd_begin = rsv_begin.dot(rsv_begin);
-        std::size_t idx = grid.numRadialSections();
-        const auto outermost_radius_it = grid.deltaRadiiSquared().crend();
-        const auto it = std::find_if(grid.deltaRadiiSquared().crbegin() + 1, outermost_radius_it,
-                                     [rsvd_begin, &idx](double dR_squared) -> bool {
-                                         --idx;
-                                         return rsvd_begin <= dR_squared;
-                                     });
-        const bool ray_origin_is_outside_grid = (it == outermost_radius_it);
-        const double max_radius_squared = grid.deltaRadiiSquared()[0];
-        const double entry_radius_squared = ray_origin_is_outside_grid ? max_radius_squared : *it;
-        const double entry_radius = grid.deltaRadii()[idx];
+        while (SED_from_center < grid.deltaRadiiSquared(radial_entrance_voxel)) { ++radial_entrance_voxel; }
+        const bool ray_origin_is_outside_grid = (radial_entrance_voxel == 0);
 
-        // Find the intersection times for the ray and the radial shell containing the parameter point at t_begin.
-        // This will determine if the ray intersects the sphere.
+        const std::size_t vector_index = radial_entrance_voxel - !ray_origin_is_outside_grid;
+        const double entry_radius = (grid.numRadialSections() - vector_index) * grid.deltaRadius();
+        const double entry_radius_squared = grid.deltaRadiiSquared(vector_index);
+
+        const FreeVec3 rsv = t_begin == 0.0 ? rsv_begin : grid.sphereCenter() - ray.pointAtParameter(0.0);
         const double rsvd = rsv.dot(rsv); // Ray Sphere Vector Dot product at time zero.
         const double v = rsv.dot(ray.unitDirection().to_free());
         const double rsvd_minus_v_squared = rsvd - v * v;
@@ -435,7 +431,7 @@ namespace svr {
         const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
 
         if (t_sphere_entrance < t_begin && t_sphere_exit < t_begin) { return {}; }
-        int current_radial_voxel = idx + 1;
+        int current_radial_voxel = radial_entrance_voxel + ray_origin_is_outside_grid;
 
         std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
         std::vector<svr::LineSegment> P_azimuthal(grid.numAzimuthalSections() + 1);
@@ -443,7 +439,7 @@ namespace svr {
 
         const FreeVec3 ray_sphere = ray_origin_is_outside_grid ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_sphere_entrance) :
-                                    rsv_begin == FreeVec3(0.0, 0.0, 0.0) ?
+                                    SED_from_center == 0.0 ?
                                     grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1) : rsv_begin;
 
         int current_polar_voxel = initializeAngularVoxelID(grid, grid.numPolarSections(), ray_sphere, P_polar,
@@ -467,7 +463,7 @@ namespace svr {
         } else {
             t = t_begin;
             const double max_d = std::sqrt(max_radius_squared - rsvd_minus_v_squared);
-            t_end = std::min(t_end, std::max(ray.timeOfIntersectionAt(v - max_d), ray.timeOfIntersectionAt(v + max_d)));
+            t_end = std::min(t_end, ray.timeOfIntersectionAt(v + max_d));
         }
 
         // Initialize the time in case of collinear min or collinear max for angular plane hits.
@@ -481,6 +477,7 @@ namespace svr {
         while (true) {
             const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
                                           v, rsvd_minus_v_squared, t, t_end);
+            if (current_radial_voxel + radial.tStep == 0) { return voxels; }
             ray_segment.updateAtTime(t, ray);
             const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
                                         current_polar_voxel, t, t_end);
