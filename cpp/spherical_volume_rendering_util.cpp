@@ -142,7 +142,7 @@ namespace svr {
                                         double ray_sphere_2, double grid_sphere_2, double entry_radius) noexcept {
         if (number_of_sections == 1) { return 0; }
         const double SED = ray_sphere.x() * ray_sphere.x() + ray_sphere_2 * ray_sphere_2;
-        if (svr::isEqual(SED, 0.0)) { return 0; }
+        if (SED == 0.0) { return 0; }
         const double r = entry_radius / std::sqrt(SED);
         const double p1 = grid.sphereCenter().x() - ray_sphere.x() * r;
         const double p2 = grid_sphere_2 - ray_sphere_2 * r;
@@ -214,7 +214,7 @@ namespace svr {
             const double inv_perp_uv_min = 1.0 / perp_uv_min;
             a = perp_vw_min * inv_perp_uv_min;
             b = perp_uw_min * inv_perp_uv_min;
-            if (!((svr::lessThan(a, 0.0) || svr::lessThan(1.0, a)) || svr::lessThan(b, 0.0) || svr::lessThan(1.0, b))) {
+            if (!(a < 0.0 || 1.0 < a || b < 0.0 || 1.0 < b)) {
                 is_intersect_min = true;
                 t_min = ray_segment.intersectionTimeAt(b, ray);
             }
@@ -225,14 +225,14 @@ namespace svr {
             const double inv_perp_uv_max = 1.0 / perp_uv_max;
             a = perp_vw_max * inv_perp_uv_max;
             b = perp_uw_max * inv_perp_uv_max;
-            if (!((svr::lessThan(a, 0.0) || svr::lessThan(1.0, a)) || svr::lessThan(b, 0.0) || svr::lessThan(1.0, b))) {
+            if (!(a < 0.0 || 1.0 < a || b < 0.0 || 1.0 < b)) {
                 is_intersect_max = true;
                 t_max = ray_segment.intersectionTimeAt(b, ray);
             }
         }
 
-        const bool t_max_within_bounds = svr::lessThan(t, t_max) && svr::lessThan(t_max, t_end);
-        const bool t_min_within_bounds = svr::lessThan(t, t_min) && svr::lessThan(t_min, t_end);
+        const bool t_max_within_bounds = svr::lessThan(t, t_max) && t_max < t_end;
+        const bool t_min_within_bounds = svr::lessThan(t, t_min) && t_min < t_end;
         if (!t_max_within_bounds && !t_min_within_bounds) {
             return {.tMax = std::numeric_limits<double>::max(), .tStep = 0, .within_bounds = false};
         }
@@ -246,7 +246,7 @@ namespace svr {
         if ((is_intersect_min && is_intersect_max) ||
             (is_intersect_min && is_collinear_max) ||
             (is_intersect_max && is_collinear_min)) {
-            if (svr::isEqual(t_min, t_max)) {
+            if (t_min == t_max) {
                 const double perturbed_t = 0.1;
                 a = -ray.direction().x() * perturbed_t;
                 b = -ray_direction_2 * perturbed_t;
@@ -255,15 +255,14 @@ namespace svr {
                 const double p2 = sphere_center_2 - max_radius_over_plane_length * b;
                 const int next_step = std::abs(current_voxel - calculateAngularVoxelIDFromPoints(P_max, p1, p2));
                 return {.tMax = t_max,
-                        .tStep = (svr::lessThan(ray_direction_2, 0.0) || svr::lessThan(ray.direction().x(), 0.0)) ?
-                                 next_step : -next_step,
+                        .tStep = ray.direction().x() < 0.0 || ray_direction_2 < 0.0 ? next_step : -next_step,
                         .within_bounds = t_min_within_bounds
                 };
             }
-            if (t_min_within_bounds && (svr::lessThan(t_min, t_max) || svr::isEqual(t, t_max))) {
+            if (t_min_within_bounds && (t_min < t_max || t == t_max)) {
                 return {.tMax = t_min, .tStep = -1, .within_bounds = true};
             }
-            if (t_max_within_bounds && (svr::lessThan(t_max, t_min) || svr::isEqual(t, t_min))) {
+            if (t_max_within_bounds && (t_max < t_min || t == t_min)) {
                 return {.tMax = t_max, .tStep = 1, .within_bounds = true};
             }
         }
