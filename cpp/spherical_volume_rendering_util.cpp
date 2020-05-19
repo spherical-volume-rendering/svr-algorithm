@@ -416,7 +416,7 @@ namespace svr {
         const bool ray_origin_is_outside_grid = (radial_entrance_voxel == 0);
 
         const std::size_t vector_index = radial_entrance_voxel - !ray_origin_is_outside_grid;
-        const double entry_radius = grid.deltaRadii(vector_index);
+        const double entry_radius = (grid.numRadialSections() - vector_index) * grid.deltaRadius();
         const double entry_radius_squared = grid.deltaRadiiSquared(vector_index);
 
         const FreeVec3 rsv = t_begin == 0.0 ? rsv_begin : grid.sphereCenter() - ray.pointAtParameter(0.0);
