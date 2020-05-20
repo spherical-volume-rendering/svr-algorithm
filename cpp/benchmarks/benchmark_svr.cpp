@@ -11,7 +11,7 @@
 //  cmake .. && make
 //
 //  To run the benchmarks:
-//  >    cd .. && ./bin/benchmark_SVR
+//  >    cd .. && ./bin/benchmark_svr
 //
 // For more information on Google Benchmark, see:
 // https://github.com/google/benchmark For examples of Google Benchmark, see:

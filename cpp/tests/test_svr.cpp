@@ -12,7 +12,7 @@
 //   following command: >    cd cpp/tests && mkdir build && cd build && cmake ..
 //   && make
 // To run tests:
-//   >    cd .. && ./bin/test_SVR
+//   >    cd .. && ./bin/test_svr
 //
 // For information on Google Test, see:
 // https://github.com/google/googletest/blob/master/googletest/README.md For
