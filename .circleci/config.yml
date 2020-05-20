@@ -26,7 +26,7 @@ jobs:
           command: 'cd cpp/tests && cmake -H. -Bbuild && cmake --build build'
       - run:
           name: SVR Unit Testing 5 Times
-          command: 'cd cpp/tests/bin && ./test_SVR && ./test_SVR && ./test_SVR && ./test_SVR && ./test_svr'
+          command: 'cd cpp/tests/bin && ./test_svr && ./test_svr && ./test_svr && ./test_svr && ./test_svr'
       - run:
           name: SVR Continuous Integration Large Tests
           command: 'cd cpp/tests/bin && ./continuous_integration_svr'
