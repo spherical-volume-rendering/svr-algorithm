@@ -508,8 +508,6 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       ray.pointAtParameter(t_begin);  // Ray Sphere Vector.
   const double SED_from_center = rsv_begin.squared_length();
   int radial_entrance_voxel = 0;
-  const double max_radius_squared = grid.deltaRadiiSquared(0);
-
   while (SED_from_center < grid.deltaRadiiSquared(radial_entrance_voxel)) {
     ++radial_entrance_voxel;
   }
@@ -517,16 +515,15 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
 
   const std::size_t vector_index =
       radial_entrance_voxel - !ray_origin_is_outside_grid;
+  const double entry_radius_squared = grid.deltaRadiiSquared(vector_index);
   const double entry_radius =
       grid.deltaRadius() *
       static_cast<double>(grid.numRadialSections() - vector_index);
-  const double entry_radius_squared = grid.deltaRadiiSquared(vector_index);
 
   const FreeVec3 rsv = t_begin == 0.0
                            ? rsv_begin
                            : grid.sphereCenter() - ray.pointAtParameter(0.0);
-  const double rsvd =
-      rsv.dot(rsv);  // Ray Sphere Vector Dot product at time zero.
+  const double rsvd = rsv.dot(rsv);
   const double v = rsv.dot(ray.unitDirection().to_free());
   const double rsvd_minus_v_squared = rsvd - v * v;
 
@@ -583,7 +580,8 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     t_end = std::min(t_end, t_sphere_exit);
   } else {
     t = t_begin;
-    const double max_d = std::sqrt(max_radius_squared - rsvd_minus_v_squared);
+    const double max_d =
+        std::sqrt(grid.deltaRadiiSquared(0) - rsvd_minus_v_squared);
     t_end = std::min(t_end, ray.timeOfIntersectionAt(v + max_d));
   }
 
