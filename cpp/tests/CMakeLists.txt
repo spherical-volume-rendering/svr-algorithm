@@ -47,7 +47,6 @@ target_link_libraries(${CI_BINARY} gtest_main gmock_main)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
-
 enable_testing()
 
 

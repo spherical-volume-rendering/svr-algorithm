@@ -243,12 +243,13 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
 }
 
 // Similar to orthographicTraverseXSquaredRaysinYCubedVoxels, but uses a
-// seeded random direction within bounds [1.0, 3.0), and random origin
-// within bounds [0.0, 10,000.0). All rays are perpendicular to the y-axis.
-// The number of sections for each voxel type is bounded by [16, Y];
+// seeded random direction within bounds [1.0, 3.0], A randomly chosen axis is
+// then used, and the other two origin values are randomly chosen from a value
+// within bounds [-10,000.0, 10,000.0]. The number of sections for each voxel
+// type is bounded by [16, Y];
 void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
     const std::size_t X, const std::size_t Y) noexcept {
-  std::default_random_engine rd;
+  std::default_random_engine rd(time(nullptr));
   std::mt19937 mt(rd());
   EXPECT_GT(Y, 24);
   std::uniform_int_distribution<int> num_sections(16, Y);
@@ -267,17 +268,31 @@ void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
   const double t_begin = 0.0;
   const double t_end = sphere_max_radius * 100;
 
-  const double ray_origin_y = -(sphere_max_radius + 1.0);
+  std::uniform_int_distribution<int> ray_major_axis_distribution(1, 3);
+  BoundVec3 ray_origin;
+  FreeVec3 ray_direction;
+  const double chosen_axis = ray_major_axis_distribution(mt);
+  if (chosen_axis == 1) {
+    ray_origin.x() = -(sphere_max_radius + 1.0);
+  } else if (chosen_axis == 2) {
+    ray_origin.y() = -(sphere_max_radius + 1.0);
+  } else {
+    ray_origin.z() = -(sphere_max_radius + 1.0);
+  }
   for (int i = 0; i < X * X; ++i) {
-    std::uniform_real_distribution<double> dist1(0.0, 10000.0);
-    const double ray_origin_x = dist1(mt);
-    const double ray_origin_z = dist1(mt);
-    const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
+    std::uniform_real_distribution<double> dist1(-10000.0, 10000.0);
+    if (chosen_axis == 1) {
+      ray_origin.y() = dist1(mt);
+      ray_origin.z() = dist1(mt);
+    } else if (chosen_axis == 2) {
+      ray_origin.x() = dist1(mt);
+      ray_origin.z() = dist1(mt);
+    } else {
+      ray_origin.x() = dist1(mt);
+      ray_origin.y() = dist1(mt);
+    }
     std::uniform_real_distribution<double> dist2(1.0, 3.0);
-    const double ray_x_dir = dist2(mt);
-    const double ray_y_dir = dist2(mt);
-    const double ray_z_dir = dist2(mt);
-    const Ray ray(ray_origin, FreeVec3(ray_x_dir, ray_y_dir, ray_z_dir));
+    const Ray ray(ray_origin, FreeVec3(dist2(mt), dist2(mt), dist2(mt)));
     const auto actual_voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
     if (!CheckRadialVoxelsForOrthographicProjection(ray, actual_voxels, Y)) {
       const bool radial_voxels_check_passed = false;
@@ -302,7 +317,7 @@ struct TestParameters {
   std::size_t voxel_cubed_count;
 };
 
-const std::vector<TestParameters> random_test_parameters = {
+static const std::vector<TestParameters> random_test_parameters = {
     {.ray_squared_count = 32, .voxel_cubed_count = 32},
     {.ray_squared_count = 64, .voxel_cubed_count = 32},
     {.ray_squared_count = 64, .voxel_cubed_count = 64},
@@ -311,7 +326,7 @@ const std::vector<TestParameters> random_test_parameters = {
     {.ray_squared_count = 128, .voxel_cubed_count = 128},
 };
 
-const std::vector<TestParameters> orthographic_test_parameters = {
+static const std::vector<TestParameters> orthographic_test_parameters = {
     {.ray_squared_count = 64, .voxel_cubed_count = 64},
     {.ray_squared_count = 128, .voxel_cubed_count = 64},
     {.ray_squared_count = 256, .voxel_cubed_count = 64},
