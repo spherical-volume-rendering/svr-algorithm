@@ -16,7 +16,7 @@ FetchContent_MakeAvailable(
         googlebenchmark)
 
 set(BENCHMARK_BINARY benchmark_${CMAKE_PROJECT_NAME})
-set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp benchmark_SVR.cpp)
+set(BENCHMARK_SOURCE_FILES ../spherical_volume_rendering_util.cpp benchmark_svr.cpp)
 
 add_executable(${BENCHMARK_BINARY} ${BENCHMARK_SOURCE_FILES})
 
