@@ -670,6 +670,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   }
 }
 
+// LCOV_EXCL_START
 std::vector<svr::SphericalVoxel> walkSphericalVolume(
     double *ray_origin, double *ray_direction, double *min_bound,
     double *max_bound, std::size_t num_radial_voxels,
@@ -689,5 +690,6 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
           BoundVec3(sphere_center[0], sphere_center[1], sphere_center[2])),
       t_begin, t_end);
 }
+// LCOV_EXCL_STOP
 
 }  // namespace svr
