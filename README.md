@@ -1,5 +1,4 @@
 # Fast Voxel Traversal Algorithm Over Spherical Grids
-![Example ray tracing in spherical coordinates](images/polar_view_next_to_spherical_image.png)
 
 ## About
 [![spherical-volume-rendering](https://circleci.com/gh/spherical-volume-rendering/svr-algorithm.svg?style=shield)](https://app.circleci.com/pipelines/github/spherical-volume-rendering/svr-algorithm)
@@ -15,15 +14,19 @@ This project extends the [yt](https://yt-project.org/) open-source data analysis
 ## Initial Benchmarks*
 | # Rays 	| # Voxels 	| CPU Mean (ms) 	| CPU Median (ms) 	| CPU Std Dev (ms) 	|
 |--------	|----------	|---------------	|-----------------	|------------------	|
-| 128^2  	| 64^3     	| 216           	| 215             	| 2.6              	|
-| 256^2  	| 64^3     	| 865           	| 861             	| 14.0             	|
-| 512^2  	| 64^3    	| 3496          	| 3496           	  | 11.7            	|
-| 128^2  	| 128^3    	| 430           	| 429             	| 3.4              	|
-| 256^2  	| 128^3    	| 1713          	| 1713            	| 6.0             	|
-| 512^2  	| 128^3    	| 6844          	| 6828            	| 42.8            	|
+| 128^2  	| 64^3     	| 106            	| 104            	| 3.9             	|
+| 256^2  	| 64^3     	| 417           	| 417             	| 1.7             	|
+| 512^2  	| 64^3    	| 1665          	| 1664          	| 6.3            	|
+| 128^2  	| 128^3    	| 207           	| 206             	| 1.0              	|
+| 256^2  	| 128^3    	| 821           	| 820            	| 4.1             	|
+| 512^2  	| 128^3    	| 3272          	| 3274           	| 8.8            	|
 
-<sup>\*Run on (4 X 1600 MHz CPUs). </sup>
-<sup>CPU Caches: L1 Data 32 KiB (x2), L1 Instruction 32 KiB (x2), L2 Unified 256 KiB (x2), L3 Unified 3072 KiB (x1)</sup>
+<sup> *Run on (8 X 1400 MHz CPUs). </sup>
+<br />
+<sup> CPU Caches:
+<br /> 
+L1 Data 32 KiB (x4), L1 Instruction 32 KiB (x4), L2 Unified 256 KiB (x4), L3 Unified 6144 KiB (x1)</sup>
+<br />
 
 ## C++ Build Requirements
 - [CMake 3.7 or later](https://cmake.org/)

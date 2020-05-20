@@ -2,8 +2,6 @@
 
 #include "../spherical_volume_rendering_util.h"
 
-#define DEBUG 0
-
 // Benchmarking for the spherical coordinate voxel traversal algorithm.
 // Utilises the Google Benchmark library.
 //
@@ -18,7 +16,6 @@
 // For more information on Google Benchmark, see:
 // https://github.com/google/benchmark For examples of Google Benchmark, see:
 // https://github.com/google/benchmark#usage
-
 namespace {
 
 // Sends X^2 rays through a Y^3 voxel sphere with maximum radius 10e4.
@@ -60,26 +57,6 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
       const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
       const auto actual_voxels = walkSphericalVolume(
           Ray(ray_origin, ray_direction), grid, t_begin, t_end);
-#if DEBUG
-      if (actual_voxels.size() == 0) {
-        printf("\n No intersection at all.");
-      } else {
-        const std::size_t last = actual_voxels.size() - 1;
-        if (actual_voxels[0].radial != 1 || actual_voxels[last].radial != 1 ||
-            actual_voxels.size() < 2) {
-          printf("\nDid not complete entire traversal.");
-          const auto first_voxel = actual_voxels[0];
-          const auto last_voxel = actual_voxels[last];
-          printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y,
-                 ray_origin_z);
-          printf("\nEntrance Voxel: {%d, %d, %d} ... Exit Voxel: {%d, %d, %d}",
-                 first_voxel.radial, first_voxel.polar, first_voxel.azimuthal,
-                 last_voxel.radial, last_voxel.polar, last_voxel.azimuthal);
-          for (const auto v : actual_voxels)
-            printf("{%d, %d, %d} , ", v.radial, v.polar, v.azimuthal);
-        }
-      }
-#endif
       ray_origin_y =
           (j == X - 1) ? -1000.0 : ray_origin_y + ray_origin_plane_movement;
     }
@@ -126,24 +103,25 @@ static void Orthographic_512SquaredRays_128CubedVoxels(
   }
 }
 
+constexpr std::size_t NUM_ITERATIONS = 10;
 BENCHMARK(Orthographic_128SquaredRays_64CubedVoxels)
     ->Unit(benchmark::kMillisecond)
-    ->Repetitions(1);
+    ->Repetitions(NUM_ITERATIONS);
 BENCHMARK(Orthographic_256SquaredRays_64CubedVoxels)
     ->Unit(benchmark::kMillisecond)
-    ->Repetitions(1);
+    ->Repetitions(NUM_ITERATIONS);
 BENCHMARK(Orthographic_512SquaredRays_64CubedVoxels)
     ->Unit(benchmark::kMillisecond)
-    ->Repetitions(1);
+    ->Repetitions(NUM_ITERATIONS);
 BENCHMARK(Orthographic_128SquaredRays_128CubedVoxels)
     ->Unit(benchmark::kMillisecond)
-    ->Repetitions(1);
+    ->Repetitions(NUM_ITERATIONS);
 BENCHMARK(Orthographic_256SquaredRays_128CubedVoxels)
     ->Unit(benchmark::kMillisecond)
-    ->Repetitions(1);
+    ->Repetitions(NUM_ITERATIONS);
 BENCHMARK(Orthographic_512SquaredRays_128CubedVoxels)
     ->Unit(benchmark::kMillisecond)
-    ->Repetitions(1);
+    ->Repetitions(NUM_ITERATIONS);
 
 }  // namespace
 

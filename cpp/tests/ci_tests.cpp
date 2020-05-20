@@ -221,6 +221,14 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
   }
 }
 
+TEST(ContinuousIntegration, 512SquaredRaysIn32CubedVoxels) {
+orthographicTraverseXSquaredRaysinYCubedVoxels(512, 32);
+}
+
+TEST(ContinuousIntegration, 1024SquaredRaysIn32CubedVoxels) {
+orthographicTraverseXSquaredRaysinYCubedVoxels(1024, 32);
+}
+
 TEST(ContinuousIntegration, 64SquaredRaysIn64CubedVoxels) {
   orthographicTraverseXSquaredRaysinYCubedVoxels(64, 64);
 }
@@ -231,14 +239,6 @@ TEST(ContinuousIntegration, 128SquaredRaysIn64CubedVoxels) {
 
 TEST(ContinuousIntegration, 256SquaredRaysIn64CubedVoxels) {
   orthographicTraverseXSquaredRaysinYCubedVoxels(256, 64);
-}
-
-TEST(ContinuousIntegration, 512SquaredRaysIn64CubedVoxels) {
-  orthographicTraverseXSquaredRaysinYCubedVoxels(512, 64);
-}
-
-TEST(ContinuousIntegration, 1024SquaredRaysIn64CubedVoxels) {
-  orthographicTraverseXSquaredRaysinYCubedVoxels(1024, 64);
 }
 
 TEST(ContinuousIntegration, 64SquaredRaysIn128CubedVoxels) {
