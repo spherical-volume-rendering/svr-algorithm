@@ -507,7 +507,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       grid.sphereCenter() -
       ray.pointAtParameter(t_begin);  // Ray Sphere Vector.
   const double SED_from_center = rsv_begin.squared_length();
-  std::size_t radial_entrance_voxel = 0;
+  int radial_entrance_voxel = 0;
   const double max_radius_squared = grid.deltaRadiiSquared(0);
 
   while (SED_from_center < grid.deltaRadiiSquared(radial_entrance_voxel)) {
@@ -518,7 +518,8 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   const std::size_t vector_index =
       radial_entrance_voxel - !ray_origin_is_outside_grid;
   const double entry_radius =
-      (grid.numRadialSections() - vector_index) * grid.deltaRadius();
+      grid.deltaRadius() *
+      static_cast<double>(grid.numRadialSections() - vector_index);
   const double entry_radius_squared = grid.deltaRadiiSquared(vector_index);
 
   const FreeVec3 rsv = t_begin == 0.0
