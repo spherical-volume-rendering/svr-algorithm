@@ -25,8 +25,8 @@ jobs:
           name: Create Build, Binary Files
           command: 'cd cpp/tests && cmake -H. -Bbuild && cmake --build build'
       - run:
-          name: SVR Unit Testing
-          command: 'cd cpp/tests/bin && ./test_SVR'
+          name: SVR Unit Testing 5 Times.
+          command: 'cd cpp/tests/bin && ./test_SVR && ./test_SVR && ./test_SVR && ./test_SVR && ./test_SVR'
       - run:
           name: Install Curl
           command: 'apt-get update && sudo apt install -y curl'
