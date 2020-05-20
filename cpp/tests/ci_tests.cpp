@@ -325,11 +325,11 @@ const std::vector<TestParameters> orthographic_test_parameters = {
 
 TEST(ContinuousIntegration, RandomizedInputs) {
   for (const auto param : random_test_parameters) {
-    printf("   [ RUN      ] %lu^2 Rays in [16, %lu^3] Bounded Voxels\n",
+    printf("   [ RUN      ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
     randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
         param.ray_squared_count, param.voxel_cubed_count);
-    printf("   [       OK ] %lu^2 Rays in [16, %lu^3] Bounded Voxels\n",
+    printf("   [       OK ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
   }
 }
