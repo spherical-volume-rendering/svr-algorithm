@@ -94,8 +94,8 @@ bool CheckRadialVoxelsForOrthographicProjection(
 // angular voxel except for at most in one case. This case occurs
 // when traversing the line x = 0.
 bool checkAngularVoxelOrdering(const Ray& ray,
-                                const std::vector<svr::SphericalVoxel>& v,
-                                int number_of_angular_voxels) {
+                               const std::vector<svr::SphericalVoxel>& v,
+                               int number_of_angular_voxels) {
   const auto it_polar = std::adjacent_find(
       v.cbegin(), v.cend(),
       [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
@@ -209,9 +209,13 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
       const auto actual_voxels = walkSphericalVolume(
           Ray(ray_origin, ray_direction), grid, t_begin, t_end);
       if (!CheckRadialVoxelsForOrthographicProjection(ray, actual_voxels, Y)) {
+        const bool radial_voxels_check_passed = false;
+        EXPECT_TRUE(radial_voxels_check_passed);
         return;
       }
       if (!CheckAngularVoxelsForOrthographicProjection(actual_voxels, ray, Y)) {
+        const bool angular_voxels_check_passed = false;
+        EXPECT_TRUE(angular_voxels_check_passed);
         return;
       }
       ray_origin_y =
@@ -222,11 +226,11 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
 }
 
 TEST(ContinuousIntegration, 512SquaredRaysIn32CubedVoxels) {
-orthographicTraverseXSquaredRaysinYCubedVoxels(512, 32);
+  orthographicTraverseXSquaredRaysinYCubedVoxels(512, 32);
 }
 
 TEST(ContinuousIntegration, 1024SquaredRaysIn32CubedVoxels) {
-orthographicTraverseXSquaredRaysinYCubedVoxels(1024, 32);
+  orthographicTraverseXSquaredRaysinYCubedVoxels(1024, 32);
 }
 
 TEST(ContinuousIntegration, 64SquaredRaysIn64CubedVoxels) {
