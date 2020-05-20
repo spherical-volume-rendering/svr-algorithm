@@ -12,13 +12,20 @@ namespace {
 // Verifies the entrance and radial voxel is 1 for all rays, and each radial
 // voxel is within bounds (0, number_of_radial_voxels]. Also verifies
 // the number of voxels for each traversal is greater than two. Lastly,
-// verifies each radial voxel is within +-1 of the last radial voxel.
+// verifies each radial voxel's transition order. If its solely a radial hit,
+// the next radial voxel should be current+1 or current-1. If it is not, then
+// the next radial voxel is current+1, current-1, or current+0.
 bool CheckRadialVoxelsForOrthographicProjection(
     const Ray& ray, const std::vector<svr::SphericalVoxel>& actual_voxels,
     int number_of_radial_voxels) {
   const auto it = std::adjacent_find(
       actual_voxels.cbegin(), actual_voxels.cend(),
       [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
+        const bool radial_hit_only =
+            v1.polar == v2.polar && v1.azimuthal == v2.azimuthal;
+        if (radial_hit_only) {
+          return !(v1.radial - 1 == v2.radial || v1.radial + 1 == v2.radial);
+        }
         const bool within_one =
             (v1.radial == v2.radial || v1.radial - 1 == v2.radial ||
              v1.radial + 1 == v2.radial);
@@ -157,26 +164,26 @@ bool checkAngularVoxelOrdering(const Ray& ray,
 }
 
 // Verifies all polar and azimuthal voxels are within bounds
-// 0 <= X <= number_of_voxels.
+// 0 <= X <= number_of_sections.
 bool CheckAngularVoxelsForOrthographicProjection(
     const std::vector<svr::SphericalVoxel>& v, const Ray& ray,
-    int number_of_angular_voxels) {
+    int number_of_angular_sections) {
   const auto it =
       std::find_if_not(v.cbegin(), v.cend(), [&](svr::SphericalVoxel i) {
-        return 0 <= i.azimuthal && i.azimuthal < number_of_angular_voxels &&
-               0 <= i.polar && i.polar < number_of_angular_voxels;
+        return 0 <= i.azimuthal && i.azimuthal < number_of_angular_sections &&
+               0 <= i.polar && i.polar < number_of_angular_sections;
       });
   if (it != v.cend()) {
     const auto vxl = *it;
     printf(
         "\n There exists an angular voxel i such that"
-        "0 <= i <= number_of_angular_voxels does not hold.");
+        "0 <= i <= number_of_angular_sections does not hold.");
     printf("\nRay origin: {%f, %f, %f}", ray.origin().x(), ray.origin().y(),
            ray.origin().z());
     printf("\nVoxel: {%d, %d, %d}", vxl.radial, vxl.polar, vxl.azimuthal);
     return false;
   }
-  return checkAngularVoxelOrdering(ray, v, number_of_angular_voxels);
+  return checkAngularVoxelOrdering(ray, v, number_of_angular_sections);
 }
 
 void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
@@ -225,14 +232,6 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
   }
 }
 
-TEST(ContinuousIntegration, 512SquaredRaysIn32CubedVoxels) {
-  orthographicTraverseXSquaredRaysinYCubedVoxels(512, 32);
-}
-
-TEST(ContinuousIntegration, 1024SquaredRaysIn32CubedVoxels) {
-  orthographicTraverseXSquaredRaysinYCubedVoxels(1024, 32);
-}
-
 TEST(ContinuousIntegration, 64SquaredRaysIn64CubedVoxels) {
   orthographicTraverseXSquaredRaysinYCubedVoxels(64, 64);
 }
@@ -263,6 +262,14 @@ TEST(ContinuousIntegration, 64SquaredRaysIn512CubedVoxels) {
 
 TEST(ContinuousIntegration, 64SquaredRaysIn1024CubedVoxels) {
   orthographicTraverseXSquaredRaysinYCubedVoxels(64, 1024);
+}
+
+TEST(ContinuousIntegration, 512SquaredRaysIn32CubedVoxels) {
+  orthographicTraverseXSquaredRaysinYCubedVoxels(512, 32);
+}
+
+TEST(ContinuousIntegration, 1024SquaredRaysIn32CubedVoxels) {
+  orthographicTraverseXSquaredRaysinYCubedVoxels(1024, 32);
 }
 
 }  // namespace
