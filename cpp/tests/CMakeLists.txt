@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 set(CMAKE_CXX_STANDARD 11)
-project(SVR)
+project(svr)
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -40,7 +40,7 @@ add_executable(${TESTING_BINARY} ${TESTING_SOURCE_FILES})
 target_link_libraries(${TESTING_BINARY} gtest_main gmock_main)
 
 
-set(CI_BINARY ci_${CMAKE_PROJECT_NAME})
+set(CI_BINARY continuous_integration_${CMAKE_PROJECT_NAME})
 set(CI_SOURCE_FILES ../spherical_volume_rendering_util.cpp continuous_integration_tests.cpp ../floating_point_comparison_util.h)
 add_executable(${CI_BINARY} ${CI_SOURCE_FILES})
 target_link_libraries(${CI_BINARY} gtest_main gmock_main)

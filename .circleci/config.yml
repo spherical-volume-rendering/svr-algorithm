@@ -26,10 +26,10 @@ jobs:
           command: 'cd cpp/tests && cmake -H. -Bbuild && cmake --build build'
       - run:
           name: SVR Unit Testing 5 Times
-          command: 'cd cpp/tests/bin && ./test_SVR && ./test_SVR && ./test_SVR && ./test_SVR && ./test_SVR'
+          command: 'cd cpp/tests/bin && ./test_SVR && ./test_SVR && ./test_SVR && ./test_SVR && ./test_svr'
       - run:
           name: SVR Continuous Integration Large Tests
-          command: 'cd cpp/tests/bin && ./ci_SVR'
+          command: 'cd cpp/tests/bin && ./continuous_integration_svr'
       - run:
           name: Install Curl
           command: 'apt-get update && sudo apt install -y curl'

@@ -41,7 +41,7 @@ cd svr-algorithm/cpp/benchmarks && mkdir build && cd build && cmake .. && make
 ```
 3. Run the benchmarks:
 ```
-cd .. && ./bin/benchmark_SVR
+cd .. && ./bin/benchmark_svr
 ```
 
 ### C++ Example
