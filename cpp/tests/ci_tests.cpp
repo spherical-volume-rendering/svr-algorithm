@@ -9,7 +9,8 @@
 namespace {
 
 // Verifies the entrance and radial voxel is 1 for all rays. Also verifies
-// the number of voxels for each traversal is greater than two.
+// the number of voxels for each traversal is greater than two. Lastly,
+// verifies each radial voxel is within +-1 of the last radial voxel.
 void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
     const std::size_t X, const std::size_t Y) noexcept {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
@@ -38,18 +39,50 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
       const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
       const auto actual_voxels = walkSphericalVolume(
           Ray(ray_origin, ray_direction), grid, t_begin, t_end);
+      const auto it = std::adjacent_find(
+          actual_voxels.cbegin(), actual_voxels.cend(),
+          [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
+            const bool within_one =
+                (v1.radial == v2.radial ||
+                 v1.radial - 1 == v2.radial ||
+                 v1.radial + 1 == v2.radial);
+            return !within_one;
+          });
+      if (it != actual_voxels.cend()) {
+        const auto v = *it;
+        printf(
+            "\nThe current radial voxel is not within +- 1 of the next voxel.");
+        printf("Current Voxel: {%d, %d, %d}", v.radial, v.polar, v.azimuthal);
+        if (it - 1 == actual_voxels.cbegin()) {
+          printf("\n Previous Voxel: None. This is the first voxel");
+        } else {
+          const auto vb = *(it - 1);
+          printf("\nPrevious Voxel: {%d, %d, %d}", vb.radial, vb.polar,
+                 vb.azimuthal);
+        }
+        if (it + 1 == actual_voxels.cend()) {
+          printf("\n Next Voxel: None. This is the last voxel");
+        } else {
+          const auto vn = *(it + 1);
+          printf("\nNext Voxel: {%d, %d, %d}", vn.radial, vn.polar,
+                 vn.azimuthal);
+        }
+        printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y,
+               ray_origin_z);
+        return;
+      }
       if (actual_voxels.size() == 0) {
         printf("\n No intersection at all.");
-        printf("\nRay origin: {%f, %f, %f}",
-               ray_origin_x, ray_origin_y, ray_origin_z);
+        printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y,
+               ray_origin_z);
         EXPECT_FALSE(actual_voxels.size() == 0);
         return;
       }
       const std::size_t last = actual_voxels.size() - 1;
       if (actual_voxels.size() < 2) {
-        printf ("\nRay traversed less than two voxels.");
-        printf("\nRay origin: {%f, %f, %f}",
-               ray_origin_x, ray_origin_y, ray_origin_z);
+        printf("\nRay traversed less than two voxels.");
+        printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y,
+               ray_origin_z);
         EXPECT_GE(actual_voxels.size(), 2);
         return;
       }
@@ -57,8 +90,8 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
         printf("\nDid not complete entire traversal.");
         const auto first_voxel = actual_voxels[0];
         const auto last_voxel = actual_voxels[last];
-        printf("\nRay origin: {%f, %f, %f}",
-               ray_origin_x, ray_origin_y, ray_origin_z);
+        printf("\nRay origin: {%f, %f, %f}", ray_origin_x, ray_origin_y,
+               ray_origin_z);
         printf("\nEntrance Voxel: {%d, %d, %d} ... Exit Voxel: {%d, %d, %d}",
                first_voxel.radial, first_voxel.polar, first_voxel.azimuthal,
                last_voxel.radial, last_voxel.polar, last_voxel.azimuthal);
