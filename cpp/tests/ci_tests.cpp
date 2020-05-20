@@ -292,6 +292,11 @@ void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
   }
 }
 
+// Represents the parameters for the CI tests.
+// For example, if ray_squared_count = 64, then 64^2 rays will traverse.
+// Similarly, if voxel_cubed_count = 32, then the grid will be divided into
+// 32^3 voxels. The exception to this is with RandomizedInputs, which uses
+// a random number of sections within bounds [16, Y].
 struct TestParameters {
   std::size_t ray_squared_count;
   std::size_t voxel_cubed_count;
@@ -318,13 +323,13 @@ const std::vector<TestParameters> orthographic_test_parameters = {
     {.ray_squared_count = 1024, .voxel_cubed_count = 32},
 };
 
-TEST(ContinuousIntegration, RandomRayPlacement) {
+TEST(ContinuousIntegration, RandomizedInputs) {
   for (const auto param : random_test_parameters) {
-    printf("   [ RUN      ] %lu^2 Rays in [16, %lu^3] Voxels\n",
+    printf("   [ RUN      ] %lu^2 Rays in [16, %lu^3] Bounded Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
     randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
         param.ray_squared_count, param.voxel_cubed_count);
-    printf("   [       OK ] %lu^2 Rays in [16, %lu^3] Voxels\n",
+    printf("   [       OK ] %lu^2 Rays in [16, %lu^3] Bounded Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
   }
 }
