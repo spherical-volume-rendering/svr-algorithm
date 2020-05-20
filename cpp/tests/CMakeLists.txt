@@ -35,13 +35,13 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif ()
 
 set(TESTING_BINARY test_${CMAKE_PROJECT_NAME})
-set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_SVR.cpp ../floating_point_comparison_util.h)
+set(TESTING_SOURCE_FILES ../spherical_volume_rendering_util.cpp test_svr.cpp ../floating_point_comparison_util.h)
 add_executable(${TESTING_BINARY} ${TESTING_SOURCE_FILES})
 target_link_libraries(${TESTING_BINARY} gtest_main gmock_main)
 
 
 set(CI_BINARY ci_${CMAKE_PROJECT_NAME})
-set(CI_SOURCE_FILES ../spherical_volume_rendering_util.cpp ci_tests.cpp ../floating_point_comparison_util.h)
+set(CI_SOURCE_FILES ../spherical_volume_rendering_util.cpp continuous_integration_tests.cpp ../floating_point_comparison_util.h)
 add_executable(${CI_BINARY} ${CI_SOURCE_FILES})
 target_link_libraries(${CI_BINARY} gtest_main gmock_main)
 
