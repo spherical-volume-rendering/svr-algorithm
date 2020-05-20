@@ -1,18 +1,21 @@
 #include <algorithm>
 
 #include "../spherical_volume_rendering_util.h"
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-// A set of tests to be run by continuous integration. The functionality is an
-// almost exact duplicate of the benchmark testing.
+// A set of tests to be run by continuous integration. These test general
+// functionality of sending many rays through a spherical volume.
+// todo: This was written hastily and likely can be refactored to reduce
+//       time complexity and code duplication.
 namespace {
 
-// Verifies the entrance and radial voxel is 1 for all rays. Also verifies
+// Verifies the entrance and radial voxel is 1 for all rays, and each radial
+// voxel is within bounds (0, number_of_radial_voxels]. Also verifies
 // the number of voxels for each traversal is greater than two. Lastly,
 // verifies each radial voxel is within +-1 of the last radial voxel.
 bool CheckRadialVoxelsForOrthographicProjection(
-    const Ray& ray, const std::vector<svr::SphericalVoxel> actual_voxels) {
+    const Ray& ray, const std::vector<svr::SphericalVoxel>& actual_voxels,
+    int number_of_radial_voxels) {
   const auto it = std::adjacent_find(
       actual_voxels.cbegin(), actual_voxels.cend(),
       [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
@@ -70,7 +73,110 @@ bool CheckRadialVoxelsForOrthographicProjection(
     EXPECT_TRUE(actual_voxels[last].radial == 1);
     return false;
   }
+  const auto it2 = std::find_if_not(
+      actual_voxels.cbegin(), actual_voxels.cend(), [&](svr::SphericalVoxel i) {
+        return 0 < i.radial <= number_of_radial_voxels;
+      });
+  if (it2 != actual_voxels.cend()) {
+    const auto vxl = *it2;
+    printf(
+        "\n There exists a radial voxel i such that"
+        "0 < i <= number_of_radial_voxels does not hold.");
+    printf("\nRay origin: {%f, %f, %f}", ray.origin().x(), ray.origin().y(),
+           ray.origin().z());
+    printf("\nVoxel: {%d, %d, %d}", vxl.radial, vxl.polar, vxl.azimuthal);
+    return false;
+  }
   return true;
+}
+
+// It should hold that each angular voxel should be within +- 1 of the last
+// angular voxel except for at most in one case. This case occurs
+// when traversing the line x = 0.
+bool checkAngularVoxelOrdering(const Ray& ray,
+                                const std::vector<svr::SphericalVoxel>& v,
+                                int number_of_angular_voxels) {
+  const auto it_polar = std::adjacent_find(
+      v.cbegin(), v.cend(),
+      [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
+        const bool polar_within_one =
+            (v1.polar == v2.polar || v1.polar - 1 == v2.polar ||
+             v1.polar + 1 == v2.polar);
+        return !polar_within_one;
+      });
+  if (it_polar != v.cend()) {
+    const auto it2_polar = std::adjacent_find(
+        it_polar, v.cend(),
+        [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
+          const bool polar_within_one =
+              (v1.polar == v2.polar || v1.polar - 1 == v2.polar ||
+               v1.polar + 1 == v2.polar);
+          return !polar_within_one;
+        });
+    if (it2_polar != v.cend()) {
+      const auto vxl = *it2_polar;
+      printf(
+          "\n A polar voxel makes two jumps greater than +-1 voxel. This"
+          "should only occur once per ray when the ray passes the line X = 0.");
+      printf("\nRay origin: {%f, %f, %f}", ray.origin().x(), ray.origin().y(),
+             ray.origin().z());
+      printf("\nVoxel: {%d, %d, %d}", vxl.radial, vxl.polar, vxl.azimuthal);
+      return false;
+    }
+  }
+
+  const auto it_azimuthal = std::adjacent_find(
+      v.cbegin(), v.cend(),
+      [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
+        const bool azimuthal_within_one =
+            (v1.azimuthal == v2.azimuthal || v1.azimuthal - 1 == v2.azimuthal ||
+             v1.azimuthal + 1 == v2.azimuthal);
+        return !azimuthal_within_one;
+      });
+  if (it_azimuthal != v.cend()) {
+    const auto it2_azimuthal = std::adjacent_find(
+        it_polar, v.cend(),
+        [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
+          const bool azimuthal_within_one = (v1.azimuthal == v2.azimuthal ||
+                                             v1.azimuthal - 1 == v2.azimuthal ||
+                                             v1.azimuthal + 1 == v2.azimuthal);
+          return !azimuthal_within_one;
+        });
+    if (it2_azimuthal != v.cend()) {
+      const auto vxl = *it2_azimuthal;
+      printf(
+          "\n An azimuthal voxel makes two jumps greater than +-1 voxel. This"
+          "should only occur once per ray when the ray passes the line X = 0.");
+      printf("\nRay origin: {%f, %f, %f}", ray.origin().x(), ray.origin().y(),
+             ray.origin().z());
+      printf("\nVoxel: {%d, %d, %d}", vxl.radial, vxl.polar, vxl.azimuthal);
+      return false;
+    }
+  }
+  return true;
+}
+
+// Verifies all polar and azimuthal voxels are within bounds
+// 0 <= X <= number_of_voxels.
+bool CheckAngularVoxelsForOrthographicProjection(
+    const std::vector<svr::SphericalVoxel>& v, const Ray& ray,
+    int number_of_angular_voxels) {
+  const auto it =
+      std::find_if_not(v.cbegin(), v.cend(), [&](svr::SphericalVoxel i) {
+        return 0 <= i.azimuthal && i.azimuthal < number_of_angular_voxels &&
+               0 <= i.polar && i.polar < number_of_angular_voxels;
+      });
+  if (it != v.cend()) {
+    const auto vxl = *it;
+    printf(
+        "\n There exists an angular voxel i such that"
+        "0 <= i <= number_of_angular_voxels does not hold.");
+    printf("\nRay origin: {%f, %f, %f}", ray.origin().x(), ray.origin().y(),
+           ray.origin().z());
+    printf("\nVoxel: {%d, %d, %d}", vxl.radial, vxl.polar, vxl.azimuthal);
+    return false;
+  }
+  return checkAngularVoxelOrdering(ray, v, number_of_angular_voxels);
 }
 
 void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
@@ -102,8 +208,12 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
       const Ray ray(ray_origin, ray_direction);
       const auto actual_voxels = walkSphericalVolume(
           Ray(ray_origin, ray_direction), grid, t_begin, t_end);
-      if (!CheckRadialVoxelsForOrthographicProjection(ray, actual_voxels))
+      if (!CheckRadialVoxelsForOrthographicProjection(ray, actual_voxels, Y)) {
         return;
+      }
+      if (!CheckAngularVoxelsForOrthographicProjection(actual_voxels, ray, Y)) {
+        return;
+      }
       ray_origin_y =
           (j == X - 1) ? -1000.0 : ray_origin_y + ray_origin_plane_movement;
     }
@@ -117,6 +227,18 @@ TEST(ContinuousIntegration, 64SquaredRaysIn64CubedVoxels) {
 
 TEST(ContinuousIntegration, 128SquaredRaysIn64CubedVoxels) {
   orthographicTraverseXSquaredRaysinYCubedVoxels(128, 64);
+}
+
+TEST(ContinuousIntegration, 256SquaredRaysIn64CubedVoxels) {
+  orthographicTraverseXSquaredRaysinYCubedVoxels(256, 64);
+}
+
+TEST(ContinuousIntegration, 512SquaredRaysIn64CubedVoxels) {
+  orthographicTraverseXSquaredRaysinYCubedVoxels(512, 64);
+}
+
+TEST(ContinuousIntegration, 1024SquaredRaysIn64CubedVoxels) {
+  orthographicTraverseXSquaredRaysinYCubedVoxels(1024, 64);
 }
 
 TEST(ContinuousIntegration, 64SquaredRaysIn128CubedVoxels) {
