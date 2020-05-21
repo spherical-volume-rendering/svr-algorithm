@@ -107,7 +107,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsWithinSphere) {
                     expected_theta_voxels, expected_phi_voxels);
 }
 
-TEST(DISABLED_SphericalCoordinateTraversal, RayEndsWithinSphere) {
+TEST(SphericalCoordinateTraversal, RayEndsWithinSphere) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
@@ -121,7 +121,7 @@ TEST(DISABLED_SphericalCoordinateTraversal, RayEndsWithinSphere) {
   const BoundVec3 ray_origin(13.0, -15.0, 16.0);
   const UnitVec3 ray_direction(-1.5, 1.2, -1.5);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.5);
   const std::vector<int> expected_radial_voxels = {1, 2, 2, 3};
   const std::vector<int> expected_theta_voxels = {3, 3, 2, 2};
   const std::vector<int> expected_phi_voxels = {0, 0, 1, 1};
@@ -129,7 +129,7 @@ TEST(DISABLED_SphericalCoordinateTraversal, RayEndsWithinSphere) {
                     expected_theta_voxels, expected_phi_voxels);
 }
 
-TEST(DISABLED_SphericalCoordinateTraversal, RayBeginsAndEndsWithinSphere) {
+TEST(SphericalCoordinateTraversal, RayBeginsAndEndsWithinSphere) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
@@ -143,7 +143,7 @@ TEST(DISABLED_SphericalCoordinateTraversal, RayBeginsAndEndsWithinSphere) {
   const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
   const UnitVec3 ray_direction(1.0, -1.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.4);
   const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0};
@@ -151,7 +151,7 @@ TEST(DISABLED_SphericalCoordinateTraversal, RayBeginsAndEndsWithinSphere) {
                     expected_theta_voxels, expected_phi_voxels);
 }
 
-TEST(DISABLED_SphericalCoordinateTraversal,
+TEST(SphericalCoordinateTraversal,
      RayBeginsAndEndsWithinSphereNotCenteredAtOrigin) {
   const BoundVec3 sphere_center(2.0, 3.0, 2.0);
   const double sphere_max_radius = 10.0;
@@ -166,7 +166,7 @@ TEST(DISABLED_SphericalCoordinateTraversal,
   const BoundVec3 ray_origin(-1.0, 7.0, 7.0);
   const UnitVec3 ray_direction(1.0, -1.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.4);
   const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0};
@@ -585,7 +585,7 @@ TEST(SphericalCoordinateTraversal, LargeNumberOfAzimuthalSections) {
                     expected_theta_voxels, expected_phi_voxels);
 }
 
-TEST(DISABLED_SphericalCoordinateTraversal,
+TEST(SphericalCoordinateTraversal,
      RayBeginsInOutermostRadiusAndEndsWithinSphere) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
@@ -600,7 +600,7 @@ TEST(DISABLED_SphericalCoordinateTraversal,
   const BoundVec3 ray_origin(-4.0, -4.0, -6.0);
   const UnitVec3 ray_direction(1.3, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.5);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 3, 3, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 3, 3, 3};

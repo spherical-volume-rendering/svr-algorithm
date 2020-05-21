@@ -490,7 +490,6 @@ inline void initializeVoxelBoundarySegments(
 std::vector<svr::SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid,
     double t_end) noexcept {
-  t_end *= grid.sphereMaxRadius() * 2.0 + 10e6;
   const FreeVec3 rsv =
       grid.sphereCenter() - ray.pointAtParameter(0.0);  // Ray Sphere Vector.
   const double SED_from_center = rsv.squared_length();
@@ -519,6 +518,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     return {};
   }
   const double t_ray_entrance = ray.timeOfIntersectionAt(v - d);
+  t_end = (t_end * grid.sphereMaxRadius() * 2.0) + t_ray_entrance;
 
   int current_radial_voxel = radial_entrance_voxel + ray_origin_is_outside_grid;
 
