@@ -15,7 +15,7 @@ cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
                                                double *min_bound, double *max_bound,
                                                size_t num_radial_voxels, size_t num_polar_voxels,
                                                size_t num_azimuthal_voxels, double *sphere_center,
-                                               double t_begin, double t_end)
+                                               double t_end)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -25,21 +25,19 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] min_bound,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] max_bound,
                           int num_radial_voxels, int num_polar_voxels, int num_azimuthal_voxels,
-                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center,
-                          np.float64_t t_begin, np.float64_t t_end):
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center, np.float64_t t_end):
     '''
     Spherical Coordinate Voxel Traversal Algorithm
     Cythonized version of the Spherical Coordinate Voxel Traversal Algorithm.
     Arguments:
            ray_origin: The 3-dimensional (x,y,z) origin of the ray.
-           ray_direction: The 3-dimensional (x,y,z) direction of the ray.
+           ray_direction: The 3-dimensional (x,y,z) unit direction of the ray.
            min_bound: The minimum boundary of the sectored sphere in the form (radial, theta, phi).
            max_bound: The maximum boundary of the sectored sphere in the form (radial, theta, phi).
            num_radial_voxels: The number of radial voxels.
            num_polar_voxels: The number of polar voxels.
            num_azimuthal_voxels: The number of azimuthal voxels.
            sphere_center: The 3-dimensional (x,y,z) center of the sphere.
-           t_begin: The beginning time of the ray.
            t_end: The end time of the ray.
     Returns:
            A numpy array of the spherical voxel coordinates.
