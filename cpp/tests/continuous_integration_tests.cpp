@@ -198,8 +198,6 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
   const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
-  const double t_end = 1.0;
-
   const UnitVec3 ray_direction(0.0, 0.0, 1.0);
   double ray_origin_x = -1000.0;
   double ray_origin_y = -1000.0;
@@ -210,7 +208,7 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
     for (std::size_t j = 0; j < X; ++j) {
       const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
       const Ray ray(ray_origin, ray_direction);
-      const auto actual_voxels = walkSphericalVolume(ray, grid, t_end);
+      const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
       ASSERT_TRUE(checkVoxelBounds(ray, actual_voxels, Y, Y, Y) &&
                   checkRadialVoxelOrdering(ray, actual_voxels) &&
                   checkAngularVoxelOrdering(ray, actual_voxels));
@@ -244,7 +242,6 @@ void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
   const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
-  const double t_end = 1.0;
   std::uniform_int_distribution<int> ray_major_axis_distribution(1, 3);
   BoundVec3 ray_origin;
   const double chosen_axis = ray_major_axis_distribution(mt);
@@ -269,7 +266,7 @@ void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
     }
     std::uniform_real_distribution<double> dist2(1.0, 3.0);
     const Ray ray(ray_origin, UnitVec3(dist2(mt), dist2(mt), dist2(mt)));
-    const auto actual_voxels = walkSphericalVolume(ray, grid, t_end);
+    const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
     ASSERT_TRUE(checkVoxelBounds(ray, actual_voxels, num_radial_sections,
                                  num_polar_sections, num_azimuthal_sections) &&
                 checkRadialVoxelOrdering(ray, actual_voxels) &&
