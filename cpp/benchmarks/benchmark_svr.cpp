@@ -43,10 +43,7 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
   const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
-  const double t_begin = 0.0;
-  const double t_end = sphere_max_radius * 3;
-
-  const FreeVec3 ray_direction(0.0, 0.0, 1.0);
+  const UnitVec3 ray_direction(0.0, 0.0, 1.0);
   double ray_origin_x = -1000.0;
   double ray_origin_y = -1000.0;
   const double ray_origin_z = -(sphere_max_radius + 1.0);
@@ -56,7 +53,7 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
     for (std::size_t j = 0; j < X; ++j) {
       const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
       const auto actual_voxels = walkSphericalVolume(
-          Ray(ray_origin, ray_direction), grid, t_begin, t_end);
+          Ray(ray_origin, ray_direction), grid, /*t_end=*/1.0);
       ray_origin_y =
           (j == X - 1) ? -1000.0 : ray_origin_y + ray_origin_plane_movement;
     }
