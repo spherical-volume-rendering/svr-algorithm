@@ -50,7 +50,8 @@ bool checkVoxelBounds(const Ray& ray,
                       int number_of_radial_voxels, int number_of_polar_sections,
                       int number_of_azimuthal_sections) {
   const auto it2 = std::find_if_not(
-      actual_voxels.cbegin(), actual_voxels.cend(), [&](svr::SphericalVoxel i) {
+      actual_voxels.cbegin(), actual_voxels.cend(),
+      [&](const svr::SphericalVoxel& i) {
         return 0 < i.radial && i.radial <= number_of_radial_voxels &&
                0 <= i.azimuthal && i.azimuthal < number_of_azimuthal_sections &&
                0 <= i.polar && i.polar < number_of_polar_sections;
