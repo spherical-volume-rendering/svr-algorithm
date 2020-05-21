@@ -57,8 +57,8 @@ struct RadialHitMetadata {
   }
 
  private:
-  // Determine whether the current voxel traversal was a ' radial step
-  // transition'. This is necessary to determine when the radial steps should go
+  // Determine whether the current voxel traversal was a 'radial step
+  // transition.' This is necessary to determine when the radial steps should go
   // from negative to positive or vice-versa, since the radial voxels go
   // from 1..N..1, where N is the number of radial sections.
   bool transition_flag_ = false;

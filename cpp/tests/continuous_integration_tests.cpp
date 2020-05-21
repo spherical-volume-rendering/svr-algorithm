@@ -98,7 +98,7 @@ bool CheckRadialVoxelsForOrthographicProjection(
   }
   const auto it2 = std::find_if_not(
       actual_voxels.cbegin(), actual_voxels.cend(), [&](svr::SphericalVoxel i) {
-        return 0 < i.radial <= number_of_radial_voxels;
+        return 0 < i.radial && i.radial <= number_of_radial_voxels;
       });
   if (it2 != actual_voxels.cend()) {
     printRayData(ray);
@@ -116,23 +116,18 @@ bool CheckRadialVoxelsForOrthographicProjection(
 // case occurs when traversing the line x = 0.
 bool checkOrthographicProjectionAngularVoxelOrdering(
     const Ray& ray, const std::vector<svr::SphericalVoxel>& v) {
-  const auto it_polar = std::adjacent_find(
-      v.cbegin(), v.cend(),
-      [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
-        const bool polar_within_one =
-            (v1.polar == v2.polar || v1.polar - 1 == v2.polar ||
-             v1.polar + 1 == v2.polar);
-        return !polar_within_one;
-      });
+  const auto polar_not_within_one = [](const svr::SphericalVoxel& v1,
+                                       const svr::SphericalVoxel& v2) {
+    const bool polar_within_one =
+        (v1.polar == v2.polar || v1.polar - 1 == v2.polar ||
+         v1.polar + 1 == v2.polar);
+    return !polar_within_one;
+  };
+  const auto it_polar =
+      std::adjacent_find(v.cbegin(), v.cend(), polar_not_within_one);
   if (it_polar != v.cend()) {
-    const auto it2_polar = std::adjacent_find(
-        it_polar + 1, v.cend(),
-        [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
-          const bool polar_within_one =
-              (v1.polar == v2.polar || v1.polar - 1 == v2.polar ||
-               v1.polar + 1 == v2.polar);
-          return !polar_within_one;
-        });
+    const auto it2_polar =
+        std::adjacent_find(it_polar + 1, v.cend(), polar_not_within_one);
     if (it2_polar != v.cend()) {
       printRayData(ray);
       printVoxelGroupingInformation(
@@ -144,23 +139,18 @@ bool checkOrthographicProjectionAngularVoxelOrdering(
       return false;
     }
   }
-  const auto it_azimuthal = std::adjacent_find(
-      v.cbegin(), v.cend(),
-      [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
-        const bool azimuthal_within_one =
-            (v1.azimuthal == v2.azimuthal || v1.azimuthal - 1 == v2.azimuthal ||
-             v1.azimuthal + 1 == v2.azimuthal);
-        return !azimuthal_within_one;
-      });
+  const auto azimuthal_not_within_one = [](const svr::SphericalVoxel& v1,
+                                           const svr::SphericalVoxel& v2) {
+    const bool azimuthal_within_one =
+        (v1.azimuthal == v2.azimuthal || v1.azimuthal - 1 == v2.azimuthal ||
+         v1.azimuthal + 1 == v2.azimuthal);
+    return !azimuthal_within_one;
+  };
+  const auto it_azimuthal =
+      std::adjacent_find(v.cbegin(), v.cend(), azimuthal_not_within_one);
   if (it_azimuthal != v.cend()) {
-    const auto it2_azimuthal = std::adjacent_find(
-        it_azimuthal + 1, v.cend(),
-        [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
-          const bool azimuthal_within_one = (v1.azimuthal == v2.azimuthal ||
-                                             v1.azimuthal - 1 == v2.azimuthal ||
-                                             v1.azimuthal + 1 == v2.azimuthal);
-          return !azimuthal_within_one;
-        });
+    const auto it2_azimuthal = std::adjacent_find(it_azimuthal + 1, v.cend(),
+                                                  azimuthal_not_within_one);
     if (it2_azimuthal != v.cend()) {
       printRayData(ray);
       printVoxelGroupingInformation(
