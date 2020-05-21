@@ -518,13 +518,12 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     return {};
   }
   const double d = std::sqrt(entry_radius_squared - rsvd_minus_v_squared);
-
-  const double t_sphere_entrance = ray.timeOfIntersectionAt(v - d);
   const double t_sphere_exit = ray.timeOfIntersectionAt(v + d);
-
-  if (t_sphere_entrance < t_begin && t_sphere_exit < t_begin) {
+  if (t_sphere_exit < t_begin) {
     return {};
   }
+  const double t_sphere_entrance = ray.timeOfIntersectionAt(v - d);
+
   int current_radial_voxel = radial_entrance_voxel + ray_origin_is_outside_grid;
 
   std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
