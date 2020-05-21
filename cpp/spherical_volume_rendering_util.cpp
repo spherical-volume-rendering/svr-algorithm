@@ -117,21 +117,6 @@ struct RaySegment {
   FreeVec3 ray_segment_;
 };
 
-// Maintains a count until BinaryPredicate p is met for two consecutive
-// elements.
-template <class ForwardIt, class BinaryPredicate>
-inline std::size_t index_adjacent_find_until(ForwardIt first, ForwardIt last,
-                                             BinaryPredicate p) noexcept {
-  std::size_t count = 0;
-  ForwardIt next = first;
-  ++next;
-  for (; next != last; ++next, ++first) {
-    if (p(*first, *next)) return count;
-    count++;
-  }
-  return count;
-}
-
 // A point will lie between two polar voxel boundaries iff the angle between it
 // and the polar boundary intersection points along the circle of max radius is
 // obtuse. Equality represents the case when the point lies on an polar
@@ -141,20 +126,22 @@ inline std::size_t index_adjacent_find_until(ForwardIt first, ForwardIt last,
 inline int calculateAngularVoxelIDFromPoints(
     const std::vector<LineSegment> &angular_max, const double p1,
     double p2) noexcept {
-  return index_adjacent_find_until(
-      angular_max.cbegin(), angular_max.cend(),
-      [p1, p2](const LineSegment &LS1, const LineSegment &LS2) -> bool {
-        const double X_diff = LS1.P1 - LS2.P1;
-        const double Y_diff = LS1.P2 - LS2.P2;
-        const double X_p1_diff = LS1.P1 - p1;
-        const double X_p2_diff = LS1.P2 - p2;
-        const double Y_p1_diff = LS2.P1 - p1;
-        const double Y_p2_diff = LS2.P2 - p2;
-        const double d1d2 = (X_p1_diff * X_p1_diff) + (X_p2_diff * X_p2_diff) +
-                            (Y_p1_diff * Y_p1_diff) + (Y_p2_diff * Y_p2_diff);
-        const double d3 = (X_diff * X_diff) + (Y_diff * Y_diff);
-        return d1d2 < d3 || svr::isEqual(d1d2, d3);
-      });
+  std::size_t i = 0;
+  for (std::size_t j = 1; j < angular_max.size(); ++i, ++j) {
+    const double X_diff = angular_max[i].P1 - angular_max[j].P1;
+    const double Y_diff = angular_max[i].P2 - angular_max[j].P2;
+    const double X_p1_diff = angular_max[i].P1 - p1;
+    const double X_p2_diff = angular_max[i].P2 - p2;
+    const double Y_p1_diff = angular_max[j].P1 - p1;
+    const double Y_p2_diff = angular_max[j].P2 - p2;
+    const double d1d2 = (X_p1_diff * X_p1_diff) + (X_p2_diff * X_p2_diff) +
+                        (Y_p1_diff * Y_p1_diff) + (Y_p2_diff * Y_p2_diff);
+    const double d3 = (X_diff * X_diff) + (Y_diff * Y_diff);
+    if (d1d2 < d3 || svr::isEqual(d1d2, d3)) {
+      return i;
+    }
+  }
+  return i;
 }
 
 // Initializes an angular voxel ID. For polar initializations=, *_2 represents
@@ -213,7 +200,7 @@ inline HitParameters radialHit(const Ray &ray,
     const double t_entrance = ray.timeOfIntersectionAt(v - d_a);
     const double t_exit = ray.timeOfIntersectionAt(v + d_a);
 
-    const double t_entrance_gt_t = t_entrance > t;
+    const bool t_entrance_gt_t = t_entrance > t;
     if (t_entrance_gt_t && t_entrance == t_exit) {
       // Tangential hit.
       rh_metadata.isRadialStepTransition(true);
