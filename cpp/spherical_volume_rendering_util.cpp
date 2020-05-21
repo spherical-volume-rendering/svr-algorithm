@@ -490,10 +490,10 @@ inline void initializeVoxelBoundarySegments(
 std::vector<svr::SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid, double t_begin,
     double t_end) noexcept {
-  const FreeVec3 rsv_begin =
+  const FreeVec3 rsv =
       grid.sphereCenter() -
-      ray.pointAtParameter(t_begin);  // Ray Sphere Vector.
-  const double SED_from_center = rsv_begin.squared_length();
+      ray.pointAtParameter(0.0);  // Ray Sphere Vector.
+  const double SED_from_center = rsv.squared_length();
   int radial_entrance_voxel = 0;
   while (SED_from_center < grid.deltaRadiiSquared(radial_entrance_voxel)) {
     ++radial_entrance_voxel;
@@ -506,10 +506,6 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   const double entry_radius =
       grid.deltaRadius() *
       static_cast<double>(grid.numRadialSections() - vector_index);
-
-  const FreeVec3 rsv = t_begin == 0.0
-                           ? rsv_begin
-                           : grid.sphereCenter() - ray.pointAtParameter(0.0);
   const double rsvd = rsv.dot(rsv);
   const double v = rsv.dot(ray.unitDirection().to_free());
   const double rsvd_minus_v_squared = rsvd - v * v;
@@ -519,7 +515,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   }
   const double d = std::sqrt(entry_radius_squared - rsvd_minus_v_squared);
   const double t_ray_exit = ray.timeOfIntersectionAt(v + d);
-  if (t_ray_exit < t_begin) {
+  if (t_ray_exit < 0.0) {
     return {};
   }
   const double t_ray_entrance = ray.timeOfIntersectionAt(v - d);
@@ -535,8 +531,8 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       ray_origin_is_outside_grid
           ? grid.sphereCenter() - ray.pointAtParameter(t_ray_entrance)
           : SED_from_center == 0.0
-                ? grid.sphereCenter() - ray.pointAtParameter(t_begin + 0.1)
-                : rsv_begin;
+                ? grid.sphereCenter() - ray.pointAtParameter(0.1)
+                : rsv;
 
   int current_polar_voxel = initializeAngularVoxelID(
       grid, grid.numPolarSections(), ray_sphere, P_polar, ray_sphere.y(),
@@ -560,12 +556,11 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   voxels.push_back({.radial = current_radial_voxel,
                     .polar = current_polar_voxel,
                     .azimuthal = current_azimuthal_voxel});
-  double t;
+  double t = 0.0;
   if (ray_origin_is_outside_grid) {
     t = t_ray_entrance;
     t_end = std::min(t_end, t_ray_exit);
   } else {
-    t = t_begin;
     const double max_d =
         std::sqrt(grid.deltaRadiiSquared(0) - rsvd_minus_v_squared);
     t_end = std::min(t_end, ray.timeOfIntersectionAt(v + max_d));
