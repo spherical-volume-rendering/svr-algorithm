@@ -14,7 +14,7 @@ void printRayData(const Ray& ray) {
          ray.direction().y(), ray.direction().z());
 }
 
-void printVoxelInformation(const svr::SphericalVoxel v,
+void printVoxelInformation(const svr::SphericalVoxel& v,
                            const std::string& info = "") {
   if (info.empty()) {
     printf("{%d, %d, %d} ", v.radial, v.polar, v.azimuthal);
