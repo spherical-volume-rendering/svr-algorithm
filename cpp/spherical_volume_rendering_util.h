@@ -19,8 +19,9 @@ struct SphericalVoxel {
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the
 // ray with unit direction over the spherical voxel grid provided. Returns a
 // vector of the spherical coordinate voxels traversed. max_t is the unitized
-// time for which the ray may travel. It is used in a linear function and will
-// be multiplied by the sphere's diameter to determine travel duration. Its
+// time for which the ray may travel. It is used in the following linear
+// function: ray_travel_duration = time_to_entrance + sphere.diameter() * max_t
+// If the ray origin is within the sphere, then time_to_entrance is 0. Its
 // expected values are within bounds [0.0, 1.0]. For example, if max_t <= 0.0,
 // then no voxels will be traversed. If max_t == 1.0, then the entire sphere
 // will be traversed.
