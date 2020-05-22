@@ -25,7 +25,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] min_bound,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] max_bound,
                           int num_radial_voxels, int num_polar_voxels, int num_azimuthal_voxels,
-                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center, np.float64_t t_end):
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center, np.float64_t t_end = 1.0):
     '''
     Spherical Coordinate Voxel Traversal Algorithm
     Cythonized version of the Spherical Coordinate Voxel Traversal Algorithm.
@@ -38,7 +38,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
            num_polar_voxels: The number of polar voxels.
            num_azimuthal_voxels: The number of azimuthal voxels.
            sphere_center: The 3-dimensional (x,y,z) center of the sphere.
-           t_end: The end time of the ray.
+           t_end: The unitized end time of the ray. Defaulted to the maximum time 1.0
     Returns:
            A numpy array of the spherical voxel coordinates.
            The voxel coordinates are as follows:

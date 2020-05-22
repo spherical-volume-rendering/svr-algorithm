@@ -553,8 +553,9 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
                     .polar = current_polar_voxel,
                     .azimuthal = current_azimuthal_voxel});
 
-  const double unitized_ray_time =
-      t_end * grid.sphereMaxRadius() * 2.0 + t_ray_entrance;
+  double t = t_ray_entrance * ray_origin_is_outside_grid;
+  const double unitized_ray_time = t_end * grid.sphereMaxRadius() * 2.0 +
+                                   t_ray_entrance * ray_origin_is_outside_grid;
   t_end = ray_origin_is_outside_grid ? std::min(t_ray_exit, unitized_ray_time)
                                      : unitized_ray_time;
 
@@ -567,7 +568,6 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   RadialHitMetadata rh_metadata;
   rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
   RaySegment ray_segment(t_end, ray);
-  double t = ray_origin_is_outside_grid ? t_ray_entrance : 0.0;
   while (true) {
     const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
                                   v, rsvd_minus_v_squared, t, t_end);

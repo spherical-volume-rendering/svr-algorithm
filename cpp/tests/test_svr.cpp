@@ -600,7 +600,7 @@ TEST(SphericalCoordinateTraversal,
   const BoundVec3 ray_origin(-4.0, -4.0, -6.0);
   const UnitVec3 ray_direction(1.3, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.5);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.4);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 3, 3, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 3, 3, 3};
