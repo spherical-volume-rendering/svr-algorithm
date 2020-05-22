@@ -20,6 +20,7 @@ struct SphericalVoxel {
 // ray over the spherical voxel grid provided. t_end is the unitized time at
 // which the ray traversal ends. Returns a vector of the spherical coordinate
 // voxels traversed.
+// todo: Explain t_end.
 std::vector<SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid, double t_end) noexcept;
 

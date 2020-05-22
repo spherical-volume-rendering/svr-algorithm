@@ -518,8 +518,6 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     return {};
   }
   const double t_ray_entrance = ray.timeOfIntersectionAt(v - d);
-  t_end = (t_end * grid.sphereMaxRadius() * 2.0) + t_ray_entrance;
-
   int current_radial_voxel = radial_entrance_voxel + ray_origin_is_outside_grid;
 
   std::vector<svr::LineSegment> P_polar(grid.numPolarSections() + 1);
@@ -530,9 +528,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   const FreeVec3 ray_sphere =
       ray_origin_is_outside_grid
           ? grid.sphereCenter() - ray.pointAtParameter(t_ray_entrance)
-          : SED_from_center == 0.0
-                ? grid.sphereCenter() - ray.pointAtParameter(0.1)
-                : rsv;
+          : SED_from_center == 0.0 ? rsv - ray.direction().to_free() : rsv;
 
   int current_polar_voxel = initializeAngularVoxelID(
       grid, grid.numPolarSections(), ray_sphere, P_polar, ray_sphere.y(),
@@ -556,15 +552,11 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   voxels.push_back({.radial = current_radial_voxel,
                     .polar = current_polar_voxel,
                     .azimuthal = current_azimuthal_voxel});
-  double t = 0.0;
-  if (ray_origin_is_outside_grid) {
-    t = t_ray_entrance;
-    t_end = std::min(t_end, t_ray_exit);
-  } else {
-    const double max_d =
-        std::sqrt(grid.deltaRadiiSquared(0) - rsvd_minus_v_squared);
-    t_end = std::min(t_end, ray.timeOfIntersectionAt(v + max_d));
-  }
+
+  const double unitized_ray_time =
+      t_end * grid.sphereMaxRadius() * 2.0 + t_ray_entrance;
+  t_end = ray_origin_is_outside_grid ? std::min(t_ray_exit, unitized_ray_time)
+                                     : unitized_ray_time;
 
   // Initialize the time in case of collinear min or collinear max for angular
   // plane hits. In the case where the hit is not collinear, a time of 0.0 is
@@ -575,18 +567,18 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   RadialHitMetadata rh_metadata;
   rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
   RaySegment ray_segment(t_end, ray);
-
+  double t = ray_origin_is_outside_grid ? t_ray_entrance : 0.0;
   while (true) {
     const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
                                   v, rsvd_minus_v_squared, t, t_end);
-    if (current_radial_voxel + radial.tStep == 0) {
-      return voxels;
-    }
     ray_segment.updateAtTime(t, ray);
     const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
                                 current_polar_voxel, t, t_end);
     const auto azimuthal = azimuthalHit(ray, grid, ray_segment, collinear_times,
                                         current_azimuthal_voxel, t, t_end);
+    if (current_radial_voxel + radial.tStep == 0) {
+      return voxels;
+    }
     const auto voxel_intersection =
         minimumIntersection(radial, polar, azimuthal);
     switch (voxel_intersection) {
