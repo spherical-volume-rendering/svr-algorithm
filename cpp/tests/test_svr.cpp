@@ -196,6 +196,116 @@ TEST(SphericalCoordinateTraversal, SphereCenteredAtOrigin) {
                     expected_theta_voxels, expected_phi_voxels);
 }
 
+TEST(SphericalCoordinateTraversal, RayOutsideSphereAndMaxTGreaterThanOne) {
+  const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+  const double sphere_max_radius = 10.0;
+  const std::size_t num_radial_sections = 4;
+  const std::size_t num_polar_sections = 4;
+  const std::size_t num_azimuthal_sections = 4;
+  const svr::SphereBound max_bound = {
+      .radial = sphere_max_radius, .polar = TAU, .azimuthal = TAU};
+  const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
+                                     num_polar_sections, num_azimuthal_sections,
+                                     sphere_center);
+  const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
+  const UnitVec3 ray_direction(1.0, 1.0, 1.0);
+  const Ray ray(ray_origin, ray_direction);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/10.0);
+  const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
+  const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
+  const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
+  verifyEqualVoxels(actual_voxels, expected_radial_voxels,
+                    expected_theta_voxels, expected_phi_voxels);
+}
+
+TEST(SphericalCoordinateTraversal, RayInsideSphereAndMaxTGreaterThanOne) {
+  const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+  const double sphere_max_radius = 10.0;
+  const std::size_t num_radial_sections = 4;
+  const std::size_t num_polar_sections = 4;
+  const std::size_t num_azimuthal_sections = 4;
+  const svr::SphereBound max_bound = {
+      .radial = sphere_max_radius, .polar = TAU, .azimuthal = TAU};
+  const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
+                                     num_polar_sections, num_azimuthal_sections,
+                                     sphere_center);
+  const BoundVec3 ray_origin(0.0, 0.0, 0.0);
+  const UnitVec3 ray_direction(1.0, 1.0, 1.0);
+  const Ray ray(ray_origin, ray_direction);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/10.0);
+  const std::vector<int> expected_radial_voxels = {4, 3, 2, 1};
+  const std::vector<int> expected_theta_voxels = {0, 0, 0, 0};
+  const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
+  verifyEqualVoxels(actual_voxels, expected_radial_voxels,
+                    expected_theta_voxels, expected_phi_voxels);
+}
+
+TEST(SphericalCoordinateTraversal, MaxTHalvedAndRayOutsideSphere) {
+  const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+  const double sphere_max_radius = 10.0;
+  const std::size_t num_radial_sections = 4;
+  const std::size_t num_polar_sections = 4;
+  const std::size_t num_azimuthal_sections = 4;
+  const svr::SphereBound max_bound = {
+      .radial = sphere_max_radius, .polar = TAU, .azimuthal = TAU};
+  const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
+                                     num_polar_sections, num_azimuthal_sections,
+                                     sphere_center);
+  const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
+  const UnitVec3 ray_direction(1.0, 1.0, 1.0);
+  const Ray ray(ray_origin, ray_direction);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/0.5);
+  const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4};
+  const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0};
+  const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0};
+  verifyEqualVoxels(actual_voxels, expected_radial_voxels,
+                    expected_theta_voxels, expected_phi_voxels);
+}
+
+TEST(SphericalCoordinateTraversal, MaxTHalvedAndRayInsideSphere) {
+  const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+  const double sphere_max_radius = 10.0;
+  const std::size_t num_radial_sections = 4;
+  const std::size_t num_polar_sections = 4;
+  const std::size_t num_azimuthal_sections = 4;
+  const svr::SphereBound max_bound = {
+      .radial = sphere_max_radius, .polar = TAU, .azimuthal = TAU};
+  const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
+                                     num_polar_sections, num_azimuthal_sections,
+                                     sphere_center);
+  const BoundVec3 ray_origin(0.0, 0.0, 0.0);
+  const UnitVec3 ray_direction(1.0, 1.0, 1.0);
+  const Ray ray(ray_origin, ray_direction);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/0.5);
+  const std::vector<int> expected_radial_voxels = {4, 3, 2, 1};
+  const std::vector<int> expected_theta_voxels = {0, 0, 0, 0};
+  const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
+  verifyEqualVoxels(actual_voxels, expected_radial_voxels,
+                    expected_theta_voxels, expected_phi_voxels);
+}
+
+TEST(SphericalCoordinateTraversal, MaxTAtOrLessThanZero) {
+  const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+  const double sphere_max_radius = 10.0;
+  const std::size_t num_radial_sections = 4;
+  const std::size_t num_polar_sections = 4;
+  const std::size_t num_azimuthal_sections = 4;
+  const svr::SphereBound max_bound = {
+      .radial = sphere_max_radius, .polar = TAU, .azimuthal = TAU};
+  const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
+                                     num_polar_sections, num_azimuthal_sections,
+                                     sphere_center);
+  const BoundVec3 ray_origin(0.0, 0.0, 0.0);
+  const UnitVec3 ray_direction(1.0, 1.0, 1.0);
+  const Ray ray(ray_origin, ray_direction);
+  const auto v1 = walkSphericalVolume(ray, grid, /*max_t=*/0.0);
+  const auto v2 = walkSphericalVolume(ray, grid, /*max_t=*/-0.1);
+  EXPECT_EQ(0, v1.size());
+  EXPECT_EQ(0, v2.size());
+}
+
+
+
 TEST(SphericalCoordinateTraversal, SphereNotCenteredAtOrigin) {
   const BoundVec3 sphere_center(2.0, 2.0, 2.0);
   const double sphere_max_radius = 10.0;
