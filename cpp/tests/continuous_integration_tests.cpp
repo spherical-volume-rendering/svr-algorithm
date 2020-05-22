@@ -228,8 +228,8 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
 // then used, and the other two origin values are randomly chosen from a value
 // within bounds [-10,000.0, 10,000.0]. The number of sections for each voxel
 // type is bounded by [16, Y];
-void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
-    const std::size_t X, const std::size_t Y) noexcept {
+void inline randomRayPlacementOutsideSphere(const std::size_t X,
+                                            const std::size_t Y) noexcept {
   std::default_random_engine rd(time(nullptr));
   std::mt19937 mt(rd());
   EXPECT_GT(Y, 24);
@@ -279,7 +279,7 @@ void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
   }
 }
 
-// Similar to randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels, but
+// Similar to randomRayPlacementOutsideSphere, but
 // the ray origin is within the sphere. The ray origin is placed within bounds
 // [10,000.0, 10,000.0) and the ray direction is within bounds [10.0, 10.0).
 void inline randomRayPlacementWithinSphere(const std::size_t X,
@@ -348,7 +348,7 @@ const std::vector<TestParameters> orthographic_test_parameters = {
     {.ray_squared_count = 1024, .voxel_cubed_count = 32},
 };
 
-TEST(ContinuousIntegration, RayWithinSphereRandomizedInputs) {
+TEST(ContinuousIntegration, RayInsideSphereRandomizedInputs) {
   for (const auto param : random_test_parameters) {
     printf("   [ RUN      ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
@@ -359,12 +359,12 @@ TEST(ContinuousIntegration, RayWithinSphereRandomizedInputs) {
   }
 }
 
-TEST(ContinuousIntegration, RandomizedInputs) {
+TEST(ContinuousIntegration, RayOutsideSphereRandomizedInputs) {
   for (const auto param : random_test_parameters) {
     printf("   [ RUN      ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
-    randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
-        param.ray_squared_count, param.voxel_cubed_count);
+    randomRayPlacementOutsideSphere(param.ray_squared_count,
+                                    param.voxel_cubed_count);
     printf("   [       OK ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
   }
