@@ -304,8 +304,6 @@ TEST(SphericalCoordinateTraversal, MaxTAtOrLessThanZero) {
   EXPECT_EQ(0, v2.size());
 }
 
-
-
 TEST(SphericalCoordinateTraversal, SphereNotCenteredAtOrigin) {
   const BoundVec3 sphere_center(2.0, 2.0, 2.0);
   const double sphere_max_radius = 10.0;
@@ -1069,12 +1067,12 @@ TEST(SphericalCoordinateTraversal, VerifyManyRaysEntranceAndExit) {
   }
 }
 
-TEST(DISABLED_SphericalCoordinateTraversal, FirstQuadrantHit) {
+TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
   const std::size_t num_polar_sections = 4;
-  const std::size_t num_azimuthal_sections = 8;
+  const std::size_t num_azimuthal_sections = 4;
   const svr::SphereBound max_bound = {.radial = sphere_max_radius,
                                       .polar = M_PI / 2.0,
                                       .azimuthal = M_PI / 2.0};
@@ -1082,16 +1080,16 @@ TEST(DISABLED_SphericalCoordinateTraversal, FirstQuadrantHit) {
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
   const auto actual_voxels = walkSphericalVolume(
-      Ray(BoundVec3(13.0, 13.0, 13.0), UnitVec3(-1.0, -1.0, -1.0)), grid,
-      /*max_t=*/1.0);
-  const std::vector<int> expected_radial_voxels = {1, 2, 3, 4};
-  const std::vector<int> expected_theta_voxels = {0, 0, 0, 0};
-  const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
+      Ray(BoundVec3(15.0, 15.0, 15.0), UnitVec3(-1.0, -1.0, -1.0)), grid,
+      /*max_t=*/0.5);
+  const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4};
+  const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0};
+  const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0};
   verifyEqualVoxels(actual_voxels, expected_radial_voxels,
                     expected_theta_voxels, expected_phi_voxels);
 }
 
-TEST(DISABLED_SphericalCoordinateTraversal, FirstQuadrantMiss) {
+TEST(SphericalCoordinateTraversal, FirstQuadrantMiss) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
@@ -1105,7 +1103,7 @@ TEST(DISABLED_SphericalCoordinateTraversal, FirstQuadrantMiss) {
                                      sphere_center);
   const auto actual_voxels = walkSphericalVolume(
       Ray(BoundVec3(13.0, -13.0, 13.0), UnitVec3(-1.0, 1.0, -1.0)), grid,
-      /*max_t=*/1.0);
+      /*max_t=*/0.5);
   EXPECT_EQ(actual_voxels.size(), 0);
 }
 
