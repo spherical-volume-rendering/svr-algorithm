@@ -23,7 +23,7 @@ struct SphericalVoxel {
 // function: ray_travel_duration = time_to_entrance + sphere.diameter() * max_t
 // If the ray origin is within the sphere, then time_to_entrance is 0. Its
 // expected values are within bounds [0.0, 1.0]. For example, if max_t <= 0.0,
-// then no voxels will be traversed. If max_t == 1.0, then the entire sphere
+// then no voxels will be traversed. If max_t >= 1.0, then the entire sphere
 // will be traversed.
 std::vector<SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid, double max_t) noexcept;
