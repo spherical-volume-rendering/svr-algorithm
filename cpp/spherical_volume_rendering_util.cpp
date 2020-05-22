@@ -485,7 +485,6 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid,
     double max_t) noexcept {
   if (max_t <= 0.0) return {};
-
   const FreeVec3 rsv =
       grid.sphereCenter() - ray.pointAtParameter(0.0);  // Ray Sphere Vector.
   const double SED_from_center = rsv.squared_length();
@@ -575,9 +574,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       case Radial: {
         t = radial.tMax;
         current_radial_voxel += radial.tStep;
-        if (rh_metadata.previousRadialVoxel() == current_radial_voxel) {
-          continue;
-        }
+        if (rh_metadata.previousRadialVoxel() == current_radial_voxel) continue;
         break;
       }
       case Polar: {
