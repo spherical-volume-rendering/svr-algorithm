@@ -62,7 +62,7 @@ TEST(SphericalCoordinateTraversal, RayDoesNotEnterSphere) {
   const BoundVec3 ray_origin(3.0, 3.0, 3.0);
   const UnitVec3 ray_direction(-2.0, -1.3, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   EXPECT_EQ(actual_voxels.size(), 0);
 }
 
@@ -80,7 +80,7 @@ TEST(SphericalCoordinateTraversal, RayDoesNotEnterSphereTangentialHit) {
   const BoundVec3 ray_origin(-10.0, -10.0, 0.0);
   const UnitVec3 ray_direction(0.0, 1.0, 0.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   EXPECT_EQ(actual_voxels.size(), 0);
 }
 
@@ -99,7 +99,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsWithinSphere) {
   const UnitVec3 ray_direction(1.0, -1.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
 
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3, 3, 3, 3, 3};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0, 3, 3, 3, 3};
@@ -121,7 +121,7 @@ TEST(SphericalCoordinateTraversal, RayEndsWithinSphere) {
   const BoundVec3 ray_origin(13.0, -15.0, 16.0);
   const UnitVec3 ray_direction(-1.5, 1.2, -1.5);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.5);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/0.5);
   const std::vector<int> expected_radial_voxels = {1, 2, 2, 3};
   const std::vector<int> expected_theta_voxels = {3, 3, 2, 2};
   const std::vector<int> expected_phi_voxels = {0, 0, 1, 1};
@@ -143,7 +143,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsAndEndsWithinSphere) {
   const BoundVec3 ray_origin(-3.0, 4.0, 5.0);
   const UnitVec3 ray_direction(1.0, -1.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.4);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/0.4);
   const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0};
@@ -166,7 +166,7 @@ TEST(SphericalCoordinateTraversal,
   const BoundVec3 ray_origin(-1.0, 7.0, 7.0);
   const UnitVec3 ray_direction(1.0, -1.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.4);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/0.4);
   const std::vector<int> expected_radial_voxels = {2, 3, 4, 4, 4};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 0, 3};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0};
@@ -188,7 +188,7 @@ TEST(SphericalCoordinateTraversal, SphereCenteredAtOrigin) {
   const BoundVec3 ray_origin(-13.0, -13.0, -13.0);
   const UnitVec3 ray_direction(1.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -210,7 +210,7 @@ TEST(SphericalCoordinateTraversal, SphereNotCenteredAtOrigin) {
   const BoundVec3 ray_origin(-11.0, -11.0, -11.0);
   const UnitVec3 ray_direction(1.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -233,7 +233,7 @@ TEST(SphericalCoordinateTraversal, RaySlightOffsetInXYPlane) {
   const UnitVec3 ray_direction(1.0, 1.5, 1.0);
   const Ray ray(ray_origin, ray_direction);
 
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 2, 3, 2, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 2, 1, 1, 1, 0, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 2, 0, 0};
@@ -255,7 +255,7 @@ TEST(SphericalCoordinateTraversal, RayTravelsAlongXAxis) {
   const BoundVec3 ray_origin(-15.0, 0.0, 0.0);
   const UnitVec3 ray_direction(1.0, 0.0, 0.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {3, 3, 3, 3, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
@@ -277,7 +277,7 @@ TEST(SphericalCoordinateTraversal, RayTravelsAlongYAxis) {
   const BoundVec3 ray_origin(0.0, -15.0, 0.0);
   const UnitVec3 ray_direction(0.0, 1.0, 0.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {5, 5, 5, 5, 1, 1, 1, 1};
   const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 0, 0, 0, 0};
@@ -299,7 +299,7 @@ TEST(SphericalCoordinateTraversal, RayTravelsAlongZAxis) {
   const BoundVec3 ray_origin(0.0, 0.0, -15.0);
   const UnitVec3 ray_direction(0.0, 0.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {0, 0, 0, 0, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -321,7 +321,7 @@ TEST(SphericalCoordinateTraversal, RayParallelToXYPlane) {
   const BoundVec3 ray_origin(-15.0, -15.0, 0.0);
   const UnitVec3 ray_direction(1.0, 1.0, 0.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
@@ -343,7 +343,7 @@ TEST(SphericalCoordinateTraversal, RayParallelToXZPlane) {
   const BoundVec3 ray_origin(-15.0, 0.0, -15.0);
   const UnitVec3 ray_direction(1.0, 0.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -365,7 +365,7 @@ TEST(SphericalCoordinateTraversal, RayParallelToYZPlane) {
   const BoundVec3 ray_origin(0.0, -15.0, -15.0);
   const UnitVec3 ray_direction(0.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -387,7 +387,7 @@ TEST(SphericalCoordinateTraversal, RayDirectionNegativeXPositiveYZ) {
   const BoundVec3 ray_origin(13.0, -15.0, -15.0);
   const UnitVec3 ray_direction(-1.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {3, 3, 3, 2, 2, 1, 1, 1, 1};
   const std::vector<int> expected_phi_voxels = {3, 3, 3, 2, 2, 1, 1, 1, 1};
@@ -409,7 +409,7 @@ TEST(SphericalCoordinateTraversal, RayDirectionNegativeYPositiveXZ) {
   const BoundVec3 ray_origin(-13.0, 17.0, -15.0);
   const UnitVec3 ray_direction(1.0, -1.2, 1.3);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4,
                                                    4, 3, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 1, 0, 0, 3, 3, 3};
@@ -432,7 +432,7 @@ TEST(SphericalCoordinateTraversal, RayDirectionNegativeZPositiveXY) {
   const BoundVec3 ray_origin(-13.0, -12.0, 15.3);
   const UnitVec3 ray_direction(1.4, 2.0, -1.3);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 1, 2, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 1, 1, 0, 0};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 0, 0};
@@ -454,7 +454,7 @@ TEST(SphericalCoordinateTraversal, RayDirectionNegativeXYZ) {
   const BoundVec3 ray_origin(15.0, 12.0, 15.0);
   const UnitVec3 ray_direction(-1.4, -2.0, -1.3);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 1, 2, 1, 1};
   const std::vector<int> expected_theta_voxels = {0, 3, 3, 3, 2};
   const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 1};
@@ -476,7 +476,7 @@ TEST(SphericalCoordinateTraversal, OddNumberAngularSections) {
   const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
   const UnitVec3 ray_direction(1.0, 1.0, 1.3);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 2, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 1, 1, 0, 0};
@@ -498,7 +498,7 @@ TEST(SphericalCoordinateTraversal, OddNumberAzimuthalSections) {
   const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
   const UnitVec3 ray_direction(1.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0, 0, 0, 0};
@@ -520,7 +520,7 @@ TEST(SphericalCoordinateTraversal, LargeNumberOfRadialSections) {
   const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
   const UnitVec3 ray_direction(1.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {
       1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
       17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
@@ -555,7 +555,7 @@ TEST(SphericalCoordinateTraversal, LargeNumberOfAngularSections) {
   const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
   const UnitVec3 ray_direction(1.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {24, 24, 24, 24, 4, 4, 4, 4};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
@@ -577,7 +577,7 @@ TEST(SphericalCoordinateTraversal, LargeNumberOfAzimuthalSections) {
   const BoundVec3 ray_origin(-15.0, -15.0, -15.0);
   const UnitVec3 ray_direction(1.0, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 2, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {24, 24, 24, 24, 4, 4, 4, 4};
@@ -600,7 +600,7 @@ TEST(SphericalCoordinateTraversal,
   const BoundVec3 ray_origin(-4.0, -4.0, -6.0);
   const UnitVec3 ray_direction(1.3, 1.0, 1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/0.4);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/0.4);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4};
   const std::vector<int> expected_theta_voxels = {2, 2, 2, 3, 3, 0};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 3, 3, 3};
@@ -622,7 +622,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsAtSphereOrigin) {
   const BoundVec3 ray_origin(0.0, 0.0, 0.0);
   const UnitVec3 ray_direction(-1.5, 1.2, -1.5);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {4, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
   const std::vector<int> expected_phi_voxels = {2, 2, 2, 2};
@@ -644,7 +644,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsPastSphereOriginOne) {
   const BoundVec3 ray_origin(-3.0, 2.4, -3.0);
   const UnitVec3 ray_direction(-1.5, 1.2, -1.5);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {3, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1};
   const std::vector<int> expected_phi_voxels = {2, 2, 2};
@@ -666,7 +666,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsPastSphereOriginTwo) {
   const BoundVec3 ray_origin(-4.5, 3.6, -4.5);
   const UnitVec3 ray_direction(-1.5, 1.2, -1.5);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1};
   const std::vector<int> expected_phi_voxels = {2, 2};
@@ -688,7 +688,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsPastSphereOriginThree) {
   const BoundVec3 ray_origin(-6.0, 4.8, -6.0);
   const UnitVec3 ray_direction(-1.5, 1.2, -1.5);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1};
   const std::vector<int> expected_theta_voxels = {1};
   const std::vector<int> expected_phi_voxels = {2};
@@ -710,7 +710,7 @@ TEST(SphericalCoordinateTraversal, RayBeginsPastSphereOriginFour) {
   const BoundVec3 ray_origin(-7.5, 6.0, -7.5);
   const UnitVec3 ray_direction(-1.5, 1.2, -1.5);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {};
   const std::vector<int> expected_theta_voxels = {};
   const std::vector<int> expected_phi_voxels = {};
@@ -732,7 +732,7 @@ TEST(SphericalCoordinateTraversal, TangentialHitWithInnerRadialVoxelOne) {
   const BoundVec3 ray_origin(-5.0, 0.0, 10.0);
   const UnitVec3 ray_direction(0.0, 0.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
   const std::vector<int> expected_phi_voxels = {1, 1, 2, 2};
@@ -754,7 +754,7 @@ TEST(SphericalCoordinateTraversal, TangentialHitWithInnerRadialVoxelTwo) {
   const BoundVec3 ray_origin(-2.5, 0.0, 10.0);
   const UnitVec3 ray_direction(0.0, 0.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 1, 1};
   const std::vector<int> expected_phi_voxels = {1, 1, 1, 2, 2, 2};
@@ -777,7 +777,7 @@ TEST(SphericalCoordinateTraversal,
   const BoundVec3 ray_origin(-2.5, 0.0, 10.0);
   const UnitVec3 ray_direction(0.0, 0.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {0, 0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {0, 0, 0, 0, 0};
@@ -799,7 +799,7 @@ TEST(SphericalCoordinateTraversal, NearlyTangentialHit) {
   const BoundVec3 ray_origin(-5.01, 0.0, 10.0);
   const UnitVec3 ray_direction(0.0, 0.0, -1.0);
   const Ray ray(ray_origin, ray_direction);
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 2, 1};
   const std::vector<int> expected_theta_voxels = {1, 1, 1, 1};
   const std::vector<int> expected_phi_voxels = {1, 1, 2, 2};
@@ -820,7 +820,7 @@ TEST(SphericalCoordinateTraversal, UpperHemisphereHit) {
                                      sphere_center);
   const auto actual_voxels = walkSphericalVolume(
       Ray(BoundVec3(-11.0, 2.0, 1.0), UnitVec3(1.0, 0.0, 0.0)), grid,
-      /*t_end=*/1.0);
+      /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 3, 4, 4,
                                                    4, 4, 3, 3, 2, 1};
   const std::vector<int> expected_theta_voxels = {3, 3, 3, 2, 2, 2,
@@ -836,7 +836,7 @@ TEST(SphericalCoordinateTraversal, UpperHemisphereHit) {
   for (const auto &ray_origin : ray_origins) {
     const UnitVec3 ray_direction(0.0, 0.0, -1.0);
     const auto v = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
-                                       /*t_end=*/1.0);
+                                       /*max_t=*/1.0);
     EXPECT_NE(v.size(), 0);
   }
 }
@@ -855,7 +855,7 @@ TEST(SphericalCoordinateTraversal, UpperHemisphereMiss) {
   const BoundVec3 ray_origin = BoundVec3(-5.0, -5.0, -5.0);
   const UnitVec3 ray_direction(1.0, 0.0, 0.0);
   const auto actual_voxels =
-      walkSphericalVolume(Ray(ray_origin, ray_direction), grid, /*t_end=*/1.0);
+      walkSphericalVolume(Ray(ray_origin, ray_direction), grid, /*max_t=*/1.0);
   EXPECT_EQ(actual_voxels.size(), 0);
 }
 
@@ -873,7 +873,7 @@ TEST(SphericalCoordinateTraversal, AvoidRaySteppingToRadialVoxelZero) {
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
   const Ray ray(BoundVec3(-984.375, 250.0, -10001.0), UnitVec3(0.0, 0.0, 1.0));
-  const auto actual_voxels = walkSphericalVolume(ray, grid, /*t_end=*/1.0);
+  const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
   const std::size_t last_idx = actual_voxels.size() - 1;
   EXPECT_NE(actual_voxels[last_idx].radial, 0);
 }
@@ -903,7 +903,7 @@ TEST(SphericalCoordinateTraversal, VerifyManyRaysEntranceAndExit) {
       for (std::size_t j = 0; j < 30; ++j) {
         const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
         const auto actual_voxels = walkSphericalVolume(
-            Ray(ray_origin, ray_direction), grid, /*t_end=*/1.0);
+            Ray(ray_origin, ray_direction), grid, /*max_t=*/1.0);
         EXPECT_NE(actual_voxels.size(), 0);
         EXPECT_EQ(actual_voxels[0].radial, 1);
         const std::size_t last = actual_voxels.size() - 1;
@@ -925,7 +925,7 @@ TEST(SphericalCoordinateTraversal, VerifyManyRaysEntranceAndExit) {
       for (std::size_t j = 0; j < 30; ++j) {
         const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
         const auto actual_voxels = walkSphericalVolume(
-            Ray(ray_origin, ray_direction), grid, /*t_end=*/1.0);
+            Ray(ray_origin, ray_direction), grid, /*max_t=*/1.0);
         EXPECT_NE(actual_voxels.size(), 0);
         EXPECT_EQ(actual_voxels[0].radial, 1);
         const std::size_t last = actual_voxels.size() - 1;
@@ -946,7 +946,7 @@ TEST(SphericalCoordinateTraversal, VerifyManyRaysEntranceAndExit) {
       for (std::size_t j = 0; j < 30; ++j) {
         const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
         const auto actual_voxels = walkSphericalVolume(
-            Ray(ray_origin, ray_direction), grid, /*t_end=*/1.0);
+            Ray(ray_origin, ray_direction), grid, /*max_t=*/1.0);
         EXPECT_NE(actual_voxels.size(), 0);
         EXPECT_EQ(actual_voxels[0].radial, 1);
         const std::size_t last = actual_voxels.size() - 1;
@@ -973,7 +973,7 @@ TEST(DISABLED_SphericalCoordinateTraversal, FirstQuadrantHit) {
                                      sphere_center);
   const auto actual_voxels = walkSphericalVolume(
       Ray(BoundVec3(13.0, 13.0, 13.0), UnitVec3(-1.0, -1.0, -1.0)), grid,
-      /*t_end=*/1.0);
+      /*max_t=*/1.0);
   const std::vector<int> expected_radial_voxels = {1, 2, 3, 4};
   const std::vector<int> expected_theta_voxels = {0, 0, 0, 0};
   const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
@@ -995,7 +995,7 @@ TEST(DISABLED_SphericalCoordinateTraversal, FirstQuadrantMiss) {
                                      sphere_center);
   const auto actual_voxels = walkSphericalVolume(
       Ray(BoundVec3(13.0, -13.0, 13.0), UnitVec3(-1.0, 1.0, -1.0)), grid,
-      /*t_end=*/1.0);
+      /*max_t=*/1.0);
   EXPECT_EQ(actual_voxels.size(), 0);
 }
 

@@ -15,7 +15,7 @@ cdef extern from "../spherical_volume_rendering_util.h" namespace "svr":
                                                double *min_bound, double *max_bound,
                                                size_t num_radial_voxels, size_t num_polar_voxels,
                                                size_t num_azimuthal_voxels, double *sphere_center,
-                                               double t_end)
+                                               double max_t)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -25,7 +25,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] min_bound,
                           np.ndarray[np.float64_t, ndim=1, mode="c"] max_bound,
                           int num_radial_voxels, int num_polar_voxels, int num_azimuthal_voxels,
-                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center, np.float64_t t_end = 1.0):
+                          np.ndarray[np.float64_t, ndim=1, mode="c"] sphere_center, np.float64_t max_t = 1.0):
     '''
     Spherical Coordinate Voxel Traversal Algorithm
     Cythonized version of the Spherical Coordinate Voxel Traversal Algorithm.
@@ -38,7 +38,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
            num_polar_voxels: The number of polar voxels.
            num_azimuthal_voxels: The number of azimuthal voxels.
            sphere_center: The 3-dimensional (x,y,z) center of the sphere.
-           t_end: The unitized end time of the ray. Defaulted to the maximum time 1.0
+           max_t: The unitized maximum time of ray traversal. Defaulted to 1.0
     Returns:
            A numpy array of the spherical voxel coordinates.
            The voxel coordinates are as follows:
@@ -63,7 +63,7 @@ def walk_spherical_volume(np.ndarray[np.float64_t, ndim=1, mode="c"] ray_origin,
                                                              &min_bound[0], &max_bound[0],
                                                              num_radial_voxels, num_polar_voxels,
                                                              num_azimuthal_voxels, &sphere_center[0],
-                                                             t_end)
+                                                             max_t)
     cdef np.ndarray cyVoxels = np.empty((voxels.size(), 3), dtype=int)
     for i in range(voxels.size()):
         cyVoxels[i,0] = voxels[i].radial

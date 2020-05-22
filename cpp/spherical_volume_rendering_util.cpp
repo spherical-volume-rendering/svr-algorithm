@@ -31,7 +31,7 @@ struct HitParameters {
   // current voxel.
   int tStep;
 
-  // Determines whether the current hit is within time bounds (t, t_end).
+  // Determines whether the current hit is within time bounds (t, max_t).
   bool within_bounds;
 };
 
@@ -77,8 +77,8 @@ struct RadialHitMetadata {
 // function. Here, ray_segment is the difference between P2 and P1.
 struct RaySegment {
  public:
-  inline RaySegment(double t_end, const Ray &ray)
-      : P2_(ray.pointAtParameter(t_end)), NZDI_(ray.NonZeroDirectionIndex()) {}
+  inline RaySegment(double max_t, const Ray &ray)
+      : P2_(ray.pointAtParameter(max_t)), NZDI_(ray.NonZeroDirectionIndex()) {}
 
   // Updates the point P1 with the new time traversal time t. Similarly, updates
   // the segment denoted by P2 - P1.
@@ -179,13 +179,13 @@ inline HitParameters radialHit(const Ray &ray,
                                RadialHitMetadata &rh_metadata,
                                int current_radial_voxel, double v,
                                double rsvd_minus_v_squared, double t,
-                               double t_end) noexcept {
+                               double max_t) noexcept {
   if (rh_metadata.radialStepTransitionHasOccurred()) {
     const double d_b =
         std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) -
                   rsvd_minus_v_squared);
     const double intersection_t = ray.timeOfIntersectionAt(v + d_b);
-    if (intersection_t < t_end) {
+    if (intersection_t < max_t) {
       return {.tMax = intersection_t, .tStep = -1, .within_bounds = true};
     }
   } else {
@@ -206,10 +206,10 @@ inline HitParameters radialHit(const Ray &ray,
       rh_metadata.isRadialStepTransition(true);
       return {.tMax = t_entrance, .tStep = 0, .within_bounds = true};
     }
-    if (t_entrance_gt_t && t_entrance < t_end) {
+    if (t_entrance_gt_t && t_entrance < max_t) {
       return {.tMax = t_entrance, .tStep = 1, .within_bounds = true};
     }
-    if (t_exit < t_end) {
+    if (t_exit < max_t) {
       // t_exit is the "further" point of intersection of the current sphere.
       // Since t_entrance is not within our time bounds, it must be true that
       // this is a radial transition.
@@ -217,7 +217,7 @@ inline HitParameters radialHit(const Ray &ray,
       return {.tMax = t_exit, .tStep = -1, .within_bounds = true};
     }
   }
-  // There does not exist an intersection time X such that t < X < t_end.
+  // There does not exist an intersection time X such that t < X < max_t.
   return {.tMax = std::numeric_limits<double>::max(),
           .tStep = 0,
           .within_bounds = false};
@@ -233,7 +233,7 @@ HitParameters angularHit(
     const svr::SphericalVoxelGrid &grid, const Ray &ray, double perp_uv_min,
     double perp_uv_max, double perp_uw_min, double perp_uw_max,
     double perp_vw_min, double perp_vw_max, const RaySegment &ray_segment,
-    const std::array<double, 2> &collinear_times, double t, double t_end,
+    const std::array<double, 2> &collinear_times, double t, double max_t,
     double ray_direction_2, double sphere_center_2,
     const std::vector<svr::LineSegment> &P_max, int current_voxel) noexcept {
   const bool is_parallel_min = svr::isEqual(perp_uv_min, 0.0);
@@ -270,8 +270,8 @@ HitParameters angularHit(
     }
   }
 
-  const bool t_max_within_bounds = svr::lessThan(t, t_max) && t_max < t_end;
-  const bool t_min_within_bounds = svr::lessThan(t, t_min) && t_min < t_end;
+  const bool t_max_within_bounds = svr::lessThan(t, t_max) && t_max < max_t;
+  const bool t_min_within_bounds = svr::lessThan(t, t_min) && t_min < max_t;
   if (!t_max_within_bounds && !t_min_within_bounds) {
     return {.tMax = std::numeric_limits<double>::max(),
             .tStep = 0,
@@ -326,7 +326,7 @@ inline HitParameters polarHit(const Ray &ray,
                               const RaySegment &ray_segment,
                               const std::array<double, 2> &collinear_times,
                               int current_polar_voxel, double t,
-                              double t_end) noexcept {
+                              double max_t) noexcept {
   // Calculate the voxel boundary vectors.
   const FreeVec3 p_one(grid.pMaxPolar(current_polar_voxel).P1,
                        grid.pMaxPolar(current_polar_voxel).P2, 0.0);
@@ -348,7 +348,7 @@ inline HitParameters polarHit(const Ray &ray,
                              ray_segment.vector().y() * w_max.x();
   return angularHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,
                     perp_uw_max, perp_vw_min, perp_vw_max, ray_segment,
-                    collinear_times, t, t_end, ray.direction().y(),
+                    collinear_times, t, max_t, ray.direction().y(),
                     grid.sphereCenter().y(), grid.pMaxPolar(),
                     current_polar_voxel);
 }
@@ -361,7 +361,7 @@ inline HitParameters azimuthalHit(const Ray &ray,
                                   const RaySegment &ray_segment,
                                   const std::array<double, 2> &collinear_times,
                                   int current_azimuthal_voxel, double t,
-                                  double t_end) noexcept {
+                                  double max_t) noexcept {
   // Calculate the voxel boundary vectors.
   const FreeVec3 p_one(grid.pMaxAzimuthal(current_azimuthal_voxel).P1, 0.0,
                        grid.pMaxAzimuthal(current_azimuthal_voxel).P2);
@@ -385,7 +385,7 @@ inline HitParameters azimuthalHit(const Ray &ray,
                              ray_segment.vector().z() * w_max.x();
   return angularHit(grid, ray, perp_uv_min, perp_uv_max, perp_uw_min,
                     perp_uw_max, perp_vw_min, perp_vw_max, ray_segment,
-                    collinear_times, t, t_end, ray.direction().z(),
+                    collinear_times, t, max_t, ray.direction().z(),
                     grid.sphereCenter().z(), grid.pMaxAzimuthal(),
                     current_azimuthal_voxel);
 }
@@ -401,7 +401,7 @@ inline HitParameters azimuthalHit(const Ray &ray,
 // 6. tMaxR, tMaxPhi equal intersection.
 // 7. tMaxTheta, tMaxPhi equal intersection.
 //
-// For each case, the following must hold: t < tMax < t_end
+// For each case, the following must hold: t < tMax < max_t
 inline VoxelIntersectionType minimumIntersection(
     const HitParameters &rad_params, const HitParameters &ang_params,
     const HitParameters &azi_params) noexcept {
@@ -489,7 +489,7 @@ inline void initializeVoxelBoundarySegments(
 
 std::vector<svr::SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid,
-    double t_end) noexcept {
+    double max_t) noexcept {
   const FreeVec3 rsv =
       grid.sphereCenter() - ray.pointAtParameter(0.0);  // Ray Sphere Vector.
   const double SED_from_center = rsv.squared_length();
@@ -554,9 +554,9 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
                     .azimuthal = current_azimuthal_voxel});
 
   double t = t_ray_entrance * ray_origin_is_outside_grid;
-  const double unitized_ray_time = t_end * grid.sphereMaxRadius() * 2.0 +
+  const double unitized_ray_time = max_t * grid.sphereMaxRadius() * 2.0 +
                                    t_ray_entrance * ray_origin_is_outside_grid;
-  t_end = ray_origin_is_outside_grid ? std::min(t_ray_exit, unitized_ray_time)
+  max_t = ray_origin_is_outside_grid ? std::min(t_ray_exit, unitized_ray_time)
                                      : unitized_ray_time;
 
   // Initialize the time in case of collinear min or collinear max for angular
@@ -567,15 +567,15 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
 
   RadialHitMetadata rh_metadata;
   rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
-  RaySegment ray_segment(t_end, ray);
+  RaySegment ray_segment(max_t, ray);
   while (true) {
     const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
-                                  v, rsvd_minus_v_squared, t, t_end);
+                                  v, rsvd_minus_v_squared, t, max_t);
     ray_segment.updateAtTime(t, ray);
     const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
-                                current_polar_voxel, t, t_end);
+                                current_polar_voxel, t, max_t);
     const auto azimuthal = azimuthalHit(ray, grid, ray_segment, collinear_times,
-                                        current_azimuthal_voxel, t, t_end);
+                                        current_azimuthal_voxel, t, max_t);
     if (current_radial_voxel + radial.tStep == 0) {
       return voxels;
     }
@@ -648,7 +648,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     double *ray_origin, double *ray_direction, double *min_bound,
     double *max_bound, std::size_t num_radial_voxels,
     std::size_t num_polar_voxels, std::size_t num_azimuthal_voxels,
-    double *sphere_center, double t_end) noexcept {
+    double *sphere_center, double max_t) noexcept {
   return svr::walkSphericalVolume(
       Ray(BoundVec3(ray_origin[0], ray_origin[1], ray_origin[2]),
           UnitVec3(ray_direction[0], ray_direction[1], ray_direction[2])),
@@ -661,7 +661,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
                            .azimuthal = max_bound[2]},
           num_radial_voxels, num_polar_voxels, num_azimuthal_voxels,
           BoundVec3(sphere_center[0], sphere_center[1], sphere_center[2])),
-      t_end);
+      max_t);
 }
 // LCOV_EXCL_STOP
 
