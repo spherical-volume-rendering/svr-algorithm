@@ -17,10 +17,13 @@ struct SphericalVoxel {
 };
 
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the
-// ray over the spherical voxel grid provided. max_t is the maximum unitized time at
-// until which the ray traverses. Returns a vector of the spherical coordinate
-// voxels traversed.
-// todo: Explain max_t.
+// ray with unit direction over the spherical voxel grid provided. Returns a
+// vector of the spherical coordinate voxels traversed. max_t is the unitized
+// time for which the ray may travel. It is used in a linear function and will
+// be multiplied by the sphere's diameter to determine travel duration. Its
+// expected values are within bounds [0.0, 1.0]. For example, if max_t <= 0.0,
+// then no voxels will be traversed. If max_t == 1.0, then the entire sphere
+// will be traversed.
 std::vector<SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid, double max_t) noexcept;
 
