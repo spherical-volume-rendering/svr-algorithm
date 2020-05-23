@@ -576,7 +576,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
         .polar = current_polar_voxel,
         .azimuthal = current_azimuthal_voxel};
     if (voxels.back() == intersected_voxel) continue;
-    if (sampler != nullptr) {
+    if (sampler != nullptr && data != nullptr) {
       sampler(grid, ray, /*enter_t=*/previous_intersection_t, /*exit_t=*/t,
               intersected_voxel, data);
     }
