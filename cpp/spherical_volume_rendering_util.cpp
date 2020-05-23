@@ -11,7 +11,6 @@ namespace svr {
 // The type corresponding to the voxel(s) with the minimum tMax value for a
 // given traversal.
 enum VoxelIntersectionType {
-  None = 0,
   Radial = 1,
   Polar = 2,
   Azimuthal = 3,
@@ -33,42 +32,6 @@ struct HitParameters {
 
   // Determines whether the current hit is within time bounds (t, max_t).
   bool within_bounds;
-};
-
-// Metadata for the radial hit parameters. There are two main components of the
-// metadata: the transition flag and the previous radial voxel. The transition
-// flag is necessary to determine when tStepR's sign changes, and the previous
-// radial voxel ensures we do not hit the same voxel twice in the case of a
-// tangential hit.
-struct RadialHitMetadata {
- public:
-  inline bool radialStepTransitionHasOccurred() const noexcept {
-    return transition_flag_;
-  }
-
-  inline void isRadialStepTransition(bool b) noexcept { transition_flag_ = b; }
-
-  inline int previousRadialVoxel() const noexcept {
-    return previous_radial_voxel_;
-  }
-
-  inline void updatePreviousRadialVoxel(int radial_voxel) noexcept {
-    previous_radial_voxel_ = radial_voxel;
-  }
-
- private:
-  // Determine whether the current voxel traversal was a 'radial step
-  // transition.' This is necessary to determine when the radial steps should go
-  // from negative to positive or vice-versa, since the radial voxels go
-  // from 1..N..1, where N is the number of radial sections.
-  bool transition_flag_ = false;
-
-  // The previous radial voxel ID. This is necessary to maintain in the case of
-  // a tangential hit. If the current radial voxel is equal to the previous
-  // radial voxel (i.e. a tangential hit occurred) and the only voxel
-  // intersection is Radial, then we don't want another intersection to occur
-  // with the same voxel.
-  int previous_radial_voxel_ = -1;
 };
 
 // Pre-calculated information for the generalized angular hit function, which
@@ -168,13 +131,16 @@ inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid,
 // considered an intersection with the ray and a radial section. To determine
 // line-sphere intersection, this follows closely the mathematics presented in:
 // http://cas.xav.free.fr/Graphics%20Gems%204%20-%20Paul%20S.%20Heckbert.pdf
+// One also needs to determine when the hit parameter's tStep should go from +1
+// to -1, since the radial voxels go from 1..N..1, where N is the number of
+// radial sections. This is performed with 'radial_step_has_transitioned'.
 inline HitParameters radialHit(const Ray &ray,
                                const svr::SphericalVoxelGrid &grid,
-                               RadialHitMetadata &rh_metadata,
+                               bool &radial_step_has_transitioned,
                                int current_radial_voxel, double v,
                                double rsvd_minus_v_squared, double t,
                                double max_t) noexcept {
-  if (rh_metadata.radialStepTransitionHasOccurred()) {
+  if (radial_step_has_transitioned) {
     const double d_b =
         std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) -
                   rsvd_minus_v_squared);
@@ -186,7 +152,6 @@ inline HitParameters radialHit(const Ray &ray,
     const std::size_t previous_idx =
         std::min(static_cast<std::size_t>(current_radial_voxel),
                  grid.numRadialSections() - 1);
-    rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
     const double r_a = grid.deltaRadiiSquared(
         previous_idx -
         (grid.deltaRadiiSquared(previous_idx) < rsvd_minus_v_squared));
@@ -197,7 +162,7 @@ inline HitParameters radialHit(const Ray &ray,
     const bool t_entrance_gt_t = t_entrance > t;
     if (t_entrance_gt_t && t_entrance == t_exit) {
       // Tangential hit.
-      rh_metadata.isRadialStepTransition(true);
+      radial_step_has_transitioned = true;
       return {.tMax = t_entrance, .tStep = 0, .within_bounds = true};
     }
     if (t_entrance_gt_t && t_entrance < max_t) {
@@ -207,7 +172,7 @@ inline HitParameters radialHit(const Ray &ray,
       // t_exit is the "further" point of intersection of the current sphere.
       // Since t_entrance is not within our time bounds, it must be true that
       // this is a radial transition.
-      rh_metadata.isRadialStepTransition(true);
+      radial_step_has_transitioned = true;
       return {.tMax = t_exit, .tStep = -1, .within_bounds = true};
     }
   }
@@ -394,15 +359,10 @@ inline HitParameters azimuthalHit(const Ray &ray,
 // 5. tMaxR, tMaxTheta equal intersection.
 // 6. tMaxR, tMaxPhi equal intersection.
 // 7. tMaxTheta, tMaxPhi equal intersection.
-//
 // For each case, the following must hold: t < tMax < max_t
 inline VoxelIntersectionType minimumIntersection(
     const HitParameters &radial, const HitParameters &polar,
     const HitParameters &azimuthal) noexcept {
-  if (!radial.within_bounds && !polar.within_bounds &&
-      !azimuthal.within_bounds) {
-    return VoxelIntersectionType::None;
-  }
   const bool RP_eq = svr::isEqual(radial.tMax, polar.tMax);
   const bool RA_eq = svr::isEqual(radial.tMax, azimuthal.tMax);
   if (radial.within_bounds && radial.tMax < polar.tMax && !RP_eq &&
@@ -552,25 +512,28 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   const std::array<double, 2> collinear_times = {
       0.0, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
-  RadialHitMetadata rh_metadata;
-  rh_metadata.updatePreviousRadialVoxel(current_radial_voxel);
   RaySegment ray_segment(max_t, ray);
+  bool radial_step_has_transitioned = false;
   while (true) {
-    const auto radial = radialHit(ray, grid, rh_metadata, current_radial_voxel,
-                                  v, rsvd_minus_v_squared, t, max_t);
+    const auto radial =
+        radialHit(ray, grid, radial_step_has_transitioned, current_radial_voxel,
+                  v, rsvd_minus_v_squared, t, max_t);
     ray_segment.updateAtTime(t, ray);
     const auto polar = polarHit(ray, grid, ray_segment, collinear_times,
                                 current_polar_voxel, t, max_t);
     const auto azimuthal = azimuthalHit(ray, grid, ray_segment, collinear_times,
                                         current_azimuthal_voxel, t, max_t);
-    if (current_radial_voxel + radial.tStep == 0) return voxels;
+    if (current_radial_voxel + radial.tStep == 0 ||
+        (!radial.within_bounds && !polar.within_bounds &&
+         !azimuthal.within_bounds)) {
+      return voxels;
+    }
     const auto voxel_intersection =
         minimumIntersection(radial, polar, azimuthal);
     switch (voxel_intersection) {
       case Radial: {
         t = radial.tMax;
         current_radial_voxel += radial.tStep;
-        if (rh_metadata.previousRadialVoxel() == current_radial_voxel) continue;
         break;
       }
       case Polar: {
@@ -616,9 +579,11 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
                                   grid.numAzimuthalSections();
         break;
       }
-      case None: {
-        return voxels;
-      }
+    }
+    if (voxels.back().radial == current_radial_voxel &&
+        voxels.back().polar == current_polar_voxel &&
+        voxels.back().azimuthal == current_azimuthal_voxel) {
+      continue;
     }
     voxels.push_back({.radial = current_radial_voxel,
                       .polar = current_polar_voxel,
