@@ -14,7 +14,7 @@ struct SphericalVoxel {
   int polar;
   int azimuthal;
 
-  inline bool operator==(SphericalVoxel v) {
+  inline bool operator==(SphericalVoxel v) const noexcept {
     return this->radial == v.radial && this->polar == v.polar &&
            this->azimuthal == v.azimuthal;
   }
@@ -31,10 +31,11 @@ struct SphericalVoxel {
 // will be traversed.
 std::vector<SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid, double max_t,
-    const std::function<void(const svr::SphericalVoxelGrid &grid, const Ray &ray,
-                       double enter_t, double exit_t,
-                       const svr::SphericalVoxel &sv, void *data)>&
-        sampler = nullptr, void* data = nullptr) noexcept;
+    const std::function<void(const svr::SphericalVoxelGrid &grid,
+                             const Ray &ray, double enter_t, double exit_t,
+                             const svr::SphericalVoxel &sv, void *data)>
+        &sampler = nullptr,
+    void *data = nullptr) noexcept;
 
 // Simplified parameters to Cythonize the function; implementation remains the
 // same as above.
