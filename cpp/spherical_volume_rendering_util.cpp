@@ -397,41 +397,37 @@ inline HitParameters azimuthalHit(const Ray &ray,
 //
 // For each case, the following must hold: t < tMax < max_t
 inline VoxelIntersectionType minimumIntersection(
-    const HitParameters &rad_params, const HitParameters &ang_params,
-    const HitParameters &azi_params) noexcept {
-  if (rad_params.within_bounds &&
-      svr::lessThan(rad_params.tMax, ang_params.tMax) &&
-      svr::lessThan(rad_params.tMax, azi_params.tMax)) {
+    const HitParameters &radial, const HitParameters &polar,
+    const HitParameters &azimuthal) noexcept {
+  if (!radial.within_bounds && !polar.within_bounds &&
+      !azimuthal.within_bounds) {
+    return VoxelIntersectionType::None;
+  }
+  const bool RP_eq = svr::isEqual(radial.tMax, polar.tMax);
+  const bool RA_eq = svr::isEqual(radial.tMax, azimuthal.tMax);
+  if (radial.within_bounds && radial.tMax < polar.tMax && !RP_eq &&
+      radial.tMax < azimuthal.tMax && !RA_eq) {
     return VoxelIntersectionType::Radial;
   }
-  if (ang_params.within_bounds &&
-      svr::lessThan(ang_params.tMax, rad_params.tMax) &&
-      svr::lessThan(ang_params.tMax, azi_params.tMax)) {
+  const bool PA_eq = svr::isEqual(polar.tMax, azimuthal.tMax);
+  if (polar.within_bounds && polar.tMax < radial.tMax && !RP_eq &&
+      polar.tMax < azimuthal.tMax && !PA_eq) {
     return VoxelIntersectionType::Polar;
   }
-  if (azi_params.within_bounds &&
-      svr::lessThan(azi_params.tMax, ang_params.tMax) &&
-      svr::lessThan(azi_params.tMax, rad_params.tMax)) {
+  if (azimuthal.within_bounds && azimuthal.tMax < polar.tMax && !PA_eq &&
+      azimuthal.tMax < radial.tMax && !RA_eq) {
     return VoxelIntersectionType::Azimuthal;
   }
-  if (rad_params.within_bounds &&
-      svr::isEqual(rad_params.tMax, ang_params.tMax) &&
-      isEqual(rad_params.tMax, azi_params.tMax)) {
+  if (radial.within_bounds && RP_eq && RA_eq) {
     return VoxelIntersectionType::RadialPolarAzimuthal;
   }
-  if (azi_params.within_bounds &&
-      svr::isEqual(azi_params.tMax, ang_params.tMax)) {
+  if (azimuthal.within_bounds && PA_eq) {
     return VoxelIntersectionType::PolarAzimuthal;
   }
-  if (rad_params.within_bounds &&
-      svr::isEqual(ang_params.tMax, rad_params.tMax)) {
+  if (radial.within_bounds && RP_eq) {
     return VoxelIntersectionType::RadialPolar;
   }
-  if (rad_params.within_bounds &&
-      svr::isEqual(rad_params.tMax, azi_params.tMax)) {
-    return VoxelIntersectionType::RadialAzimuthal;
-  }
-  return VoxelIntersectionType::None;
+  return VoxelIntersectionType::RadialAzimuthal;
 }
 
 // Initialize an array of values representing the points of intersection between
