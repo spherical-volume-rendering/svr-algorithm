@@ -511,7 +511,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
                                         current_azimuthal_voxel, t, max_t);
     if (current_radial_voxel + radial.tStep == 0 ||
         (radial.tMax == DOUBLE_MAX && polar.tMax == DOUBLE_MAX &&
-         radial.tMax == DOUBLE_MAX)) {
+         azimuthal.tMax == DOUBLE_MAX)) {
       return voxels;
     }
     const auto voxel_intersection =
