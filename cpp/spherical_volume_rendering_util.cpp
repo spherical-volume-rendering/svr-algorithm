@@ -142,7 +142,7 @@ inline int calculateAngularVoxelIDFromPoints(
   return i;
 }
 
-// Initializes an angular voxel ID. For polar initializations=, *_2 represents
+// Initializes an angular voxel ID. For polar initialization, *_2 represents
 // the y-plane. For azimuthal initialization, it represents the z-plane. If the
 // number of sections is 1 or the squared euclidean distance of the ray_sphere
 // vector in the given plane is zero, the voxel ID is set to 0. Otherwise, we
@@ -322,14 +322,14 @@ inline HitParameters polarHit(const Ray &ray,
                               int current_polar_voxel, double t,
                               double max_t) noexcept {
   // Calculate the voxel boundary vectors.
-  const FreeVec3 p_one(grid.pMaxPolar(current_polar_voxel).P1,
-                       grid.pMaxPolar(current_polar_voxel).P2, 0.0);
-  const FreeVec3 p_two(grid.pMaxPolar(current_polar_voxel + 1).P1,
-                       grid.pMaxPolar(current_polar_voxel + 1).P2, 0.0);
+  const BoundVec3 p_one(grid.pMaxPolar(current_polar_voxel).P1,
+                        grid.pMaxPolar(current_polar_voxel).P2, 0.0);
+  const BoundVec3 p_two(grid.pMaxPolar(current_polar_voxel + 1).P1,
+                        grid.pMaxPolar(current_polar_voxel + 1).P2, 0.0);
   const BoundVec3 *u_min = &grid.centerToPolarBound(current_polar_voxel);
   const BoundVec3 *u_max = &grid.centerToPolarBound(current_polar_voxel + 1);
-  const FreeVec3 w_min = p_one - FreeVec3(ray_segment.P1());
-  const FreeVec3 w_max = p_two - FreeVec3(ray_segment.P1());
+  const FreeVec3 w_min = p_one - ray_segment.P1();
+  const FreeVec3 w_max = p_two - ray_segment.P1();
   const double perp_uv_min = u_min->x() * ray_segment.vector().y() -
                              u_min->y() * ray_segment.vector().x();
   const double perp_uv_max = u_max->x() * ray_segment.vector().y() -
@@ -357,16 +357,16 @@ inline HitParameters azimuthalHit(const Ray &ray,
                                   int current_azimuthal_voxel, double t,
                                   double max_t) noexcept {
   // Calculate the voxel boundary vectors.
-  const FreeVec3 p_one(grid.pMaxAzimuthal(current_azimuthal_voxel).P1, 0.0,
-                       grid.pMaxAzimuthal(current_azimuthal_voxel).P2);
-  const FreeVec3 p_two(grid.pMaxAzimuthal(current_azimuthal_voxel + 1).P1, 0.0,
-                       grid.pMaxAzimuthal(current_azimuthal_voxel + 1).P2);
+  const BoundVec3 p_one(grid.pMaxAzimuthal(current_azimuthal_voxel).P1, 0.0,
+                        grid.pMaxAzimuthal(current_azimuthal_voxel).P2);
+  const BoundVec3 p_two(grid.pMaxAzimuthal(current_azimuthal_voxel + 1).P1, 0.0,
+                        grid.pMaxAzimuthal(current_azimuthal_voxel + 1).P2);
   const BoundVec3 *u_min =
       &grid.centerToAzimuthalBound(current_azimuthal_voxel);
   const BoundVec3 *u_max =
       &grid.centerToAzimuthalBound(current_azimuthal_voxel + 1);
-  const FreeVec3 w_min = p_one - FreeVec3(ray_segment.P1());
-  const FreeVec3 w_max = p_two - FreeVec3(ray_segment.P1());
+  const FreeVec3 w_min = p_one - ray_segment.P1();
+  const FreeVec3 w_max = p_two - ray_segment.P1();
   const double perp_uv_min = u_min->x() * ray_segment.vector().z() -
                              u_min->z() * ray_segment.vector().x();
   const double perp_uv_max = u_max->x() * ray_segment.vector().z() -
