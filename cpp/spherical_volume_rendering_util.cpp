@@ -8,6 +8,9 @@
 #include "floating_point_comparison_util.h"
 
 namespace svr {
+
+constexpr double DOUBLE_MAX = std::numeric_limits<double>::max();
+
 // The type corresponding to the voxel(s) with the minimum tMax value for a
 // given traversal.
 enum VoxelIntersectionType {
@@ -29,9 +32,6 @@ struct HitParameters {
   // The voxel traversal value of a radial step: 0, +1, -1. This is added to the
   // current voxel.
   int tStep;
-
-  // Determines whether the current hit is within time bounds (t, max_t).
-  bool within_bounds;
 };
 
 // Pre-calculated information for the generalized angular hit function, which
@@ -145,9 +145,7 @@ inline HitParameters radialHit(const Ray &ray,
         std::sqrt(grid.deltaRadiiSquared(current_radial_voxel - 1) -
                   rsvd_minus_v_squared);
     const double intersection_t = ray.timeOfIntersectionAt(v + d_b);
-    if (intersection_t < max_t) {
-      return {.tMax = intersection_t, .tStep = -1, .within_bounds = true};
-    }
+    if (intersection_t < max_t) return {.tMax = intersection_t, .tStep = -1};
   } else {
     const std::size_t previous_idx =
         std::min(static_cast<std::size_t>(current_radial_voxel),
@@ -163,23 +161,21 @@ inline HitParameters radialHit(const Ray &ray,
     if (t_entrance_gt_t && t_entrance == t_exit) {
       // Tangential hit.
       radial_step_has_transitioned = true;
-      return {.tMax = t_entrance, .tStep = 0, .within_bounds = true};
+      return {.tMax = t_entrance, .tStep = 0};
     }
     if (t_entrance_gt_t && t_entrance < max_t) {
-      return {.tMax = t_entrance, .tStep = 1, .within_bounds = true};
+      return {.tMax = t_entrance, .tStep = 1};
     }
     if (t_exit < max_t) {
       // t_exit is the "further" point of intersection of the current sphere.
       // Since t_entrance is not within our time bounds, it must be true that
       // this is a radial transition.
       radial_step_has_transitioned = true;
-      return {.tMax = t_exit, .tStep = -1, .within_bounds = true};
+      return {.tMax = t_exit, .tStep = -1};
     }
   }
   // There does not exist an intersection time X such that t < X < max_t.
-  return {.tMax = std::numeric_limits<double>::max(),
-          .tStep = 0,
-          .within_bounds = false};
+  return {.tMax = DOUBLE_MAX, .tStep = 0};
 }
 
 // A generalized version of the latter half of the polar and azimuthal hit
@@ -229,24 +225,26 @@ HitParameters angularHit(
     }
   }
 
-  const bool t_max_within_bounds = svr::lessThan(t, t_max) && t_max < max_t;
-  const bool t_min_within_bounds = svr::lessThan(t, t_min) && t_min < max_t;
+  const bool t_t_max_eq = svr::isEqual(t, t_max);
+  const bool t_max_within_bounds = t < t_max && !t_t_max_eq && t_max < max_t;
+  const bool t_t_min_eq = svr::isEqual(t, t_min);
+  const bool t_min_within_bounds = t < t_min && !t_t_min_eq && t_min < max_t;
   if (!t_max_within_bounds && !t_min_within_bounds) {
-    return {.tMax = std::numeric_limits<double>::max(),
-            .tStep = 0,
-            .within_bounds = false};
+    return {.tMax = DOUBLE_MAX, .tStep = 0};
   }
-
-  if (is_intersect_max && !is_intersect_min && !is_collinear_min) {
-    return {.tMax = t_max, .tStep = 1, .within_bounds = t_max_within_bounds};
+  if (is_intersect_max && !is_intersect_min && !is_collinear_min &&
+      t_max_within_bounds) {
+    return {.tMax = t_max, .tStep = 1};
   }
-  if (is_intersect_min && !is_intersect_max && !is_collinear_max) {
-    return {.tMax = t_min, .tStep = -1, .within_bounds = t_min_within_bounds};
+  if (is_intersect_min && !is_intersect_max && !is_collinear_max &&
+      t_min_within_bounds) {
+    return {.tMax = t_min, .tStep = -1};
   }
   if ((is_intersect_min && is_intersect_max) ||
       (is_intersect_min && is_collinear_max) ||
       (is_intersect_max && is_collinear_min)) {
-    if (svr::isEqual(t_min, t_max)) {
+    const bool min_max_eq = svr::isEqual(t_min, t_max);
+    if (min_max_eq && t_min_within_bounds) {
       const double perturbed_t = 0.1;
       a = -ray.direction().x() * perturbed_t;
       b = -ray_direction_2 * perturbed_t;
@@ -260,21 +258,16 @@ HitParameters angularHit(
       return {.tMax = t_max,
               .tStep = ray.direction().x() < 0.0 || ray_direction_2 < 0.0
                            ? next_step
-                           : -next_step,
-              .within_bounds = t_min_within_bounds};
+                           : -next_step};
     }
-    if (t_min_within_bounds &&
-        (svr::lessThan(t_min, t_max) || svr::isEqual(t, t_max))) {
-      return {.tMax = t_min, .tStep = -1, .within_bounds = true};
+    if (t_min_within_bounds && ((t_min < t_max && !min_max_eq) || t_t_max_eq)) {
+      return {.tMax = t_min, .tStep = -1};
     }
-    if (t_max_within_bounds &&
-        (svr::lessThan(t_max, t_min) || svr::isEqual(t, t_min))) {
-      return {.tMax = t_max, .tStep = 1, .within_bounds = true};
+    if (t_max_within_bounds && ((t_max < t_min && !min_max_eq) || t_t_min_eq)) {
+      return {.tMax = t_max, .tStep = 1};
     }
   }
-  return {.tMax = std::numeric_limits<double>::max(),
-          .tStep = 0,
-          .within_bounds = false};
+  return {.tMax = DOUBLE_MAX, .tStep = 0};
 }
 
 // Determines whether a polar hit occurs for the given ray. A polar hit is
@@ -360,34 +353,27 @@ inline HitParameters azimuthalHit(const Ray &ray,
 // 6. tMaxR, tMaxPhi equal intersection.
 // 7. tMaxTheta, tMaxPhi equal intersection.
 // For each case, the following must hold: t < tMax < max_t
+// For reference in shorthand naming:
+//        RP = Radial - Polar
+//        RA = Radial - Azimuthal
+//        PA = Polar  - Azimuthal
 inline VoxelIntersectionType minimumIntersection(
     const HitParameters &radial, const HitParameters &polar,
     const HitParameters &azimuthal) noexcept {
   const bool RP_eq = svr::isEqual(radial.tMax, polar.tMax);
   const bool RA_eq = svr::isEqual(radial.tMax, azimuthal.tMax);
-  if (radial.within_bounds && radial.tMax < polar.tMax && !RP_eq &&
-      radial.tMax < azimuthal.tMax && !RA_eq) {
-    return VoxelIntersectionType::Radial;
-  }
+  const bool RP_lt = radial.tMax < polar.tMax;
+  const bool RA_lt = radial.tMax < azimuthal.tMax;
+  if (RP_lt && !RP_eq && RA_lt && !RA_eq) return Radial;
+
   const bool PA_eq = svr::isEqual(polar.tMax, azimuthal.tMax);
-  if (polar.within_bounds && polar.tMax < radial.tMax && !RP_eq &&
-      polar.tMax < azimuthal.tMax && !PA_eq) {
-    return VoxelIntersectionType::Polar;
-  }
-  if (azimuthal.within_bounds && azimuthal.tMax < polar.tMax && !PA_eq &&
-      azimuthal.tMax < radial.tMax && !RA_eq) {
-    return VoxelIntersectionType::Azimuthal;
-  }
-  if (radial.within_bounds && RP_eq && RA_eq) {
-    return VoxelIntersectionType::RadialPolarAzimuthal;
-  }
-  if (azimuthal.within_bounds && PA_eq) {
-    return VoxelIntersectionType::PolarAzimuthal;
-  }
-  if (radial.within_bounds && RP_eq) {
-    return VoxelIntersectionType::RadialPolar;
-  }
-  return VoxelIntersectionType::RadialAzimuthal;
+  const bool PA_lt = polar.tMax < azimuthal.tMax;
+  if (!RP_lt && !RP_eq && PA_lt && !PA_eq) return Polar;
+  if (!PA_lt && !PA_eq && !RA_lt && !RA_eq) return Azimuthal;
+  if (RP_eq && RA_eq) return RadialPolarAzimuthal;
+  if (PA_eq) return PolarAzimuthal;
+  if (RP_eq) return RadialPolar;
+  return RadialAzimuthal;
 }
 
 // Initialize an array of values representing the points of intersection between
@@ -524,8 +510,8 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     const auto azimuthal = azimuthalHit(ray, grid, ray_segment, collinear_times,
                                         current_azimuthal_voxel, t, max_t);
     if (current_radial_voxel + radial.tStep == 0 ||
-        (!radial.within_bounds && !polar.within_bounds &&
-         !azimuthal.within_bounds)) {
+        (radial.tMax == DOUBLE_MAX && polar.tMax == DOUBLE_MAX &&
+         radial.tMax == DOUBLE_MAX)) {
       return voxels;
     }
     const auto voxel_intersection =
