@@ -29,6 +29,7 @@ struct SphericalVoxel {
 // expected values are within bounds [0.0, 1.0]. For example, if max_t <= 0.0,
 // then no voxels will be traversed. If max_t >= 1.0, then the entire sphere
 // will be traversed.
+// todo(cgyurgyik): Add description of sampler, data.
 std::vector<SphericalVoxel> walkSphericalVolume(
     const Ray &ray, const svr::SphericalVoxelGrid &grid, double max_t,
     const std::function<void(const svr::SphericalVoxelGrid &grid,
