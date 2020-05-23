@@ -424,8 +424,11 @@ inline void initializeVoxelBoundarySegments(
 }
 
 std::vector<svr::SphericalVoxel> walkSphericalVolume(
-    const Ray &ray, const svr::SphericalVoxelGrid &grid,
-    double max_t) noexcept {
+    const Ray &ray, const svr::SphericalVoxelGrid &grid, double max_t,
+    const std::function<void(
+        const svr::SphericalVoxelGrid &grid, const Ray &ray, double enter_t,
+        double exit_t, const svr::SphericalVoxel &sv, void *data)> &sampler,
+    void *data) noexcept {
   if (max_t <= 0.0) return {};
   const FreeVec3 rsv =
       grid.sphereCenter() - ray.pointAtParameter(0.0);  // Ray Sphere Vector.
@@ -499,6 +502,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       0.0, ray.timeOfIntersectionAt(grid.sphereCenter())};
 
   RaySegment ray_segment(max_t, ray);
+  double previous_intersection_t;
   bool radial_step_has_transitioned = false;
   while (true) {
     const auto radial =
@@ -516,6 +520,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     }
     const auto voxel_intersection =
         minimumIntersection(radial, polar, azimuthal);
+    previous_intersection_t = t;
     switch (voxel_intersection) {
       case Radial: {
         t = radial.tMax;
@@ -566,14 +571,16 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
         break;
       }
     }
-    if (voxels.back().radial == current_radial_voxel &&
-        voxels.back().polar == current_polar_voxel &&
-        voxels.back().azimuthal == current_azimuthal_voxel) {
-      continue;
+    const svr::SphericalVoxel intersected_voxel = {
+        .radial = current_radial_voxel,
+        .polar = current_polar_voxel,
+        .azimuthal = current_azimuthal_voxel};
+    if (voxels.back() == intersected_voxel) continue;
+    if (sampler != nullptr) {
+      sampler(grid, ray, /*enter_t=*/previous_intersection_t, /*exit_t=*/t,
+              intersected_voxel, data);
     }
-    voxels.push_back({.radial = current_radial_voxel,
-                      .polar = current_polar_voxel,
-                      .azimuthal = current_azimuthal_voxel});
+    voxels.push_back(intersected_voxel);
   }
 }
 
