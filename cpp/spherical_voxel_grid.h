@@ -46,6 +46,7 @@ struct SphericalVoxelGrid {
         num_azimuthal_sections_(num_azimuthal_sections),
         sphere_center_(sphere_center),
         sphere_max_radius_(max_bound.radial),
+        sphere_max_diameter_(sphere_max_radius_ * 2.0),
         delta_radius_((max_bound.radial - min_bound.radial) /
                       num_radial_sections),
         delta_theta_((max_bound.polar - min_bound.polar) / num_polar_sections),
@@ -152,6 +153,10 @@ struct SphericalVoxelGrid {
     return this->sphere_max_radius_;
   }
 
+  inline double sphereMaxDiameter() const noexcept {
+    return this->sphere_max_diameter_;
+  }
+
   inline const BoundVec3 &sphereCenter() const noexcept {
     return this->sphere_center_;
   }
@@ -206,6 +211,9 @@ struct SphericalVoxelGrid {
 
   // The maximum radius of the sphere.
   const double sphere_max_radius_;
+
+  // The maximum diamater of the sphere.
+  const double sphere_max_diameter_;
 
   // The maximum sphere radius divided by the number of radial sections.
   const double delta_radius_;

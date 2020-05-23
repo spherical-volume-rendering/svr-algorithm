@@ -76,7 +76,8 @@ bool checkVoxelBounds(const Ray& ray,
 // the next radial voxel is current+1, current-1, or current+0.
 // Returns false if the checks did not pass.
 bool checkRadialVoxelOrdering(
-    const Ray& ray, const std::vector<svr::SphericalVoxel>& actual_voxels) {
+    const Ray& ray, const std::vector<svr::SphericalVoxel>& actual_voxels,
+    bool traverses_entire_sphere) {
   const auto it = std::adjacent_find(
       actual_voxels.cbegin(), actual_voxels.cend(),
       [](const svr::SphericalVoxel& v1, const svr::SphericalVoxel& v2) {
@@ -100,23 +101,25 @@ bool checkRadialVoxelOrdering(
     printRayData(ray);
     return false;
   }
-  EXPECT_FALSE(actual_voxels.empty());
-  if (actual_voxels.empty()) {
-    printf("\nNo intersection with sphere at all.");
-    printRayData(ray);
-    return false;
-  }
-  const std::size_t last = actual_voxels.size() - 1;
-  EXPECT_TRUE(actual_voxels[0].radial == 1);
-  EXPECT_TRUE(actual_voxels[last].radial == 1);
-  if (actual_voxels[0].radial != 1 || actual_voxels[last].radial != 1) {
-    printf("\nDid not complete entire traversal.");
-    const auto first_voxel = actual_voxels[0];
-    const auto last_voxel = actual_voxels[last];
-    printRayData(ray);
-    printVoxelInformation(first_voxel, "Entrance Voxel.");
-    printVoxelInformation(last_voxel, "Exit Voxel");
-    return false;
+  if (traverses_entire_sphere) {
+    EXPECT_FALSE(actual_voxels.empty());
+    if (actual_voxels.empty()) {
+      printf("\nNo intersection with sphere at all.");
+      printRayData(ray);
+      return false;
+    }
+    const std::size_t last = actual_voxels.size() - 1;
+    EXPECT_TRUE(actual_voxels[0].radial == 1);
+    EXPECT_TRUE(actual_voxels[last].radial == 1);
+    if (actual_voxels[0].radial != 1 || actual_voxels[last].radial != 1) {
+      printf("\nDid not complete entire traversal.");
+      const auto first_voxel = actual_voxels[0];
+      const auto last_voxel = actual_voxels[last];
+      printRayData(ray);
+      printVoxelInformation(first_voxel, "Entrance Voxel.");
+      printVoxelInformation(last_voxel, "Exit Voxel");
+      return false;
+    }
   }
   return true;
 }
@@ -198,10 +201,7 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
   const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
-  const double t_begin = 0.0;
-  const double t_end = sphere_max_radius * 3;
-
-  const FreeVec3 ray_direction(0.0, 0.0, 1.0);
+  const UnitVec3 ray_direction(0.0, 0.0, 1.0);
   double ray_origin_x = -1000.0;
   double ray_origin_y = -1000.0;
   const double ray_origin_z = -(sphere_max_radius + 1.0);
@@ -211,9 +211,10 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
     for (std::size_t j = 0; j < X; ++j) {
       const BoundVec3 ray_origin(ray_origin_x, ray_origin_y, ray_origin_z);
       const Ray ray(ray_origin, ray_direction);
-      const auto actual_voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
+      const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
       ASSERT_TRUE(checkVoxelBounds(ray, actual_voxels, Y, Y, Y) &&
-                  checkRadialVoxelOrdering(ray, actual_voxels) &&
+                  checkRadialVoxelOrdering(ray, actual_voxels,
+                                           /*traverses_entire_sphere=*/true) &&
                   checkAngularVoxelOrdering(ray, actual_voxels));
       ray_origin_y =
           (j == X - 1) ? -1000.0 : ray_origin_y + ray_origin_plane_movement;
@@ -227,8 +228,8 @@ void inline orthographicTraverseXSquaredRaysinYCubedVoxels(
 // then used, and the other two origin values are randomly chosen from a value
 // within bounds [-10,000.0, 10,000.0]. The number of sections for each voxel
 // type is bounded by [16, Y];
-void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
-    const std::size_t X, const std::size_t Y) noexcept {
+void inline randomRayPlacementOutsideSphere(const std::size_t X,
+                                            const std::size_t Y) noexcept {
   std::default_random_engine rd(time(nullptr));
   std::mt19937 mt(rd());
   EXPECT_GT(Y, 24);
@@ -245,12 +246,8 @@ void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
   const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
-  const double t_begin = 0.0;
-  const double t_end = sphere_max_radius * 100;
-
   std::uniform_int_distribution<int> ray_major_axis_distribution(1, 3);
   BoundVec3 ray_origin;
-  FreeVec3 ray_direction;
   const double chosen_axis = ray_major_axis_distribution(mt);
   if (chosen_axis == 1) {
     ray_origin.x() = -(sphere_max_radius + 1.0);
@@ -272,11 +269,50 @@ void inline randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
       ray_origin.y() = dist1(mt);
     }
     std::uniform_real_distribution<double> dist2(1.0, 3.0);
-    const Ray ray(ray_origin, FreeVec3(dist2(mt), dist2(mt), dist2(mt)));
-    const auto actual_voxels = walkSphericalVolume(ray, grid, t_begin, t_end);
+    const Ray ray(ray_origin, UnitVec3(dist2(mt), dist2(mt), dist2(mt)));
+    const auto actual_voxels = walkSphericalVolume(ray, grid, /*max_t=*/1.0);
     ASSERT_TRUE(checkVoxelBounds(ray, actual_voxels, num_radial_sections,
                                  num_polar_sections, num_azimuthal_sections) &&
-                checkRadialVoxelOrdering(ray, actual_voxels) &&
+                checkRadialVoxelOrdering(ray, actual_voxels,
+                                         /*traverses_entire_sphere=*/true) &&
+                checkAngularVoxelOrdering(ray, actual_voxels));
+  }
+}
+
+// Similar to randomRayPlacementOutsideSphere, but
+// the ray origin is within the sphere. The ray origin is placed within bounds
+// [10,000.0, 10,000.0) and the ray direction is within bounds [10.0, 10.0).
+void inline randomRayPlacementWithinSphere(const std::size_t X,
+                                           const std::size_t Y) noexcept {
+  std::default_random_engine rd(time(nullptr));
+  std::mt19937 mt(rd());
+  EXPECT_GT(Y, 24);
+  std::uniform_int_distribution<int> num_sections(16, Y);
+  const BoundVec3 sphere_center(0.0, 0.0, 0.0);
+  const double sphere_max_radius = 10e6;
+  const std::size_t num_radial_sections = num_sections(mt);
+  const std::size_t num_polar_sections = num_sections(mt);
+  const std::size_t num_azimuthal_sections = num_sections(mt);
+  const svr::SphereBound min_bound = {
+      .radial = 0.0, .polar = 0.0, .azimuthal = 0.0};
+  const svr::SphereBound max_bound = {
+      .radial = sphere_max_radius, .polar = 2 * M_PI, .azimuthal = 2 * M_PI};
+  const svr::SphericalVoxelGrid grid(min_bound, max_bound, num_radial_sections,
+                                     num_polar_sections, num_azimuthal_sections,
+                                     sphere_center);
+
+  std::uniform_real_distribution<double> dist1(-10000.0, 10000.0);
+  std::uniform_real_distribution<double> dist2(-10.0, 10.0);
+  std::uniform_real_distribution<double> dist3(-0.1, 1.1);
+  for (int i = 0; i < X * X; ++i) {
+    BoundVec3 ray_origin(dist1(mt), dist1(mt), dist1(mt));
+    const Ray ray(ray_origin, UnitVec3(dist2(mt), dist2(mt), dist2(mt)));
+    const double max_t = dist3(mt);
+    const auto actual_voxels = walkSphericalVolume(ray, grid, max_t);
+    ASSERT_TRUE(checkVoxelBounds(ray, actual_voxels, num_radial_sections,
+                                 num_polar_sections, num_azimuthal_sections) &&
+                checkRadialVoxelOrdering(ray, actual_voxels,
+                                         /*traverses_entire_sphere=*/false) &&
                 checkAngularVoxelOrdering(ray, actual_voxels));
   }
 }
@@ -312,12 +348,23 @@ const std::vector<TestParameters> orthographic_test_parameters = {
     {.ray_squared_count = 1024, .voxel_cubed_count = 32},
 };
 
-TEST(ContinuousIntegration, RandomizedInputs) {
+TEST(ContinuousIntegration, RayInsideSphereRandomizedInputs) {
   for (const auto param : random_test_parameters) {
     printf("   [ RUN      ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
-    randomRayPlacementTraverseXSquaredRaysInYBoundedCubedVoxels(
-        param.ray_squared_count, param.voxel_cubed_count);
+    randomRayPlacementWithinSphere(param.ray_squared_count,
+                                   param.voxel_cubed_count);
+    printf("   [       OK ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
+           param.ray_squared_count, param.voxel_cubed_count);
+  }
+}
+
+TEST(ContinuousIntegration, RayOutsideSphereRandomizedInputs) {
+  for (const auto param : random_test_parameters) {
+    printf("   [ RUN      ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
+           param.ray_squared_count, param.voxel_cubed_count);
+    randomRayPlacementOutsideSphere(param.ray_squared_count,
+                                    param.voxel_cubed_count);
     printf("   [       OK ] %lu^2 Rays in [16, %lu]^3 Voxels\n",
            param.ray_squared_count, param.voxel_cubed_count);
   }

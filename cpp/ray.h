@@ -4,16 +4,15 @@
 #include "vec3.h"
 
 // Encapsulates the functionality of a ray. This consists of two components, the
-// origin of the ray, and the direction of the ray. To avoid checking for a
+// origin of the ray, and the unit direction of the ray. To avoid checking for a
 // non-zero direction upon each function call, these parameters are initialized
 // upon construction.
 struct Ray final {
-  inline Ray(const BoundVec3 &origin, const FreeVec3 &direction)
+  inline Ray(const BoundVec3 &origin, const UnitVec3 &direction)
       : origin_(origin),
         direction_(direction),
-        unit_direction_(direction),
-        inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(),
-                                    1.0 / direction.z())),
+        inverse_direction_(FreeVec3(1.0 / direction_.x(), 1.0 / direction_.y(),
+                                    1.0 / direction_.z())),
         NZD_index_(std::abs(direction.x()) > 0.0
                        ? X_DIRECTION
                        : std::abs(direction.y()) > 0.0 ? Y_DIRECTION
@@ -33,7 +32,7 @@ struct Ray final {
   // ray.direction() * (v +/- discriminant), We can simply provide the
   // difference or addition of v and the discriminant.
   inline double timeOfIntersectionAt(double discriminant_v) const noexcept {
-    return this->unit_direction_[NZD_index_] * discriminant_v *
+    return this->direction_[NZD_index_] * discriminant_v *
            this->inverse_direction_[NZD_index_];
   }
 
@@ -45,14 +44,10 @@ struct Ray final {
 
   inline const BoundVec3 &origin() const noexcept { return this->origin_; }
 
-  inline const FreeVec3 &direction() const noexcept { return this->direction_; }
+  inline const UnitVec3 &direction() const noexcept { return this->direction_; }
 
   inline const FreeVec3 &invDirection() const noexcept {
     return this->inverse_direction_;
-  }
-
-  inline const UnitVec3 &unitDirection() const noexcept {
-    return this->unit_direction_;
   }
 
   inline DirectionIndex NonZeroDirectionIndex() const noexcept {
@@ -64,10 +59,7 @@ struct Ray final {
   const BoundVec3 origin_;
 
   // The direction of the ray.
-  const FreeVec3 direction_;
-
-  // The normalized direction of the ray.
-  const UnitVec3 unit_direction_;
+  const UnitVec3 direction_;
 
   // The inverse direction of the ray.
   const FreeVec3 inverse_direction_;
