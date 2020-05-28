@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@1.0.5
 
 jobs:
   build:
@@ -13,14 +16,28 @@ jobs:
           name: Installing GCC
           command: 'apt-get update && apt-get install -y gcc g++'
       - run:
-          name: Install CMAKE
+          name: Installing CMAKE
           command: 'apt-get update && sudo apt-get install -y cmake'
       - run:
-          name: Install GIT
+          name: Installing GIT
           command: 'apt-get update && apt-get install -y git'
       - run: 
           name: Create Build, Binary Files
           command: 'cd cpp/tests && cmake -H. -Bbuild && cmake --build build'
       - run:
-          name: SVR Unit Testing
-          command: 'cd cpp/tests/bin && ./test_SVR'
+          name: SVR Unit Testing 5 Times
+          command: 'cd cpp/tests/bin && ./test_svr && ./test_svr && ./test_svr && ./test_svr && ./test_svr'
+      - run:
+          name: SVR Continuous Integration Large Tests
+          command: 'cd cpp/tests/bin && ./continuous_integration_svr'
+      - run:
+          name: Install Curl
+          command: 'apt-get update && sudo apt install -y curl'
+      - run:
+          name: Install LCOV
+          command: 'apt-get update && sudo apt-get install -y lcov'
+      - run:
+          name: Run Coverage
+          command: 'lcov --rc lcov_branch_coverage=1 --directory . --capture --output-file coverage.info && lcov --remove coverage.info "*cpp/tests/*" --output-file coverage.info && lcov --list coverage.info'
+      - codecov/upload:
+          file: coverage.info
