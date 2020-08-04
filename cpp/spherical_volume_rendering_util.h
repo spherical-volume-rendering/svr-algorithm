@@ -14,6 +14,8 @@ struct SphericalVoxel {
   int radial;
   int polar;
   int azimuthal;
+  double enter_t;
+  double exit_t;
 };
 
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the
