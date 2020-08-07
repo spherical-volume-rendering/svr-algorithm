@@ -14,6 +14,8 @@ struct SphericalVoxel {
   int radial;
   int polar;
   int azimuthal;
+
+  // Entrance and exit time into the given voxel.
   double enter_t;
   double exit_t;
 };
