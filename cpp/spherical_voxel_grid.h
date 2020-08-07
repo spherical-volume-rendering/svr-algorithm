@@ -45,6 +45,10 @@ struct SphericalVoxelGrid {
         num_polar_sections_(num_polar_sections),
         num_azimuthal_sections_(num_azimuthal_sections),
         sphere_center_(sphere_center),
+        sphere_max_bound_polar_(max_bound.polar),
+        sphere_min_bound_polar_(min_bound.polar),
+        sphere_max_bound_azimuthal_(max_bound.azimuthal),
+        sphere_min_bound_azimuthal_(min_bound.azimuthal),
         sphere_max_radius_(max_bound.radial),
         sphere_max_diameter_(sphere_max_radius_ * 2.0),
         delta_radius_((max_bound.radial - min_bound.radial) /
@@ -95,7 +99,7 @@ struct SphericalVoxelGrid {
       }
       return;
     }
-    double radians = 0.0;
+    double radians = min_bound.polar;
     polar_trig_values_.resize(num_polar_sections + 1);
     std::generate(polar_trig_values_.begin(), polar_trig_values_.end(),
                   [&]() -> TrigonometricValues {
@@ -104,7 +108,7 @@ struct SphericalVoxelGrid {
                     radians += delta_theta_;
                     return {.cosine = cos, .sine = sin};
                   });
-    radians = 0.0;
+    radians = min_bound.azimuthal;
     azimuthal_trig_values_.resize(num_azimuthal_sections + 1);
     std::generate(azimuthal_trig_values_.begin(), azimuthal_trig_values_.end(),
                   [&]() -> TrigonometricValues {
@@ -149,6 +153,22 @@ struct SphericalVoxelGrid {
     return this->num_azimuthal_sections_;
   }
 
+  inline double sphereMaxBoundPolar() const noexcept {
+    return this->sphere_max_bound_polar_;
+  }
+
+  inline double sphereMinBoundPolar() const noexcept {
+    return this->sphere_min_bound_polar_;
+  }
+
+  inline double sphereMaxBoundAzi() const noexcept {
+    return this->sphere_max_bound_azimuthal_;
+  }
+
+  inline double sphereMinBoundAzi() const noexcept {
+    return this->sphere_min_bound_azimuthal_;
+  }
+
   inline double sphereMaxRadius() const noexcept {
     return this->sphere_max_radius_;
   }
@@ -162,6 +182,10 @@ struct SphericalVoxelGrid {
   }
 
   inline double deltaRadius() const noexcept { return delta_radius_; }
+
+  inline double deltaPhi() const noexcept { return delta_phi_; }
+
+  inline double deltaTheta() const noexcept { return delta_theta_; }
 
   inline double deltaRadiiSquared(std::size_t i) const noexcept {
     return this->delta_radii_sq_[i];
@@ -208,6 +232,18 @@ struct SphericalVoxelGrid {
 
   // The center of the sphere.
   const BoundVec3 sphere_center_;
+
+  // The maximum polar bound of the sphere.
+  const double sphere_max_bound_polar_;
+
+  // The minimum polar bound of the sphere.
+  const double sphere_min_bound_polar_;
+
+  // The maximum azimuthal bound of the sphere.
+  const double sphere_max_bound_azimuthal_;
+
+  // The minimum azimuthal bound of the sphere.
+  const double sphere_min_bound_azimuthal_;
 
   // The maximum radius of the sphere.
   const double sphere_max_radius_;

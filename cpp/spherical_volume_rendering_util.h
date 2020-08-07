@@ -8,16 +8,14 @@
 #include "vec3.h"
 
 namespace svr {
+
 // Represents a spherical voxel coordinate.
 struct SphericalVoxel {
   int radial;
   int polar;
   int azimuthal;
-
-  inline bool operator==(SphericalVoxel v) const noexcept {
-    return this->radial == v.radial && this->polar == v.polar &&
-           this->azimuthal == v.azimuthal;
-  }
+  double enter_t;
+  double exit_t;
 };
 
 // A spherical coordinate voxel traversal algorithm. The algorithm traces the
@@ -29,14 +27,8 @@ struct SphericalVoxel {
 // expected values are within bounds [0.0, 1.0]. For example, if max_t <= 0.0,
 // then no voxels will be traversed. If max_t >= 1.0, then the entire sphere
 // will be traversed.
-// todo(cgyurgyik): Add description of sampler, data.
 std::vector<SphericalVoxel> walkSphericalVolume(
-    const Ray &ray, const svr::SphericalVoxelGrid &grid, double max_t,
-    const std::function<void(const svr::SphericalVoxelGrid &grid,
-                             const Ray &ray, double enter_t, double exit_t,
-                             const svr::SphericalVoxel &sv, void *data)>
-        &sampler = nullptr,
-    void *data = nullptr) noexcept;
+    const Ray &ray, const svr::SphericalVoxelGrid &grid, double max_t) noexcept;
 
 // Simplified parameters to Cythonize the function; implementation remains the
 // same as above.
