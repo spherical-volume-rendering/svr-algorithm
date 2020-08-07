@@ -99,7 +99,7 @@ struct SphericalVoxelGrid {
       }
       return;
     }
-    double radians = 0.0;
+    double radians = min_bound.polar;
     polar_trig_values_.resize(num_polar_sections + 1);
     std::generate(polar_trig_values_.begin(), polar_trig_values_.end(),
                   [&]() -> TrigonometricValues {
@@ -108,7 +108,7 @@ struct SphericalVoxelGrid {
                     radians += delta_theta_;
                     return {.cosine = cos, .sine = sin};
                   });
-    radians = 0.0;
+    radians = min_bound.azimuthal;
     azimuthal_trig_values_.resize(num_azimuthal_sections + 1);
     std::generate(azimuthal_trig_values_.begin(), azimuthal_trig_values_.end(),
                   [&]() -> TrigonometricValues {

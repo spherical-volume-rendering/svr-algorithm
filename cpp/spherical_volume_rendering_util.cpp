@@ -532,6 +532,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
     if (current_radial_voxel + radial.tStep == 0 ||
         (radial.tMax == DOUBLE_MAX && polar.tMax == DOUBLE_MAX &&
          azimuthal.tMax == DOUBLE_MAX)) {
+        voxels.back().exit_t = t_ray_exit;
       return voxels;
     }
     const bool in_azi_bounds =
@@ -601,9 +602,11 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
         voxels.back().azimuthal == current_azimuthal_voxel) {
       continue;
     }
+    voxels.back().exit_t = t;
     voxels.push_back({.radial = current_radial_voxel,
                       .polar = current_polar_voxel,
-                      .azimuthal = current_azimuthal_voxel});
+                      .azimuthal = current_azimuthal_voxel,
+                      .enter_t = t});
   }
 }
 
