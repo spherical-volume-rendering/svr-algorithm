@@ -107,21 +107,21 @@ inline int calculateAngularVoxelIDFromPoints(
 
 // Returns true if the "step" taken from the current voxel ID remains in
 // the grid bounds.
-inline int inBoundsAzimuthal(const SphericalVoxelGrid &grid,
+inline bool inBoundsAzimuthal(const SphericalVoxelGrid &grid,
                     const int step,
                     const int azi_voxel) noexcept {
   const double radian = (azi_voxel + 1)*grid.deltaPhi();
-  const double angval = radian - abs(step * grid.deltaPhi());
+  const double angval = radian - std::abs(step * grid.deltaPhi());
   return angval <= grid.sphereMaxBoundAzi() && angval >= grid.sphereMinBoundAzi() ;
 }
 
 // Returns true if the "step" taken from the current voxel ID remains in
 // the grid bounds.
-inline int inBoundsPolar(const SphericalVoxelGrid &grid,
+inline bool inBoundsPolar(const SphericalVoxelGrid &grid,
                          const int step,
                          const int pol_voxel) noexcept {
   const double radian = (pol_voxel + 1)*grid.deltaTheta();
-  const double angval = radian - abs(step * grid.deltaTheta());
+  const double angval = radian - std::abs(step * grid.deltaTheta());
   return angval <= grid.sphereMaxBoundPolar() && angval >= grid.sphereMinBoundPolar() ;
 }
 
