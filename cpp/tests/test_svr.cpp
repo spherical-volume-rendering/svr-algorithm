@@ -960,11 +960,15 @@ TEST(SphericalCoordinateTraversal, UpperHemisphereMiss) {
   const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
-  const BoundVec3 ray_origin = BoundVec3(-5.0, -5.0, -5.0);
-  const UnitVec3 ray_direction(1.0, 0.0, 0.0);
-  const auto actual_voxels =
-      walkSphericalVolume(Ray(ray_origin, ray_direction), grid, /*max_t=*/1.0);
-  EXPECT_EQ(actual_voxels.size(), 0);
+  const std::vector<BoundVec3> ray_origins = {
+      BoundVec3(-5.0, -5.0, -5.0), BoundVec3(-1.0, -1.0, -1.0),
+      BoundVec3(0.0, 0.0, -5.0), BoundVec3(1.0, 1.0, -0.02)};
+  for (const auto &ray_origin : ray_origins) {
+    const UnitVec3 ray_direction(1.0, 0.0, 0.0);
+    const auto v = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
+                                        /*max_t=*/1.0);
+    EXPECT_EQ(v.size(), 0);
+  }
 }
 
 TEST(SphericalCoordinateTraversal, AvoidRaySteppingToRadialVoxelZero) {
@@ -1071,8 +1075,8 @@ TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
-  const std::size_t num_polar_sections = 4;
-  const std::size_t num_azimuthal_sections = 4;
+  const std::size_t num_polar_sections = 1;
+  const std::size_t num_azimuthal_sections = 1;
   const svr::SphereBound max_bound = {.radial = sphere_max_radius,
                                       .polar = M_PI / 2.0,
                                       .azimuthal = M_PI / 2.0};
@@ -1081,12 +1085,21 @@ TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
                                      sphere_center);
   const auto actual_voxels = walkSphericalVolume(
       Ray(BoundVec3(15.0, 15.0, 15.0), UnitVec3(-1.0, -1.0, -1.0)), grid,
-      /*max_t=*/0.5);
-  const std::vector<int> expected_radial_voxels = {1, 2, 3, 4, 4};
-  const std::vector<int> expected_theta_voxels = {1, 1, 1, 1, 0};
-  const std::vector<int> expected_phi_voxels = {1, 1, 1, 1, 0};
+      /*max_t=*/1.0);
+  const std::vector<int> expected_radial_voxels = {1, 2, 3, 4};
+  const std::vector<int> expected_theta_voxels = {0, 0, 0, 0};
+  const std::vector<int> expected_phi_voxels = {0, 0, 0, 0};
   verifyEqualVoxels(actual_voxels, expected_radial_voxels,
                     expected_theta_voxels, expected_phi_voxels);
+  const std::vector<BoundVec3> ray_origins = {
+      BoundVec3(0.0, 0.0, -0.01), BoundVec3(-1.0, -1.0, -1.0),
+      BoundVec3(0.0, 0.0, -5.0), BoundVec3(1.0, 1.0, -0.02)};
+  for (const auto &ray_origin : ray_origins) {
+      const UnitVec3 ray_direction(4.0, 4.0, 4.0);
+      const auto v = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
+                                                          /*max_t=*/1.0);
+      EXPECT_NE(v.size(), 0);
+    };
 }
 
 TEST(SphericalCoordinateTraversal, FirstQuadrantMiss) {
@@ -1101,10 +1114,19 @@ TEST(SphericalCoordinateTraversal, FirstQuadrantMiss) {
   const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
-  const auto actual_voxels = walkSphericalVolume(
-      Ray(BoundVec3(13.0, -13.0, 13.0), UnitVec3(-1.0, 1.0, -1.0)), grid,
-      /*max_t=*/0.5);
-  EXPECT_EQ(actual_voxels.size(), 0);
+  const std::vector<BoundVec3> ray_origins = {
+        BoundVec3(13.0, -13.0, 13.0), BoundVec3(-1.0, 0.0, 1.0),
+        BoundVec3(-1.0, 1.0, 1.0), BoundVec3(-1.0, -3.0, -1.0)};
+  for (const auto &ray_origin : ray_origins) {
+      const UnitVec3 ray_direction(-1.0, 0.0, 0.0);
+      const auto v = walkSphericalVolume(Ray(ray_origin, ray_direction), grid,
+                                                        /*max_t=*/1.0);
+      EXPECT_EQ(v.size(),0);
+      const UnitVec3 ray_direction1(0.0, 0.0, -1.0);
+      const auto v1 = walkSphericalVolume(Ray(ray_origin, ray_direction1), grid,
+                                                    /*max_t=*/1.0);
+      EXPECT_EQ(v1.size(),0);
+  };
 }
 
 }  // namespace

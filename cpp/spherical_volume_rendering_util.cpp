@@ -82,7 +82,7 @@ struct RaySegment {
 
 // A point will lie between two polar voxel boundaries iff the angle between it
 // and the polar boundary intersection points along the circle of max radius is
-// obtuse. Equality represents the case when the point lies on an polar
+// obtuse. Equality represents the case when the point lies on a polar
 // boundary. This is similar for azimuthal boundaries. Since both cases use
 // points in a plane (XY for polar, XZ for azimuthal), this can be generalized
 // to a single function.
@@ -102,7 +102,27 @@ inline int calculateAngularVoxelIDFromPoints(
     const double d3 = (X_diff * X_diff) + (Y_diff * Y_diff);
     if (d1d2 < d3 || svr::isEqual(d1d2, d3)) return i;
   }
-  return i;
+  return angular_max.size() + 1;
+}
+
+// Returns true if the "step" taken from the current voxel ID remains in
+// the grid bounds.
+inline bool inBoundsAzimuthal(const SphericalVoxelGrid &grid,
+                    const int step,
+                    const int azi_voxel) noexcept {
+  const double radian = (azi_voxel + 1)*grid.deltaPhi();
+  const double angval = radian - std::abs(step * grid.deltaPhi());
+  return angval <= grid.sphereMaxBoundAzi() && angval >= grid.sphereMinBoundAzi() ;
+}
+
+// Returns true if the "step" taken from the current voxel ID remains in
+// the grid bounds.
+inline bool inBoundsPolar(const SphericalVoxelGrid &grid,
+                         const int step,
+                         const int pol_voxel) noexcept {
+  const double radian = (pol_voxel + 1)*grid.deltaTheta();
+  const double angval = radian - std::abs(step * grid.deltaTheta());
+  return angval <= grid.sphereMaxBoundPolar() && angval >= grid.sphereMinBoundPolar() ;
 }
 
 // Initializes an angular voxel ID. For polar initialization, *_2 represents
@@ -466,7 +486,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   int current_polar_voxel = initializeAngularVoxelID(
       grid, grid.numPolarSections(), ray_sphere, P_polar, ray_sphere.y(),
       grid.sphereCenter().y(), entry_radius);
-  if (static_cast<std::size_t>(current_polar_voxel) ==
+  if (static_cast<std::size_t>(current_polar_voxel) >=
       grid.numPolarSections()) {
     return {};
   }
@@ -474,7 +494,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
   int current_azimuthal_voxel = initializeAngularVoxelID(
       grid, grid.numAzimuthalSections(), ray_sphere, P_azimuthal,
       ray_sphere.z(), grid.sphereCenter().z(), entry_radius);
-  if (static_cast<std::size_t>(current_azimuthal_voxel) ==
+  if (static_cast<std::size_t>(current_azimuthal_voxel) >=
       grid.numAzimuthalSections()) {
     return {};
   }
@@ -514,6 +534,10 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
          azimuthal.tMax == DOUBLE_MAX)) {
       return voxels;
     }
+    const bool in_azi_bounds =
+        inBoundsAzimuthal(grid,azimuthal.tStep,current_azimuthal_voxel);
+    const bool in_polar_bounds =
+        inBoundsPolar(grid,polar.tStep,current_polar_voxel);
     const auto voxel_intersection =
         minimumIntersection(radial, polar, azimuthal);
     switch (voxel_intersection) {
@@ -524,11 +548,13 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       }
       case Polar: {
         t = polar.tMax;
+        if (!in_polar_bounds) return voxels;
         current_polar_voxel =
             (current_polar_voxel + polar.tStep) % grid.numPolarSections();
         break;
       }
       case Azimuthal: {
+        if (!in_azi_bounds) return voxels;
         t = azimuthal.tMax;
         current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) %
                                   grid.numAzimuthalSections();
@@ -536,6 +562,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       }
       case RadialPolar: {
         t = radial.tMax;
+        if (!in_polar_bounds) return voxels;
         current_radial_voxel += radial.tStep;
         current_polar_voxel =
             (current_polar_voxel + polar.tStep) % grid.numPolarSections();
@@ -543,6 +570,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       }
       case RadialAzimuthal: {
         t = radial.tMax;
+        if (!in_azi_bounds) return voxels;
         current_radial_voxel += radial.tStep;
         current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) %
                                   grid.numAzimuthalSections();
@@ -550,6 +578,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       }
       case PolarAzimuthal: {
         t = polar.tMax;
+        if (!in_azi_bounds) return voxels;
         current_polar_voxel =
             (current_polar_voxel + polar.tStep) % grid.numPolarSections();
         current_azimuthal_voxel = (current_azimuthal_voxel + azimuthal.tStep) %
@@ -558,6 +587,7 @@ std::vector<svr::SphericalVoxel> walkSphericalVolume(
       }
       case RadialPolarAzimuthal: {
         t = radial.tMax;
+        if (!in_azi_bounds) return voxels;
         current_radial_voxel += radial.tStep;
         current_polar_voxel =
             (current_polar_voxel + polar.tStep) % grid.numPolarSections();

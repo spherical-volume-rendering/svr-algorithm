@@ -7,7 +7,7 @@ function [tMaxTheta, tStepTheta] = polar_hit(ray_origin, ray_direction, current_
 %    current_voxel_ID_theta: the (angular) ID of current voxel.
 %    num_angular_sections: number of total angular sections on the grid.
 %    sphere_center: The center of the circle.
-%    pointArray:
+%    P_max:
 %    t: The current time parameter of the ray.
 %    t_end:
 %    verbose: Determines whether debug print statements are enabled.
