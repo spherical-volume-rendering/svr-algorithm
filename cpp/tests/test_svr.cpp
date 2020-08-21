@@ -1071,7 +1071,7 @@ TEST(SphericalCoordinateTraversal, VerifyManyRaysEntranceAndExit) {
   }
 }
 
-TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
+TEST(SphericalCoordinateTraversal, FirstOctantHit) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
@@ -1102,7 +1102,7 @@ TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
     };
 }
 
-TEST(SphericalCoordinateTraversal, FirstQuadrantMiss) {
+TEST(SphericalCoordinateTraversal, FirstOctantMiss) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
