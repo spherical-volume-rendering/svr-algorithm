@@ -1071,7 +1071,7 @@ TEST(SphericalCoordinateTraversal, VerifyManyRaysEntranceAndExit) {
   }
 }
 
-TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
+TEST(SphericalCoordinateTraversal, FirstOctantHit) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
@@ -1079,7 +1079,7 @@ TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
   const std::size_t num_azimuthal_sections = 1;
   const svr::SphereBound max_bound = {.radial = sphere_max_radius,
                                       .polar = M_PI / 2.0,
-                                      .azimuthal = M_PI / 2.0};
+                                      .azimuthal = M_PI};
   const svr::SphericalVoxelGrid grid(MIN_BOUND, max_bound, num_radial_sections,
                                      num_polar_sections, num_azimuthal_sections,
                                      sphere_center);
@@ -1102,7 +1102,7 @@ TEST(SphericalCoordinateTraversal, FirstQuadrantHit) {
     };
 }
 
-TEST(SphericalCoordinateTraversal, FirstQuadrantMiss) {
+TEST(SphericalCoordinateTraversal, FirstOctantMiss) {
   const BoundVec3 sphere_center(0.0, 0.0, 0.0);
   const double sphere_max_radius = 10.0;
   const std::size_t num_radial_sections = 4;
