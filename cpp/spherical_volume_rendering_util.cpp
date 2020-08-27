@@ -35,52 +35,6 @@ struct HitParameters {
   int tStep;
 };
 
-// Pre-calculated information for the generalized angular hit function, which
-// generalizes azimuthal and polar hits. Since the ray segment is dependent
-// solely on time, this is unnecessary to calculate twice for each plane hit
-// function. Here, ray_segment is the difference between P2 and P1.
-struct RaySegment {
- public:
-  inline RaySegment(double max_t, const Ray &ray)
-      : P2_(ray.pointAtParameter(max_t)), NZDI_(ray.NonZeroDirectionIndex()) {}
-
-  // Updates the point P1 with the new time traversal time t. Similarly, updates
-  // the segment denoted by P2 - P1.
-  inline void updateAtTime(double t, const Ray &ray) noexcept {
-    P1_ = ray.pointAtParameter(t);
-    ray_segment_ = P2_ - P1_;
-  }
-
-  // Calculates the updated ray segment intersection point given an intersect
-  // parameter. More information on the use case can be found at:
-  // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
-  inline double intersectionTimeAt(double intersect_parameter,
-                                   const Ray &ray) const noexcept {
-    return (P1_[NZDI_] + ray_segment_[NZDI_] * intersect_parameter -
-            ray.origin()[NZDI_]) *
-           ray.invDirection()[NZDI_];
-  }
-
-  inline const BoundVec3 &P1() const noexcept { return P1_; }
-
-  inline const BoundVec3 &P2() const noexcept { return P2_; }
-
-  inline const FreeVec3 &vector() const noexcept { return ray_segment_; }
-
- private:
-  // The end point of the ray segment.
-  const BoundVec3 P2_;
-
-  // The non-zero direction index of the ray.
-  const DirectionIndex NZDI_;
-
-  // The begin point of the ray segment.
-  BoundVec3 P1_;
-
-  // The free vector represented by P2 - P1.
-  FreeVec3 ray_segment_;
-};
-
 // A point will lie between two polar voxel boundaries iff the angle between it
 // and the polar boundary intersection points along the circle of max radius is
 // obtuse. Equality represents the case when the point lies on a polar
@@ -106,26 +60,6 @@ inline int calculateAngularVoxelIDFromPoints(
   return angular_max.size() + 1;
 }
 
-// Returns true if the "step" taken from the current voxel ID remains in
-// the grid bounds.
-inline bool inBoundsAzimuthal(const SphericalVoxelGrid &grid, const int step,
-                              const int azi_voxel) noexcept {
-  const double radian = (azi_voxel + 1) * grid.deltaPhi();
-  const double angval = radian - std::abs(step * grid.deltaPhi());
-  return angval <= grid.sphereMaxBoundAzi() &&
-         angval >= grid.sphereMinBoundAzi();
-}
-
-// Returns true if the "step" taken from the current voxel ID remains in
-// the grid bounds.
-inline bool inBoundsPolar(const SphericalVoxelGrid &grid, const int step,
-                          const int pol_voxel) noexcept {
-  const double radian = (pol_voxel + 1) * grid.deltaTheta();
-  const double angval = radian - std::abs(step * grid.deltaTheta());
-  return angval <= grid.sphereMaxBoundPolar() &&
-         angval >= grid.sphereMinBoundPolar();
-}
-
 // Initializes an angular voxel ID. For polar initialization, *_2 represents
 // the y-plane. For azimuthal initialization, it represents the z-plane. If the
 // number of sections is 1 or the squared euclidean distance of the ray_sphere
@@ -148,6 +82,26 @@ inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid,
   return calculateAngularVoxelIDFromPoints(angular_max, p1, p2);
 }
 
+// Returns true if the "step" taken from the current voxel ID remains in
+// the grid bounds.
+inline bool inBoundsAzimuthal(const SphericalVoxelGrid &grid, const int step,
+                              const int azi_voxel) noexcept {
+  const double radian = (azi_voxel + 1) * grid.deltaPhi();
+  const double angval = radian - std::abs(step * grid.deltaPhi());
+  return angval <= grid.sphereMaxBoundAzi() &&
+         angval >= grid.sphereMinBoundAzi();
+}
+
+// Returns true if the "step" taken from the current voxel ID remains in
+// the grid bounds.
+inline bool inBoundsPolar(const SphericalVoxelGrid &grid, const int step,
+                          const int pol_voxel) noexcept {
+  const double radian = (pol_voxel + 1) * grid.deltaTheta();
+  const double angval = radian - std::abs(step * grid.deltaTheta());
+  return angval <= grid.sphereMaxBoundPolar() &&
+         angval >= grid.sphereMinBoundPolar();
+}
+
 // Determines whether a radial hit occurs for the given ray. A radial hit is
 // considered an intersection with the ray and a radial section. To determine
 // line-sphere intersection, this follows closely the mathematics presented in:
@@ -155,6 +109,9 @@ inline int initializeAngularVoxelID(const SphericalVoxelGrid &grid,
 // One also needs to determine when the hit parameter's tStep should go from +1
 // to -1, since the radial voxels go from 1..N..1, where N is the number of
 // radial sections. This is performed with 'radial_step_has_transitioned'.
+//
+// A visual demonstration of the different branches taken can be found here:
+// https://github.com/spherical-volume-rendering/svr-algorithm/pull/169
 inline HitParameters radialHit(const Ray &ray,
                                const svr::SphericalVoxelGrid &grid,
                                bool &radial_step_has_transitioned,

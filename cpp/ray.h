@@ -3,20 +3,30 @@
 
 #include "vec3.h"
 
+// Determines the non-zero direction for a given ray direction.
+constexpr DirectionIndex getNonZeroDirection(
+    const UnitVec3 &direction) noexcept {
+  return direction.x() != 0.0
+             ? X_DIRECTION
+             : direction.y() != 0.0 ? Y_DIRECTION : Z_DIRECTION;
+}
+
+// Calculates the inverse of each component of a unit direction.
+constexpr FreeVec3 inverseDirection(const UnitVec3 &direction) {
+  return FreeVec3(1.0 / direction.x(), 1.0 / direction.y(),
+                  1.0 / direction.z());
+}
+
 // Encapsulates the functionality of a ray. This consists of two components, the
 // origin of the ray, and the unit direction of the ray. To avoid checking for a
 // non-zero direction upon each function call, these parameters are initialized
 // upon construction.
 struct Ray final {
-  inline Ray(const BoundVec3 &origin, const UnitVec3 &direction)
+  inline Ray(const BoundVec3 &origin, const UnitVec3 &direction) noexcept
       : origin_(origin),
         direction_(direction),
-        inverse_direction_(FreeVec3(1.0 / direction_.x(), 1.0 / direction_.y(),
-                                    1.0 / direction_.z())),
-        NZD_index_(std::abs(direction.x()) > 0.0
-                       ? X_DIRECTION
-                       : std::abs(direction.y()) > 0.0 ? Y_DIRECTION
-                                                       : Z_DIRECTION) {}
+        inverse_direction_(inverseDirection(direction)),
+        NZD_index_(getNonZeroDirection(direction)) {}
 
   // Represents the function p(t) = origin + t * direction,
   // where p is a 3-dimensional position, and t is a scalar.
@@ -66,6 +76,52 @@ struct Ray final {
 
   // Index of a non-zero direction.
   const enum DirectionIndex NZD_index_;
+};
+
+// Pre-calculated information for the generalized angular hit function, which
+// generalizes azimuthal and polar hits. Since the ray segment is dependent
+// solely on time, this is unnecessary to calculate twice for each plane hit
+// function. Here, ray_segment is the difference between P2 and P1.
+struct RaySegment {
+ public:
+  inline RaySegment(double max_t, const Ray &ray) noexcept
+      : P2_(ray.pointAtParameter(max_t)), NZDI_(ray.NonZeroDirectionIndex()) {}
+
+  // Updates the point P1 with the new time traversal time t. Similarly, updates
+  // the segment denoted by P2 - P1.
+  inline void updateAtTime(double t, const Ray &ray) noexcept {
+    P1_ = ray.pointAtParameter(t);
+    ray_segment_ = P2_ - P1_;
+  }
+
+  // Calculates the updated ray segment intersection point given an intersect
+  // parameter. More information on the use case can be found at:
+  // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
+  inline double intersectionTimeAt(double intersect_parameter,
+                                   const Ray &ray) const noexcept {
+    return (P1_[NZDI_] + ray_segment_[NZDI_] * intersect_parameter -
+            ray.origin()[NZDI_]) *
+           ray.invDirection()[NZDI_];
+  }
+
+  inline const BoundVec3 &P1() const noexcept { return P1_; }
+
+  inline const BoundVec3 &P2() const noexcept { return P2_; }
+
+  inline const FreeVec3 &vector() const noexcept { return ray_segment_; }
+
+ private:
+  // The end point of the ray segment.
+  const BoundVec3 P2_;
+
+  // The non-zero direction index of the ray.
+  const DirectionIndex NZDI_;
+
+  // The begin point of the ray segment.
+  BoundVec3 P1_;
+
+  // The free vector represented by P2 - P1.
+  FreeVec3 ray_segment_;
 };
 
 #endif  // SPHERICAL_VOLUME_RENDERING_RAY_H

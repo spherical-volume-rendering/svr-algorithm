@@ -16,7 +16,7 @@ enum DirectionIndex { X_DIRECTION = 0, Y_DIRECTION = 1, Z_DIRECTION = 2 };
 //      [z]
 struct Vec3 {
  public:
-  constexpr inline Vec3(const double x, const double y, const double z)
+  constexpr inline Vec3(const double x, const double y, const double z) noexcept
       : e_{x, y, z} {}
 
   constexpr inline Vec3() : e_{0.0, 0.0, 0.0} {}
@@ -52,7 +52,7 @@ struct Vec3 {
   }
 
  private:
-  std::array<double, 3> e_;
+  double e_[3];
 };
 
 // A 3-dimensional free vector, which has no initial point. It has two main
@@ -64,10 +64,10 @@ struct Vec3 {
 //                  Programming with Test-Driven Development: Code Better, Sleep
 //                  Better" [5.10]
 struct FreeVec3 : Vec3 {
-  constexpr inline explicit FreeVec3(const Vec3 &vec3)
+  constexpr inline explicit FreeVec3(const Vec3 &vec3) noexcept
       : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
 
-  constexpr inline FreeVec3() : Vec3() {}
+  constexpr inline FreeVec3() noexcept : Vec3() {}
 
   constexpr inline explicit FreeVec3(double x, double y, double z)
       : Vec3(x, y, z) {}
@@ -136,12 +136,12 @@ inline FreeVec3 operator/(FreeVec3 v, const double scalar) noexcept {
 // A 3-dimensional bounded vector has a fixed start and end point. It represents
 // a fixed point in space, relative to some frame of reference.
 struct BoundVec3 : Vec3 {
-  constexpr inline explicit BoundVec3(const Vec3 &vec3)
+  constexpr inline explicit BoundVec3(const Vec3 &vec3) noexcept
       : Vec3(vec3.x(), vec3.y(), vec3.z()) {}
 
   constexpr inline BoundVec3() : Vec3() {}
 
-  constexpr inline explicit BoundVec3(double x, double y, double z)
+  constexpr inline explicit BoundVec3(double x, double y, double z) noexcept
       : Vec3(x, y, z) {}
 
   constexpr inline double dot(const Vec3 &other) const noexcept {
@@ -182,12 +182,12 @@ inline BoundVec3 operator-(BoundVec3 v1, const FreeVec3 &v2) noexcept {
 // guarantees a length of 1. To prevent its length from changing, UnitVec3 does
 // not allow for mutations.
 struct UnitVec3 {
-  inline explicit UnitVec3(double x, double y, double z)
+  inline explicit UnitVec3(double x, double y, double z) noexcept
       : UnitVec3(FreeVec3(x, y, z)) {}
 
-  inline explicit UnitVec3(const Vec3 &vec3) : UnitVec3(FreeVec3(vec3)) {}
+  inline explicit UnitVec3(const Vec3 &vec3) noexcept : UnitVec3(FreeVec3(vec3)) {}
 
-  inline explicit UnitVec3(const FreeVec3 &free_vec3)
+  inline explicit UnitVec3(const FreeVec3 &free_vec3) noexcept
       : inner_(free_vec3 / free_vec3.length()) {}
 
   inline double x() const noexcept { return this->to_free().x(); }

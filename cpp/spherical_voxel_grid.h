@@ -42,7 +42,7 @@ constexpr double TAU = 2 * M_PI;
 // Returns: { 6*6, 4*4, 2*2, 0*0 }
 std::vector<double> initializeDeltaRadiiSquared(
     const std::size_t num_radial_voxels, const double max_radius,
-    const double delta_radius) {
+    const double delta_radius) noexcept {
   std::vector<double> delta_radii_squared(num_radial_voxels + 1);
 
   double current_delta_radius = max_radius;
@@ -64,7 +64,8 @@ std::vector<double> initializeDeltaRadiiSquared(
 //            {.cosine=0.0, .sine=1.0},
 //            {.cosine=1.0, .sine=0.0} }
 std::vector<TrigonometricValues> initializeTrigonometricValues(
-    const std::size_t num_voxels, const double min_bound, const double delta) {
+    const std::size_t num_voxels, const double min_bound,
+    const double delta) noexcept {
   std::vector<TrigonometricValues> trig_values(num_voxels + 1);
 
   double radians = min_bound;
@@ -88,7 +89,7 @@ std::vector<TrigonometricValues> initializeTrigonometricValues(
 std::vector<LineSegment> initializeMaxRadiusLineSegments(
     const std::size_t num_voxels, const BoundVec3 &center,
     const double max_radius,
-    const std::vector<TrigonometricValues> &trig_values) {
+    const std::vector<TrigonometricValues> &trig_values) noexcept {
   std::vector<LineSegment> line_segments(num_voxels + 1);
   std::transform(trig_values.cbegin(), trig_values.cend(),
                  line_segments.begin(),
@@ -102,7 +103,8 @@ std::vector<LineSegment> initializeMaxRadiusLineSegments(
 // Initializes the vectors determined by the following calculation:
 // sphere center - {X, Y, Z}, WHERE X, Y = P1, P2 for polar voxels.
 std::vector<BoundVec3> initializeCenterToPolarPMaxVectors(
-    const std::vector<LineSegment> &line_segments, const BoundVec3 &center) {
+    const std::vector<LineSegment> &line_segments,
+    const BoundVec3 &center) noexcept {
   std::vector<BoundVec3> center_to_pmax_vectors;
   center_to_pmax_vectors.reserve(line_segments.size());
 
@@ -116,7 +118,8 @@ std::vector<BoundVec3> initializeCenterToPolarPMaxVectors(
 // Similar to above, but uses:
 // sphere center - {X, Y, Z}, WHERE X, Z = P1, P2 for azimuthal voxels.
 std::vector<BoundVec3> initializeCenterToAzimuthalPMaxVectors(
-    const std::vector<LineSegment> &line_segments, const BoundVec3 &center) {
+    const std::vector<LineSegment> &line_segments,
+    const BoundVec3 &center) noexcept {
   std::vector<BoundVec3> center_to_pmax_vectors;
   center_to_pmax_vectors.reserve(line_segments.size());
 
@@ -145,7 +148,7 @@ struct SphericalVoxelGrid {
                      std::size_t num_radial_sections,
                      std::size_t num_polar_sections,
                      std::size_t num_azimuthal_sections,
-                     const BoundVec3 &sphere_center)
+                     const BoundVec3 &sphere_center) noexcept
       : num_radial_sections_(num_radial_sections),
         num_polar_sections_(num_polar_sections),
         num_azimuthal_sections_(num_azimuthal_sections),
