@@ -3,14 +3,6 @@
 
 #include "vec3.h"
 
-// Determines the non-zero direction for a given ray direction.
-constexpr DirectionIndex getNonZeroDirection(
-    const UnitVec3 &direction) noexcept {
-  return direction.x() != 0.0
-             ? X_DIRECTION
-             : direction.y() != 0.0 ? Y_DIRECTION : Z_DIRECTION;
-}
-
 // Encapsulates the functionality of a ray. This consists of two components, the
 // origin of the ray, and the unit direction of the ray. To avoid checking for a
 // non-zero direction upon each function call, these parameters are initialized
@@ -21,7 +13,9 @@ struct Ray final {
         direction_(direction),
         inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(),
                                     1.0 / direction.z())),
-        NZD_index_(getNonZeroDirection(direction)) {}
+        NZD_index_(direction.x() != 0.0
+                       ? X_DIRECTION
+                       : direction.y() != 0.0 ? Y_DIRECTION : Z_DIRECTION) {}
 
   // Represents the function p(t) = origin + t * direction,
   // where p is a 3-dimensional position, and t is a scalar.
