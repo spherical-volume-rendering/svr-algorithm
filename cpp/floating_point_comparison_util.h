@@ -25,10 +25,9 @@ constexpr double REL_EPSILON = 1e-8;
 //        equations are in §4.2.2, Eq. 36 and 37.)
 inline bool isEqual(double a, double b) noexcept {
   const double diff = std::abs(a - b);
-  if (diff <= ABS_EPSILON) {
-    return true;
-  }
-  return diff <= std::max(std::abs(a), std::abs(b)) * REL_EPSILON;
+  return diff <= ABS_EPSILON
+             ? true
+             : diff <= std::max(std::abs(a), std::abs(b)) * REL_EPSILON;
 }
 
 // Overloaded version that checks for Knuth equality with vector cartesian
