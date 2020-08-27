@@ -190,13 +190,13 @@ struct UnitVec3 {
   inline explicit UnitVec3(const FreeVec3 &free_vec3) noexcept
       : inner_(free_vec3 / free_vec3.length()) {}
 
-  inline double x() const noexcept { return this->to_free().x(); }
+  constexpr inline double x() const noexcept { return this->to_free().x(); }
 
-  inline double y() const noexcept { return this->to_free().y(); }
+  constexpr inline double y() const noexcept { return this->to_free().y(); }
 
-  inline double z() const noexcept { return this->to_free().z(); }
+  constexpr inline double z() const noexcept { return this->to_free().z(); }
 
-  inline const FreeVec3 &to_free() const noexcept { return inner_; }
+  constexpr inline const FreeVec3 &to_free() const noexcept { return inner_; }
 
   inline double operator[](const std::size_t index) const noexcept {
     return this->to_free()[index];
