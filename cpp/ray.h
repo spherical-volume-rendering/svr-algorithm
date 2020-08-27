@@ -11,12 +11,6 @@ constexpr DirectionIndex getNonZeroDirection(
              : direction.y() != 0.0 ? Y_DIRECTION : Z_DIRECTION;
 }
 
-// Calculates the inverse of each component of a unit direction.
-constexpr FreeVec3 inverseDirection(const UnitVec3 &direction) {
-  return FreeVec3(1.0 / direction.x(), 1.0 / direction.y(),
-                  1.0 / direction.z());
-}
-
 // Encapsulates the functionality of a ray. This consists of two components, the
 // origin of the ray, and the unit direction of the ray. To avoid checking for a
 // non-zero direction upon each function call, these parameters are initialized
@@ -25,7 +19,8 @@ struct Ray final {
   inline Ray(const BoundVec3 &origin, const UnitVec3 &direction) noexcept
       : origin_(origin),
         direction_(direction),
-        inverse_direction_(inverseDirection(direction)),
+        inverse_direction_(FreeVec3(1.0 / direction.x(), 1.0 / direction.y(),
+                                    1.0 / direction.z())),
         NZD_index_(getNonZeroDirection(direction)) {}
 
   // Represents the function p(t) = origin + t * direction,

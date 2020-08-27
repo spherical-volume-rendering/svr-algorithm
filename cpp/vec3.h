@@ -185,18 +185,19 @@ struct UnitVec3 {
   inline explicit UnitVec3(double x, double y, double z) noexcept
       : UnitVec3(FreeVec3(x, y, z)) {}
 
-  inline explicit UnitVec3(const Vec3 &vec3) noexcept : UnitVec3(FreeVec3(vec3)) {}
+  inline explicit UnitVec3(const Vec3 &vec3) noexcept
+      : UnitVec3(FreeVec3(vec3)) {}
 
   inline explicit UnitVec3(const FreeVec3 &free_vec3) noexcept
       : inner_(free_vec3 / free_vec3.length()) {}
 
-  constexpr inline double x() const noexcept { return this->to_free().x(); }
+  inline double x() const noexcept { return this->to_free().x(); }
 
-  constexpr inline double y() const noexcept { return this->to_free().y(); }
+  inline double y() const noexcept { return this->to_free().y(); }
 
-  constexpr inline double z() const noexcept { return this->to_free().z(); }
+  inline double z() const noexcept { return this->to_free().z(); }
 
-  constexpr inline const FreeVec3 &to_free() const noexcept { return inner_; }
+  inline const FreeVec3 &to_free() const noexcept { return inner_; }
 
   inline double operator[](const std::size_t index) const noexcept {
     return this->to_free()[index];
